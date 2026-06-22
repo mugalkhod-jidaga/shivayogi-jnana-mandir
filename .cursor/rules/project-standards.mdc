@@ -1,0 +1,15 @@
+---
+description: Core engineering rules for Shivayogi Jnana Mandir / Divine Trust ERP
+alwaysApply: true
+---
+
+- Every Supabase query MUST filter by tenant_id explicitly in code. The backend uses the service_role key, which bypasses Postgres RLS — tenant isolation is enforced by application code only, never the database. Never skip `.eq('tenant_id', ...)`.
+- Never use DELETE. Soft delete only: `UPDATE deleted_at = NOW()`. Every SELECT must filter `WHERE deleted_at IS NULL`.
+- Never hardcode dropdown values (blood group, admission category, document type). Always read from the relevant `lookup_*` table.
+- Every Repository for a core entity (students, documents, users) extends `BaseRepository` (/src/repositories/BaseRepository.ts) so tenant filtering, soft deletes, audit logging, and pagination are inherited — never write one-off query logic that bypasses it.
+- Any GET endpoint returning a list must accept `?page&limit&search` and respond with `{ success, data, meta: { total, page, limit } }`.
+- Every POST/PATCH body must be validated with a Zod schema before reaching controller logic.
+- Follow Controller → Service → Repository. No business logic in controllers, no direct Supabase calls outside repositories.
+- Phone numbers are stored in E.164 format (+91XXXXXXXXXX) everywhere — required for future WhatsApp notification integration.
+- Do NOT build: hostel management, attendance, gradebooks, gate passes, notifications (WhatsApp/email), or payments. These are explicitly out of scope for this phase — see PROJECT_CONTEXT.md Section 14 for why the schema already anticipates them without implementing them.
+- Full schema, code patterns, and rationale live in PROJECT_CONTEXT.md at the repo root — read the relevant section before starting any new module.
