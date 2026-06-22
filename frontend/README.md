@@ -56,3 +56,9 @@ See [FRONTEND_PLAN.md](../FRONTEND_PLAN.md) for phased build order (FE-0 through
 - `usePermissions` + `RequirePermission` / `PermissionRoute`
 - `Layout` with permission-gated sidebar, top bar, sign out
 - Placeholder pages for all nav routes
+
+## FE-3 status
+
+- `useLookups` — parallel queries, 30 min cache, shared `lookupKeys`
+- `BloodGroupSelect`, `AdmissionCategorySelect`, `DocumentTypeSelect`
+- `/lookups` page previews cached data and test dropdowns

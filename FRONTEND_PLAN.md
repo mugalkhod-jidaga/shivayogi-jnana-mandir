@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-2 complete — app shell + API client in `frontend/`  
+**Status:** FE-3 complete — shared lookups in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -150,8 +150,8 @@
 
 ### Done when
 
-- [ ] Lookups load once and cache via TanStack Query
-- [ ] Used in a test dropdown on a dev page (or skip to FE-4)
+- [x] Lookups load once and cache via TanStack Query
+- [x] Used in a test dropdown on a dev page (or skip to FE-4)
 
 ---
 
