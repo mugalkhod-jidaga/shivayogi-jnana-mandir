@@ -3,17 +3,39 @@ export type Role = {
   name: string;
 };
 
-export type MeResponse = {
+export type StaffStatus = 'Active' | 'Inactive';
+
+export type StaffMember = {
   id: string;
   tenantId: number;
   firstName: string;
   lastName: string | null;
   phoneNumber: string;
   email: string | null;
-  status: string;
+  status: StaffStatus;
   mustResetPassword: boolean;
   roles: Role[];
-  permissions: string[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type MeResponse = StaffMember & {
+  permissions: string[];
+};
+
+export type CreateStaffPayload = {
+  firstName: string;
+  lastName?: string;
+  phone: string;
+  roleId: number;
+};
+
+export type UpdateStaffPayload = {
+  firstName?: string;
+  lastName?: string | null;
+  roleId?: number;
+};
+
+export type TempPasswordMeta = {
+  tempPassword: string;
 };

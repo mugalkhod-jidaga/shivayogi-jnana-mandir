@@ -95,3 +95,73 @@ export async function apiFetchPaginated<TItem>(
   }
   return { data, meta };
 }
+
+export async function apiFetchWithMeta<TData, TMeta>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<{ data: TData; meta: TMeta }> {
+  const { data, meta } = await apiRequest<TData>(path, options);
+  if (meta === undefined) {
+    throw new ApiError('Missing response meta', 500);
+  }
+  return { data, meta: meta as TMeta };
+}
+
+async function parseApiResponse<T>(response: Response): Promise<{ data: T; meta?: PaginationMeta }> {
+  const body = (await response.json()) as ApiResponse<T>;
+
+  if (!response.ok || !body.success) {
+    const errorCode = !body.success ? body.error : undefined;
+    throw new ApiError(errorCode ?? `Request failed (${response.status})`, response.status, errorCode);
+  }
+
+  return { data: body.data, meta: body.meta };
+}
+
+export async function apiUpload<T>(
+  path: string,
+  formData: FormData,
+  options: Omit<RequestOptions, 'body' | 'headers'> = {},
+): Promise<T> {
+  const { token: explicitToken, _retried, ...rest } = options;
+  const token = explicitToken ?? (await getToken());
+
+  const response = await fetch(`${env.apiBaseUrl}${path}`, {
+    ...rest,
+    method: 'POST',
+    body: formData,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  try {
+    const { data } = await parseApiResponse<T>(response);
+    return data;
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      error.status === 401 &&
+      error.code === 'TOKEN_EXPIRED_OR_INVALID' &&
+      !_retried
+    ) {
+      const { data, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError || !data.session) {
+        handleUnauthorized();
+        throw error;
+      }
+
+      return apiUpload<T>(path, formData, {
+        ...options,
+        token: data.session.access_token,
+        _retried: true,
+      });
+    }
+
+    if (error instanceof ApiError && error.status === 401) {
+      handleUnauthorized();
+    }
+
+    throw error;
+  }
+}

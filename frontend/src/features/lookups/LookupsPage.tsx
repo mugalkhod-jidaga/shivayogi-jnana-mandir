@@ -1,29 +1,26 @@
 import { useState } from 'react';
-import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
-import { BloodGroupSelect } from '@/components/lookups/BloodGroupSelect';
-import { DocumentTypeSelect } from '@/components/lookups/DocumentTypeSelect';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
-import { Label } from '@/components/ui/label';
+import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
 import { useLookups } from '@/hooks/useLookups';
+import { cn } from '@/lib/utils';
+
+type TabKey = 'categories' | 'document-types';
 
 export function LookupsPage() {
-  const { bloodGroups, admissionCategories, documentTypes, isLoading, isError } = useLookups();
-  const [bloodGroupId, setBloodGroupId] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [documentTypeId, setDocumentTypeId] = useState('');
+  const { admissionCategories, documentTypes, isLoading, isError } = useLookups();
+  const [tab, setTab] = useState<TabKey>('categories');
 
-  const selectedBloodGroup = bloodGroups.find((item) => String(item.id) === bloodGroupId)?.value;
-  const selectedCategory = admissionCategories.find((item) => String(item.id) === categoryId)?.value;
-  const selectedDocumentType = documentTypes.find(
-    (item) => String(item.id) === documentTypeId,
-  )?.value;
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: 'categories', label: 'Admission categories' },
+    { key: 'document-types', label: 'Document types' },
+  ];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Lookups"
-        description="Shared reference data for student forms and document workflows."
+        description="Manage tenant-specific dropdown values for student forms and document uploads."
       />
 
       {isError && (
@@ -34,78 +31,48 @@ export function LookupsPage() {
       )}
 
       {!isError && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <PlaceholderPanel
-            title="Lookup cache"
-            description="All three lookup endpoints are fetched in parallel and cached for 30 minutes via TanStack Query."
-          >
-            <dl className="mt-4 grid grid-cols-3 gap-3 text-left text-sm">
-              <div>
-                <dt className="text-muted-foreground">Blood groups</dt>
-                <dd className="font-medium">{isLoading ? '…' : bloodGroups.length}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Categories</dt>
-                <dd className="font-medium">{isLoading ? '…' : admissionCategories.length}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Document types</dt>
-                <dd className="font-medium">{isLoading ? '…' : documentTypes.length}</dd>
-              </div>
-            </dl>
-          </PlaceholderPanel>
-
-          <div className="rounded-lg border bg-card p-6">
-            <h2 className="text-lg font-medium">Shared select components</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              These dropdowns will be reused in student and document forms.
-            </p>
-
-            <div className="mt-6 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="blood-group-preview">Blood group</Label>
-                <BloodGroupSelect
-                  id="blood-group-preview"
-                  value={bloodGroupId}
-                  onChange={setBloodGroupId}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category-preview">Admission category</Label>
-                <AdmissionCategorySelect
-                  id="category-preview"
-                  value={categoryId}
-                  onChange={setCategoryId}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="document-type-preview">Document type</Label>
-                <DocumentTypeSelect
-                  id="document-type-preview"
-                  value={documentTypeId}
-                  onChange={setDocumentTypeId}
-                />
-              </div>
-            </div>
-
-            {(selectedBloodGroup || selectedCategory || selectedDocumentType) && (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Selected:{' '}
-                {[selectedBloodGroup, selectedCategory, selectedDocumentType]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            )}
+        <>
+          <div className="flex gap-2 border-b">
+            {tabs.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                className={cn(
+                  'border-b-2 px-4 py-2 text-sm font-medium transition-colors',
+                  tab === item.key
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+                onClick={() => setTab(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
-        </div>
-      )}
 
-      <PlaceholderPanel
-        title="Admin CRUD coming later"
-        description="Create, edit, and deactivate lookup values will be added when the lookups admin module is built."
-      />
+          {tab === 'categories' && (
+            <LookupAdminPanel
+              resource="admission-categories"
+              title="Admission categories"
+              singularLabel="Admission category"
+              description="Used on the student demographics form. Blood groups are global and managed separately."
+              items={admissionCategories}
+              isLoading={isLoading}
+            />
+          )}
+
+          {tab === 'document-types' && (
+            <LookupAdminPanel
+              resource="document-types"
+              title="Document types"
+              singularLabel="Document type"
+              description="Used when uploading student verification documents."
+              items={documentTypes}
+              isLoading={isLoading}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-5 complete — documents module in `frontend/`  
+**Status:** FE-8 complete — bulk CSV import in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -241,8 +241,8 @@ POST .../documents/confirm  →  DB row
 
 ### Done when
 
-- [ ] Super Admin creates Admissions Clerk test account
-- [ ] Temp password shown once; new user can log in on FE-1 flow
+- [x] Super Admin creates Admissions Clerk test account
+- [x] Temp password shown once; new user can log in on FE-1 flow
 
 ---
 
@@ -259,7 +259,7 @@ POST .../documents/confirm  →  DB row
 
 ### Done when
 
-- [ ] New category appears in student form dropdown after refresh
+- [x] New category appears in student form dropdown after refresh
 
 ---
 
@@ -278,8 +278,8 @@ POST .../documents/confirm  →  DB row
 
 ### Done when
 
-- [ ] Import 2-row sample CSV successfully
-- [ ] Row with bad blood group shows in `errorRows`, not committed
+- [x] Import 2-row sample CSV successfully
+- [x] Row with bad blood group shows in `errorRows`, not committed
 
 ---
 
