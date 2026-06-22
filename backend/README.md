@@ -54,3 +54,15 @@ Next: lookups module.
 - [x] `PATCH /api/v1/lookups/document-types/:id`
 
 Next: students + family module.
+
+## Students + family (done)
+
+- [x] `GET /api/v1/students` — paginated list with field-level filtering
+- [x] `POST /api/v1/students` — create student + family details
+- [x] `GET /api/v1/students/:id` — detail (sensitive fields gated)
+- [x] `PATCH /api/v1/students/:id` — update demographics / family / status
+- [x] `PATCH /api/v1/students/:id/deactivate` — soft delete + status reason
+- [x] `POST /api/v1/students/:id/avatar/presign` — R2 presigned upload (requires R2 env)
+- [x] `POST /api/v1/students/:id/avatar/confirm` — save photo key
+
+Next: documents + R2 module.
