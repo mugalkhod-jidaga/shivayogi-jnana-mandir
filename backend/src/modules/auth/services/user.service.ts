@@ -152,6 +152,32 @@ export const userService = {
     return serializeStaff(updatedProfile, roles);
   },
 
+  async completePasswordReset(userId: string, tenantId: number) {
+    const profile = await usersRepository.findById(userId, tenantId);
+    if (!profile) {
+      throw new AppError(404, 'User profile not found');
+    }
+
+    if (!profile.must_reset_password) {
+      return this.getMe(userId, tenantId);
+    }
+
+    const updated = (await usersRepository.update(
+      userId,
+      tenantId,
+      { must_reset_password: false },
+      userId,
+    )) as UserProfileRow;
+
+    const roles = await usersRepository.findRoles(userId);
+    const permissions = await permissionService.getUserPermissions(userId);
+
+    return {
+      ...serializeStaff(updated, roles),
+      permissions,
+    };
+  },
+
   async deactivate(userId: string, tenantId: number, actorId: string) {
     const profile = await usersRepository.findById(userId, tenantId);
     if (!profile) {

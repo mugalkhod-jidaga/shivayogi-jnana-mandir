@@ -26,6 +26,12 @@ export const userController = {
     res.json({ success: true, data });
   },
 
+  async completePasswordReset(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await userService.completePasswordReset(profileId, tenantId);
+    res.json({ success: true, data });
+  },
+
   async list(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const { page, limit, search } = paginationSchema.parse(req.query);

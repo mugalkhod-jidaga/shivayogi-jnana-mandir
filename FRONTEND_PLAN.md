@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-0 complete — scaffold in `frontend/`  
+**Status:** FE-1 complete — auth flow in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -89,10 +89,10 @@
 
 ### Done when
 
-- [ ] Admin logs in with bootstrap credentials
-- [ ] Invalid credentials show error toast
-- [ ] Logout clears session and returns to `/login`
-- [ ] `must_reset_password` flow blocks app until new password set
+- [x] Admin logs in with bootstrap credentials
+- [x] Invalid credentials show error toast
+- [x] Logout clears session and returns to `/login`
+- [x] `must_reset_password` flow blocks app until new password set
 
 ---
 
@@ -364,7 +364,7 @@ Adjust pace as needed — each phase is independently testable.
 Likely small FE-driven API tweaks:
 
 - Aggregate `GET /documents?status=Pending` for global queue (optional).
-- `PATCH /users/me` to clear `must_reset_password` after reset (if not handled by Supabase alone).
+- ~~`PATCH /users/me` to clear `must_reset_password` after reset~~ — done as `POST /users/me/password-changed` (FE-1).
 - Medical records module (Phase 2).
 - Pagination filters on compliance report (if student count grows).
 

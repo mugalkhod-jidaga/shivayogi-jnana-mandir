@@ -30,6 +30,7 @@ Health check: `GET http://localhost:4000/api/v1/health` → `{ "status": "ok" }`
 - [x] `extractTenantMiddleware`, `requirePermission`, `AppError`
 - [x] `BaseRepository`, `auditLogService`
 - [x] `GET /api/v1/users/me`
+- [x] `POST /api/v1/users/me/password-changed` — clear `must_reset_password` after staff sets new password
 
 ## Phase C — Staff / users (done)
 

@@ -10,6 +10,12 @@ export const userRoutes = Router();
 
 userRoutes.get('/me', extractTenantMiddleware, asyncHandler(userController.getMe));
 
+userRoutes.post(
+  '/me/password-changed',
+  extractTenantMiddleware,
+  asyncHandler(userController.completePasswordReset),
+);
+
 userRoutes.get(
   '/',
   extractTenantMiddleware,

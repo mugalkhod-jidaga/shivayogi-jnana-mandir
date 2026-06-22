@@ -41,3 +41,11 @@ See [FRONTEND_PLAN.md](../FRONTEND_PLAN.md) for phased build order (FE-0 through
 - Path alias `@/*` → `src/*`
 - Core deps installed (router, react-query, supabase, zod, react-hook-form)
 - shadcn `Button` component
+
+## FE-1 status
+
+- Supabase phone + password login (`/login`)
+- Session via `AuthProvider` + `useAuth`
+- `GET /users/me` via `useMe` (TanStack Query)
+- Forced password reset (`/reset-password`) → `POST /users/me/password-changed`
+- Protected routes + sign out
