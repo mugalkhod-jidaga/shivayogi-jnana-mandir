@@ -31,4 +31,14 @@ Health check: `GET http://localhost:4000/api/v1/health` → `{ "status": "ok" }`
 - [x] `BaseRepository`, `auditLogService`
 - [x] `GET /api/v1/users/me`
 
-Next: staff/users module (Phase C).
+## Phase C — Staff / users (done)
+
+- [x] `GET /api/v1/users` — paginated staff list
+- [x] `POST /api/v1/users` — create staff (returns `meta.tempPassword`)
+- [x] `GET /api/v1/users/:id`
+- [x] `PATCH /api/v1/users/:id`
+- [x] `PATCH /api/v1/users/:id/deactivate`
+- [x] `POST /api/v1/users/:id/reset-password`
+- [x] `GET /api/v1/roles`
+
+Next: lookups module.
