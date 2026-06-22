@@ -1,0 +1,9 @@
+# Cloudflare Workers static assets — serves the Vite build (dist/)
+# Docs: https://developers.cloudflare.com/workers/static-assets/
+
+name = "shivayogi-jnana-mandir"
+compatibility_date = "2025-06-22"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
