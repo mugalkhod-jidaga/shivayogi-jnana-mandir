@@ -6,7 +6,9 @@
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/index.js",
-    "bootstrap": "ts-node scripts/bootstrap-first-admin.ts"
+    "bootstrap": "ts-node --project tsconfig.scripts.json scripts/bootstrap-first-admin.ts",
+    "test:me": "ts-node --project tsconfig.scripts.json scripts/test-users-me.ts",
+    "admin:token": "node scripts/get-admin-token.js"
   },
   "keywords": [],
   "author": "",

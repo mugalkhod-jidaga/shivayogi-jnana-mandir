@@ -21,6 +21,7 @@ Health check: `GET http://localhost:4000/api/v1/health` → `{ "status": "ok" }`
 | `npm run build` | Compile to `dist/` |
 | `npm start` | Run compiled build |
 | `npm run bootstrap` | One-time first Super Admin (after migrations + tenant INSERT) |
+| `npm run test:me` | Sign in with bootstrap credentials and call `GET /users/me` (server must be running) |
 
 ## Phase B status
 
