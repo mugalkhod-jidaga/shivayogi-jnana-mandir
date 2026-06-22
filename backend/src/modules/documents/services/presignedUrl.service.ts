@@ -32,9 +32,14 @@ export async function getUploadUrl(
   studentId: string,
   filename: string,
   kind: 'documents' | 'avatar',
+  contentType?: string,
 ) {
   const key = `tenant_${tenantId}/student_${studentId}/${kind}/${randomUUID()}_${filename}`;
-  const command = new PutObjectCommand({ Bucket: getBucketName(), Key: key });
+  const command = new PutObjectCommand({
+    Bucket: getBucketName(),
+    Key: key,
+    ...(contentType ? { ContentType: contentType } : {}),
+  });
   const uploadUrl = await getSignedUrl(getR2Client(), command, { expiresIn: 900 });
   return { uploadUrl, key };
 }

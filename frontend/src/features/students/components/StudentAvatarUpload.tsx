@@ -22,8 +22,13 @@ export function StudentAvatarUpload({ studentId }: StudentAvatarUploadProps) {
     try {
       await upload.mutateAsync(file);
       toast.success('Avatar uploaded');
-    } catch {
-      toast.error('Could not upload avatar');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not upload avatar';
+      toast.error(
+        message.includes('storage')
+          ? `${message}. If you see a CORS error in the browser console, run \`npm run configure:r2-cors\` in the backend folder.`
+          : message,
+      );
     }
   };
 

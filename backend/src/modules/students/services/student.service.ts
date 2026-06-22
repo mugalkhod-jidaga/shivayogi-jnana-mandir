@@ -184,10 +184,10 @@ export const studentService = {
     return serializeStudent(student, permissions, true);
   },
 
-  async presignAvatar(id: string, tenantId: number, filename: string) {
+  async presignAvatar(id: string, tenantId: number, filename: string, contentType?: string) {
     const student = await studentsRepository.findByIdWithRelations(id, tenantId);
     if (!student) throw new AppError(404, 'Student not found');
-    return getUploadUrl(tenantId, id, filename, 'avatar');
+    return getUploadUrl(tenantId, id, filename, 'avatar', contentType);
   },
 
   async confirmAvatar(id: string, tenantId: number, key: string, userId: string, permissions: string[]) {

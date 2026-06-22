@@ -13,6 +13,7 @@
     "test:students": "ts-node --project tsconfig.scripts.json scripts/test-students-api.ts",
     "test:documents": "ts-node --project tsconfig.scripts.json scripts/test-documents-api.ts",
     "test:migration": "ts-node --project tsconfig.scripts.json scripts/test-migration-dashboard.ts",
+    "configure:r2-cors": "ts-node --project tsconfig.scripts.json scripts/configure-r2-cors.ts",
     "admin:token": "node scripts/get-admin-token.js"
   },
   "keywords": [],

@@ -22,7 +22,7 @@
 | `frontend/.env` | Copy from `.env.example` — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_BASE_URL` |
 | Backend running | `cd backend && npm run dev` on port 4000 |
 | Supabase Auth | Phone provider enabled; test admin can log in |
-| CORS | `backend/.env` `CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173` — match the host you use in the browser |
+| CORS | `backend/.env` `CORS_ORIGIN=...` for the **API**; **R2 bucket** also needs CORS for browser file uploads (see `backend/docs/r2-cors-policy.example.json`) |
 
 ---
 

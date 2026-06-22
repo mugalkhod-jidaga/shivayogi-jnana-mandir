@@ -76,6 +76,27 @@ Next: documents + R2 module.
 - [x] `GET /api/v1/documents/:id/download` — presigned GET + audit log
 - [x] `PATCH /api/v1/documents/:id/verify` — Verified / Rejected / Renewal Needed
 
+### R2 bucket CORS (required for browser uploads)
+
+Presign works from the API, but **avatar/document PUT from the browser** goes directly to `*.r2.cloudflarestorage.com`. That bucket must allow your frontend origin — this is separate from Express `CORS_ORIGIN`.
+
+**Option A — Cloudflare dashboard (recommended)**
+
+1. Cloudflare → **R2** → your bucket (`shivayogi-jnana-mandir-vault` or similar)
+2. **Settings** → **CORS policy** → Edit
+3. Paste the JSON from `backend/docs/r2-cors-policy.example.json` (add your production domain when deployed)
+4. Save
+
+**Option B — API script** (needs an R2 token with `Admin Read & Write` on the bucket)
+
+```bash
+npm run configure:r2-cors
+```
+
+Uses `CORS_ORIGIN` from `backend/.env` plus local Vite defaults.
+
+After CORS is set, restart is not required — retry the avatar upload in the app.
+
 Next: CSV migration module.
 
 ## Migration + Dashboard + Audit (done)

@@ -82,8 +82,8 @@ export const studentController = {
 
   async presignAvatar(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const { filename } = req.body as { filename: string };
-    const data = await studentService.presignAvatar(paramId(req), tenantId, filename);
+    const { filename, contentType } = req.body as { filename: string; contentType?: string };
+    const data = await studentService.presignAvatar(paramId(req), tenantId, filename, contentType);
     res.json({ success: true, data });
   },
 

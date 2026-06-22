@@ -69,21 +69,22 @@ export function useAvatarUpload(id: string) {
 
   return useMutation({
     mutationFn: async (file: File) => {
+      const contentType = file.type || 'application/octet-stream';
       const presign = await apiFetch<AvatarPresignResponse>(`/students/${id}/avatar/presign`, {
         method: 'POST',
-        body: JSON.stringify({ filename: file.name }),
+        body: JSON.stringify({ filename: file.name, contentType }),
       });
 
       const uploadResponse = await fetch(presign.uploadUrl, {
         method: 'PUT',
         body: file,
         headers: {
-          'Content-Type': file.type || 'application/octet-stream',
+          'Content-Type': contentType,
         },
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload avatar to storage');
+        throw new Error(`Failed to upload avatar to storage (${uploadResponse.status})`);
       }
 
       return apiFetch<StudentDetail>(`/students/${id}/avatar/confirm`, {

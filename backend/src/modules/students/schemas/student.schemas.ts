@@ -56,6 +56,7 @@ export const deactivateStudentSchema = z.object({
 
 export const avatarPresignSchema = z.object({
   filename: z.string().trim().min(1).max(255),
+  contentType: z.string().trim().min(1).max(100).optional(),
 });
 
 export const avatarConfirmSchema = z.object({

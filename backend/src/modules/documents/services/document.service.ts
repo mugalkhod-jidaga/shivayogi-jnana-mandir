@@ -80,7 +80,7 @@ export const documentService = {
   async presign(studentId: string, tenantId: number, input: DocumentPresignInput) {
     await documentsRepository.assertStudentInTenant(studentId, tenantId);
     await validateDocumentType(input.documentTypeId, tenantId);
-    return getUploadUrl(tenantId, studentId, input.filename, 'documents');
+    return getUploadUrl(tenantId, studentId, input.filename, 'documents', input.mimeType);
   },
 
   async confirm(
