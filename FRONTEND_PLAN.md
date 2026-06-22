@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-1 complete — auth flow in `frontend/`  
+**Status:** FE-2 complete — app shell + API client in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -22,7 +22,7 @@
 | `frontend/.env` | Copy from `.env.example` — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_BASE_URL` |
 | Backend running | `cd backend && npm run dev` on port 4000 |
 | Supabase Auth | Phone provider enabled; test admin can log in |
-| CORS | `backend/.env` `CORS_ORIGIN=http://localhost:5173` |
+| CORS | `backend/.env` `CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173` — match the host you use in the browser |
 
 ---
 
@@ -130,9 +130,9 @@
 
 ### Done when
 
-- [ ] Sidebar shows only permitted items for Super Admin
-- [ ] Teacher/Warden account (when created) sees only Students
-- [ ] All routes render placeholder pages inside layout
+- [x] Sidebar shows only permitted items for Super Admin
+- [x] Teacher/Warden account (when created) sees only Students
+- [x] All routes render placeholder pages inside layout
 
 ---
 

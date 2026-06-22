@@ -36,7 +36,7 @@ type ResetForm = z.infer<typeof resetSchema>;
 export function ResetPasswordPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { session, getAccessToken, signOut } = useAuth();
+  const { session } = useAuth();
   const { data: me, isLoading } = useMe();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,17 +62,8 @@ export function ResetPasswordPage() {
         return;
       }
 
-      const token = await getAccessToken();
-      if (!token) {
-        toast.error('Session expired. Please sign in again.');
-        await signOut();
-        navigate('/login');
-        return;
-      }
-
       const updated = await apiFetch<MeResponse>('/users/me/password-changed', {
         method: 'POST',
-        token,
       });
 
       queryClient.setQueryData(['me', session.user.id], updated);

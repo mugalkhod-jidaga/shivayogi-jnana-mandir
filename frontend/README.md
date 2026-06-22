@@ -49,3 +49,10 @@ See [FRONTEND_PLAN.md](../FRONTEND_PLAN.md) for phased build order (FE-0 through
 - `GET /users/me` via `useMe` (TanStack Query)
 - Forced password reset (`/reset-password`) → `POST /users/me/password-changed`
 - Protected routes + sign out
+
+## FE-2 status
+
+- `apiFetch` with Bearer token, 401 refresh retry, auto sign-out on failure
+- `usePermissions` + `RequirePermission` / `PermissionRoute`
+- `Layout` with permission-gated sidebar, top bar, sign out
+- Placeholder pages for all nav routes

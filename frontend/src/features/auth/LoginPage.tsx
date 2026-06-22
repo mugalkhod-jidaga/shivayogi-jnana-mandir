@@ -82,7 +82,7 @@ export function LoginPage() {
                   id="phone"
                   inputMode="numeric"
                   autoComplete="tel"
-                  placeholder="9876543210"
+                  placeholder="Enter Mobile Number"
                   className="rounded-l-none"
                   {...form.register('phone')}
                 />
