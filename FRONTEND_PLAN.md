@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** Not started (only `frontend/.env.example` exists)  
+**Status:** FE-0 complete — scaffold in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -57,9 +57,9 @@
 
 ### Done when
 
-- [ ] TypeScript strict build passes
-- [ ] Tailwind + one shadcn `Button` renders
-- [ ] `.env` loaded via `import.meta.env.VITE_*`
+- [x] TypeScript strict build passes
+- [x] Tailwind + one shadcn `Button` renders
+- [x] `.env` loaded via `import.meta.env.VITE_*`
 
 ---
 
