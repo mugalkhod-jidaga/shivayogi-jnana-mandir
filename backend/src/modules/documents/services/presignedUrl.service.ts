@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 import { env } from '../../../config/env';
@@ -37,4 +37,10 @@ export async function getUploadUrl(
   const command = new PutObjectCommand({ Bucket: getBucketName(), Key: key });
   const uploadUrl = await getSignedUrl(getR2Client(), command, { expiresIn: 900 });
   return { uploadUrl, key };
+}
+
+export async function getDownloadUrl(fileKey: string) {
+  const command = new GetObjectCommand({ Bucket: getBucketName(), Key: fileKey });
+  const downloadUrl = await getSignedUrl(getR2Client(), command, { expiresIn: 3600 });
+  return { downloadUrl };
 }

@@ -66,3 +66,13 @@ Next: students + family module.
 - [x] `POST /api/v1/students/:id/avatar/confirm` — save photo key
 
 Next: documents + R2 module.
+
+## Documents + R2 (done)
+
+- [x] `GET /api/v1/students/:studentId/documents` — Finance role filter (Income + BPL only)
+- [x] `POST /api/v1/students/:studentId/documents/presign` — R2 presigned PUT
+- [x] `POST /api/v1/students/:studentId/documents/confirm` — create document record
+- [x] `GET /api/v1/documents/:id/download` — presigned GET + audit log
+- [x] `PATCH /api/v1/documents/:id/verify` — Verified / Rejected / Renewal Needed
+
+Next: CSV migration module.
