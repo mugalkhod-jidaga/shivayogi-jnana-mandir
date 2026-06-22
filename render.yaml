@@ -1,0 +1,32 @@
+# Render Blueprint — backend API only
+# https://render.com/docs/blueprint-spec
+#
+# Manual setup: see backend/DEPLOY_RENDER.md
+# Dashboard: https://dashboard.render.com/web/new
+
+services:
+  - type: web
+    name: shivayogi-jnana-mandir-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: CLOUDFLARE_R2_ACCESS_KEY
+        sync: false
+      - key: CLOUDFLARE_R2_SECRET_KEY
+        sync: false
+      - key: CLOUDFLARE_R2_ENDPOINT
+        sync: false
+      - key: CLOUDFLARE_R2_BUCKET_NAME
+        sync: false
