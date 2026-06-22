@@ -10,3 +10,11 @@ export function normalizeIndianPhone(raw: string): string {
 export function formatPhoneInput(value: string): string {
   return value.replace(/\D/g, '').slice(0, 10);
 }
+
+/** Strip +91 prefix for form display. */
+export function phoneToDisplay(e164: string): string {
+  const digits = e164.replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+  if (digits.length === 10) return digits;
+  return digits.slice(-10);
+}

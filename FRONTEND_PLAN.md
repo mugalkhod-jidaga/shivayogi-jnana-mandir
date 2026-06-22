@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-3 complete — shared lookups in `frontend/`  
+**Status:** FE-4 complete — students module in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -184,9 +184,9 @@
 
 ### Done when
 
-- [ ] Create, list, search, view, edit, deactivate work end-to-end
-- [ ] Teacher sees list/detail **without** family section
-- [ ] Admissions clerk sees full family fields
+- [x] Create, list, search, view, edit, deactivate work end-to-end
+- [x] Teacher sees list/detail **without** family section
+- [x] Admissions clerk sees full family fields
 
 ---
 

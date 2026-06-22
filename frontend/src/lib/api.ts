@@ -1,6 +1,6 @@
 import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse, PaginatedList, PaginationMeta } from '@/types/api';
 
 export class ApiError extends Error {
   status: number;
@@ -28,10 +28,12 @@ export function configureApi(
   handleUnauthorized = onUnauthorized;
 }
 
-export async function apiFetch<T>(
+type RequestOptions = RequestInit & { token?: string; _retried?: boolean };
+
+async function apiRequest<T>(
   path: string,
-  options: RequestInit & { token?: string; _retried?: boolean } = {},
-): Promise<T> {
+  options: RequestOptions = {},
+): Promise<{ data: T; meta?: PaginationMeta }> {
   const { token: explicitToken, _retried, headers, ...rest } = options;
   const token = explicitToken ?? (await getToken());
 
@@ -61,7 +63,7 @@ export async function apiFetch<T>(
         throw new ApiError('Session expired', 401, errorCode);
       }
 
-      return apiFetch<T>(path, {
+      return apiRequest<T>(path, {
         ...options,
         token: data.session.access_token,
         _retried: true,
@@ -75,5 +77,21 @@ export async function apiFetch<T>(
     throw new ApiError(message, response.status, errorCode);
   }
 
-  return body.data;
+  return { data: body.data, meta: body.meta };
+}
+
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { data } = await apiRequest<T>(path, options);
+  return data;
+}
+
+export async function apiFetchPaginated<TItem>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<PaginatedList<TItem>> {
+  const { data, meta } = await apiRequest<TItem[]>(path, options);
+  if (!meta) {
+    throw new ApiError('Missing pagination meta', 500);
+  }
+  return { data, meta };
 }

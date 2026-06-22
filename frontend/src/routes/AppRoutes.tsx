@@ -8,7 +8,9 @@ import { DocumentsPage } from '@/features/documents/DocumentsPage';
 import { ImportPage } from '@/features/import/ImportPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { StaffPage } from '@/features/staff/StaffPage';
-import { StudentsPage } from '@/features/students/StudentsPage';
+import { StudentDetailPage } from '@/features/students/StudentDetailPage';
+import { StudentFormPage } from '@/features/students/StudentFormPage';
+import { StudentListPage } from '@/features/students/StudentListPage';
 import { PermissionRoute } from '@/routes/PermissionRoute';
 import { ProtectedRoute, PublicOnlyRoute } from '@/routes/ProtectedRoute';
 
@@ -32,10 +34,34 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/students/new"
+            element={
+              <PermissionRoute permission="students:create">
+                <StudentFormPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/students/:id/edit"
+            element={
+              <PermissionRoute permission="students:edit">
+                <StudentFormPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/students/:id"
+            element={
+              <PermissionRoute permission="students:read">
+                <StudentDetailPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
             path="/students"
             element={
               <PermissionRoute permission="students:read">
-                <StudentsPage />
+                <StudentListPage />
               </PermissionRoute>
             }
           />

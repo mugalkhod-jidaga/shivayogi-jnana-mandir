@@ -62,3 +62,10 @@ See [FRONTEND_PLAN.md](../FRONTEND_PLAN.md) for phased build order (FE-0 through
 - `useLookups` — parallel queries, 30 min cache, shared `lookupKeys`
 - `BloodGroupSelect`, `AdmissionCategorySelect`, `DocumentTypeSelect`
 - `/lookups` page previews cached data and test dropdowns
+
+## FE-4 status
+
+- Student list with search + pagination
+- Create / edit form (demographics + family gated by `students:view_sensitive_data`)
+- Detail page with Profile / Documents placeholder / Avatar upload tabs
+- Deactivate dialog (`students:soft_delete`)
