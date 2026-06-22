@@ -5,6 +5,7 @@ alwaysApply: true
 
 - Never use DELETE on app tables. Soft delete only: `UPDATE deleted_at = NOW()`. Every SELECT must filter `WHERE deleted_at IS NULL`.
 - The backend uses the service_role key, which bypasses Postgres RLS — tenant isolation is enforced by application code only, never the database.
+- Never skip `.eq('tenant_id', ...)` in any repository logic. For `student_documents`, join through `students` and filter by `students.tenant_id`.
 - Never hardcode dropdown values (blood group, admission category, document type). Always read from the relevant `lookup_*` table.
 - Every Repository for a core entity (students, documents, users) extends `BaseRepository` (/backend/src/repositories/BaseRepository.ts) so tenant filtering, soft deletes, audit logging, and pagination are inherited — never write one-off query logic that bypasses it.
 - Any GET endpoint returning a list must accept `?page&limit&search` and respond with `{ success, data, meta: { total, page, limit } }`.

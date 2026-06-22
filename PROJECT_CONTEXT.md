@@ -51,6 +51,7 @@ This software is an Enterprise Resource Planning (ERP) system initially built fo
 ### 1.2 Infrastructure Status (Phase 1)
 
 | Item | Status | Notes |
+|---|---|---|
 | Supabase project | **Created** | Apply schema + seeds from Section 10 via `supabase/migrations/` (Section 15) |
 | Cloudflare R2 bucket | Pending | Private bucket required before document module |
 | Backend codebase | Not started | Scaffold per `backend/prompt.md` |
@@ -93,7 +94,6 @@ When generating code for this project, the AI MUST adhere to the following stand
 8. **Error Handling:** All thrown errors must use the `AppError` class (Section 9) so the global error handler can format a consistent response.
 9. **Pagination & Searching:** Any `GET` route returning a list (Students, Audit Logs, Users) MUST implement offset/limit pagination. Query params: `?page=1&limit=20&search=keyword`. Response metadata: `{ success: true, data: [...], meta: { total, page, limit } }`. `limit` is capped at 100 server-side regardless of what's requested.
 10. **Structural Audit Logging:** Audit logging for updates and soft-deletes on core entities (Students, Documents, Users) is NOT something to remember to call manually — it is inherited automatically by extending `BaseRepository` (Section 6.2). Do not write one-off update/delete logic in a repository that bypasses it.
-11. **Phone Number Format:** All phone numbers (`user_profiles.phone_number`, `student_family_details.primary_contact`) are stored in **E.164 format** (`+91XXXXXXXXXX`), validated via Zod regex at the API boundary. This is required for future WhatsApp notification integration — see Section 14.
 11. **Phone Number Format:** All phone numbers (`user_profiles.phone_number`, `student_family_details.primary_contact`) are stored in **E.164 format** (`+91XXXXXXXXXX`), validated via `/src/utils/validators.ts` (`phoneSchema`, `normalizeIndianPhone` for CSV). Required for future WhatsApp notification integration — see Section 14.
 
 ---
