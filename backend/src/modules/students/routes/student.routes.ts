@@ -7,6 +7,7 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 import { studentController } from '../controllers/student.controller';
 import {
   avatarConfirmSchema,
+  avatarDownloadsSchema,
   avatarPresignSchema,
   createStudentSchema,
   deactivateStudentSchema,
@@ -28,6 +29,14 @@ studentRoutes.post(
   requirePermission('students:create'),
   validateZod(createStudentSchema),
   asyncHandler(studentController.create),
+);
+
+studentRoutes.post(
+  '/avatars/urls',
+  extractTenantMiddleware,
+  requirePermission('students:read'),
+  validateZod(avatarDownloadsSchema),
+  asyncHandler(studentController.getAvatarDownloads),
 );
 
 studentRoutes.get(
@@ -60,6 +69,13 @@ studentRoutes.post(
   requirePermission('students:edit'),
   validateZod(avatarConfirmSchema),
   asyncHandler(studentController.confirmAvatar),
+);
+
+studentRoutes.get(
+  '/:id/avatar/download',
+  extractTenantMiddleware,
+  requirePermission('students:read'),
+  asyncHandler(studentController.getAvatarDownload),
 );
 
 studentRoutes.patch(

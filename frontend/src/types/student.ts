@@ -74,3 +74,7 @@ export type AvatarPresignResponse = {
   uploadUrl: string;
   key: string;
 };
+
+export type AvatarDownloadResponse = {
+  downloadUrl: string;
+};

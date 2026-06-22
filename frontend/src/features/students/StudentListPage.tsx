@@ -1,11 +1,13 @@
 import { Plus, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { StudentListAvatar } from '@/features/students/components/StudentListAvatar';
+import { useStudentAvatarThumbnails } from '@/hooks/useStudent';
 import { useStudentsList } from '@/hooks/useStudents';
 
 function formatName(firstName: string, lastName: string | null) {
@@ -30,6 +32,12 @@ export function StudentListPage() {
   const students = data?.data ?? [];
   const meta = data?.meta;
   const totalPages = meta ? Math.max(1, Math.ceil(meta.total / meta.limit)) : 1;
+
+  const thumbnailInput = useMemo(
+    () => students.map((student) => ({ id: student.id, photoUrl: student.photoUrl })),
+    [students],
+  );
+  const { data: thumbnailUrls } = useStudentAvatarThumbnails(thumbnailInput);
 
   const applySearch = () => {
     const next = new URLSearchParams();
@@ -87,6 +95,7 @@ export function StudentListPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
+              <th className="w-14 px-4 py-3 font-medium" />
               <th className="px-4 py-3 font-medium">Admission #</th>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">DOB</th>
@@ -98,7 +107,7 @@ export function StudentListPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   Loading students…
                 </td>
               </tr>
@@ -106,28 +115,38 @@ export function StudentListPage() {
 
             {!isLoading && students.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   No students found.
                 </td>
               </tr>
             )}
 
-            {students.map((student) => (
-              <tr key={student.id} className="border-t">
-                <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
-                <td className="px-4 py-3">{formatName(student.firstName, student.lastName)}</td>
-                <td className="px-4 py-3">{student.dob}</td>
-                <td className="px-4 py-3">{student.gender}</td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={student.status} />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button asChild variant="ghost" size="sm">
-                    <Link to={`/students/${student.id}`}>View</Link>
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {students.map((student) => {
+              const name = formatName(student.firstName, student.lastName);
+              return (
+                <tr key={student.id} className="border-t">
+                  <td className="px-4 py-3">
+                    <StudentListAvatar
+                      name={name}
+                      hasPhoto={Boolean(student.photoUrl)}
+                      imageUrl={thumbnailUrls?.[student.id]}
+                    />
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
+                  <td className="px-4 py-3">{name}</td>
+                  <td className="px-4 py-3">{student.dob}</td>
+                  <td className="px-4 py-3">{student.gender}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={student.status} />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link to={`/students/${student.id}`}>View</Link>
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

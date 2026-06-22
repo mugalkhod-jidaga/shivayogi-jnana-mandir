@@ -7,7 +7,7 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
-import { StudentAvatarUpload } from '@/features/students/components/StudentAvatarUpload';
+import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
 import { cn } from '@/lib/utils';
@@ -46,7 +46,7 @@ export function StudentDetailPage() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'profile', label: 'Profile' },
     { key: 'documents', label: 'Documents' },
-    ...(hasPermission('students:edit') ? [{ key: 'avatar' as const, label: 'Avatar' }] : []),
+    { key: 'avatar', label: 'Photo' },
   ];
 
   return (
@@ -153,7 +153,13 @@ export function StudentDetailPage() {
         />
       )}
 
-      {tab === 'avatar' && <StudentAvatarUpload studentId={student.id} />}
+      {tab === 'avatar' && (
+        <StudentAvatarPanel
+          studentId={student.id}
+          photoUrl={student.photoUrl}
+          canEdit={hasPermission('students:edit')}
+        />
+      )}
 
       <DeactivateStudentDialog
         studentId={student.id}

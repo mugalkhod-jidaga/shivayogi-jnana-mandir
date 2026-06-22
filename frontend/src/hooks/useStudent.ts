@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { studentKeys } from '@/hooks/useStudents';
 import type {
+  AvatarDownloadResponse,
   AvatarPresignResponse,
   CreateStudentPayload,
   DeactivateStudentPayload,
@@ -94,7 +95,41 @@ export function useAvatarUpload(id: string) {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(studentKeys.detail(id), data);
+      queryClient.removeQueries({ queryKey: ['students', 'avatar', id] });
+      queryClient.removeQueries({ queryKey: avatarThumbnailKeys.all });
       void queryClient.invalidateQueries({ queryKey: studentKeys.lists() });
     },
+  });
+}
+
+const AVATAR_URL_STALE_TIME = 50 * 60 * 1000;
+
+export const avatarThumbnailKeys = {
+  all: ['students', 'avatar-thumbnails'] as const,
+  page: (ids: string[]) => [...avatarThumbnailKeys.all, [...ids].sort().join(',')] as const,
+};
+
+export function useStudentAvatarThumbnails(students: { id: string; photoUrl: string | null }[]) {
+  const idsWithPhotos = students.filter((student) => student.photoUrl).map((student) => student.id);
+
+  return useQuery({
+    queryKey: avatarThumbnailKeys.page(idsWithPhotos),
+    queryFn: () =>
+      apiFetch<Record<string, string>>('/students/avatars/urls', {
+        method: 'POST',
+        body: JSON.stringify({ ids: idsWithPhotos }),
+      }),
+    enabled: idsWithPhotos.length > 0,
+    staleTime: AVATAR_URL_STALE_TIME,
+  });
+}
+
+export function useStudentAvatarUrl(studentId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['students', 'avatar', studentId],
+    queryFn: () => apiFetch<AvatarDownloadResponse>(`/students/${studentId}/avatar/download`),
+    enabled,
+    staleTime: AVATAR_URL_STALE_TIME,
+    retry: false,
   });
 }
