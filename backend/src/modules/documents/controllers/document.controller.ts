@@ -1,10 +1,11 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
 import { permissionService } from '../../auth/services/permission.service';
-import type {
-  DocumentConfirmInput,
-  DocumentPresignInput,
-  DocumentVerifyInput,
+import {
+  documentListQuerySchema,
+  type DocumentConfirmInput,
+  type DocumentPresignInput,
+  type DocumentVerifyInput,
 } from '../schemas/document.schemas';
 import { documentService } from '../services/document.service';
 
@@ -67,6 +68,22 @@ export const studentDocumentController = {
 };
 
 export const documentController = {
+  async list(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const permissions = await getPermissions(profileId);
+    const { page, limit, search, status } = documentListQuerySchema.parse(req.query);
+    const result = await documentService.listQueue(
+      tenantId,
+      profileId,
+      permissions,
+      page,
+      limit,
+      status,
+      search,
+    );
+    res.json({ success: true, data: result.data, meta: result.meta });
+  },
+
   async download(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const permissions = await getPermissions(profileId);

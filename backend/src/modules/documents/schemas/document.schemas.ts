@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import { paginationSchema } from '../../../utils/validators';
+
+export const documentListQuerySchema = paginationSchema.extend({
+  status: z.string().trim().max(50).optional(),
+});
 
 export const documentPresignSchema = z.object({
   filename: z.string().trim().min(1).max(255),
@@ -19,6 +24,7 @@ export const documentVerifySchema = z.object({
   status: z.enum(['Verified', 'Rejected', 'Renewal Needed']),
 });
 
+export type DocumentListQuery = z.infer<typeof documentListQuerySchema>;
 export type DocumentPresignInput = z.infer<typeof documentPresignSchema>;
 export type DocumentConfirmInput = z.infer<typeof documentConfirmSchema>;
 export type DocumentVerifyInput = z.infer<typeof documentVerifySchema>;

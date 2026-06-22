@@ -4,7 +4,7 @@ import { AuditLogsPage } from '@/features/audit/AuditLogsPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-import { DocumentsPage } from '@/features/documents/DocumentsPage';
+import { DocumentQueuePage } from '@/features/documents/DocumentQueuePage';
 import { ImportPage } from '@/features/import/ImportPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { StaffPage } from '@/features/staff/StaffPage';
@@ -69,7 +69,7 @@ export function AppRoutes() {
             path="/documents"
             element={
               <PermissionRoute permission="documents:view">
-                <DocumentsPage />
+                <DocumentQueuePage />
               </PermissionRoute>
             }
           />

@@ -1,13 +1,15 @@
 import { Pencil } from 'lucide-react';
-import { useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { StudentDocumentsTab } from '@/features/documents/StudentDocumentsTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
+import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
 import { cn } from '@/lib/utils';
@@ -25,10 +27,20 @@ function DetailField({ label, value }: { label: string; value: string | null | u
 
 export function StudentDetailPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
-  const [tab, setTab] = useState<TabKey>('profile');
+  const tabParam = searchParams.get('tab');
+  const [tab, setTab] = useState<TabKey>(() =>
+    tabParam === 'documents' || tabParam === 'avatar' ? tabParam : 'profile',
+  );
   const [deactivateOpen, setDeactivateOpen] = useState(false);
+
+  useEffect(() => {
+    if (tabParam === 'documents' || tabParam === 'avatar' || tabParam === 'profile') {
+      setTab(tabParam);
+    }
+  }, [tabParam]);
 
   if (!id) return <Navigate to="/students" replace />;
 
@@ -45,14 +57,22 @@ export function StudentDetailPage() {
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'profile', label: 'Profile' },
-    { key: 'documents', label: 'Documents' },
+    ...(hasPermission('documents:view')
+      ? [{ key: 'documents' as const, label: 'Documents' }]
+      : []),
     { key: 'avatar', label: 'Photo' },
   ];
 
   return (
     <div className="space-y-6">
       <PageHeader title={displayName} description={`Admission # ${student.admissionNumber}`}>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <StudentInitialsAvatar
+            firstName={student.firstName}
+            lastName={student.lastName}
+            size="lg"
+          />
+          <div className="flex flex-wrap gap-2">
           <StatusBadge status={student.status} />
           <RequirePermission permission="students:edit">
             <Button asChild variant="outline" size="sm">
@@ -74,6 +94,7 @@ export function StudentDetailPage() {
               </Button>
             )}
           </RequirePermission>
+          </div>
         </div>
       </PageHeader>
 
@@ -146,16 +167,15 @@ export function StudentDetailPage() {
         </div>
       )}
 
-      {tab === 'documents' && (
-        <PlaceholderPanel
-          title="Documents — coming in FE-5"
-          description="Upload, list, and verify student documents will be added in the documents module."
-        />
+      {tab === 'documents' && hasPermission('documents:view') && (
+        <StudentDocumentsTab studentId={student.id} />
       )}
 
       {tab === 'avatar' && (
         <StudentAvatarPanel
           studentId={student.id}
+          firstName={student.firstName}
+          lastName={student.lastName}
           photoUrl={student.photoUrl}
           canEdit={hasPermission('students:edit')}
         />

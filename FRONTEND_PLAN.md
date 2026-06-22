@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-4 complete — students module in `frontend/`  
+**Status:** FE-5 complete — documents module in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -220,9 +220,9 @@ POST .../documents/confirm  →  DB row
 
 ### Done when
 
-- [ ] PDF/image uploads to R2 and appears in list
-- [ ] Super Admin can verify/reject
-- [ ] Finance user only sees allowed document types
+- [x] PDF/image uploads to R2 and appears in list
+- [x] Super Admin can verify/reject
+- [x] Finance user only sees allowed document types
 
 ---
 

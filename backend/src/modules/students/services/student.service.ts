@@ -209,28 +209,4 @@ export const studentService = {
 
     return getDownloadUrl(student.photo_url);
   },
-
-  async getAvatarDownloadUrls(ids: string[], tenantId: number) {
-    const uniqueIds = [...new Set(ids)];
-    const { data, error } = await supabase
-      .from('students')
-      .select('id, photo_url')
-      .eq('tenant_id', tenantId)
-      .in('id', uniqueIds)
-      .is('deleted_at', null)
-      .not('photo_url', 'is', null);
-
-    if (error) throw new AppError(500, error.message);
-
-    const urls: Record<string, string> = {};
-    await Promise.all(
-      (data ?? []).map(async (row) => {
-        if (!row.photo_url) return;
-        const { downloadUrl } = await getDownloadUrl(row.photo_url);
-        urls[row.id] = downloadUrl;
-      }),
-    );
-
-    return urls;
-  },
 };

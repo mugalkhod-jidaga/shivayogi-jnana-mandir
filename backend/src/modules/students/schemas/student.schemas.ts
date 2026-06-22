@@ -63,10 +63,6 @@ export const avatarConfirmSchema = z.object({
   key: z.string().trim().min(1),
 });
 
-export const avatarDownloadsSchema = z.object({
-  ids: z.array(z.string().uuid()).min(1).max(25),
-});
-
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
 export type DeactivateStudentInput = z.infer<typeof deactivateStudentSchema>;

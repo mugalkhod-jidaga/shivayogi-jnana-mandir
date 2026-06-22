@@ -100,11 +100,4 @@ export const studentController = {
     const data = await studentService.getAvatarDownloadUrl(paramId(req), tenantId);
     res.json({ success: true, data });
   },
-
-  async getAvatarDownloads(req: Request, res: Response): Promise<void> {
-    const { tenantId } = requireAuthContext(req);
-    const { ids } = req.body as { ids: string[] };
-    const data = await studentService.getAvatarDownloadUrls(ids, tenantId);
-    res.json({ success: true, data });
-  },
 };

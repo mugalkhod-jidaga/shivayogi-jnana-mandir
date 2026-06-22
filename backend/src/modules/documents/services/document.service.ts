@@ -7,7 +7,7 @@ import type {
   DocumentPresignInput,
   DocumentVerifyInput,
 } from '../schemas/document.schemas';
-import { documentsRepository, type DocumentRow } from '../repositories/documents.repository';
+import { documentsRepository, type DocumentRow, type DocumentRowWithStudent } from '../repositories/documents.repository';
 import { getDownloadUrl, getUploadUrl } from '../services/presignedUrl.service';
 
 const FINANCE_ALLOWED_DOC_TYPES = ['Income Certificate', 'BPL Card'];
@@ -26,6 +26,30 @@ function serializeDocument(doc: DocumentRow) {
     verifiedBy: doc.verified_by,
     uploadedAt: doc.uploaded_at,
   };
+}
+
+function serializeDocumentWithStudent(doc: DocumentRowWithStudent) {
+  return {
+    ...serializeDocument(doc),
+    student: {
+      id: doc.student.id,
+      admissionNumber: doc.student.admission_number,
+      firstName: doc.student.first_name,
+      lastName: doc.student.last_name,
+    },
+  };
+}
+
+async function getFinanceDocumentTypeIds(tenantId: number): Promise<number[]> {
+  const { data, error } = await supabase
+    .from('lookup_document_types')
+    .select('id')
+    .eq('tenant_id', tenantId)
+    .eq('is_active', true)
+    .in('value', FINANCE_ALLOWED_DOC_TYPES);
+
+  if (error) throw new AppError(500, error.message);
+  return (data ?? []).map((row) => row.id);
 }
 
 async function validateDocumentType(documentTypeId: number, tenantId: number) {
@@ -70,11 +94,53 @@ async function filterDocumentsForRole(
   });
 }
 
+async function resolveFinanceDocumentTypeIds(
+  userId: string,
+  permissions: string[],
+  tenantId: number,
+): Promise<number[] | undefined> {
+  const roles = await usersRepository.findRoles(userId);
+  const roleNames = roles.map((r) => r.name);
+  const isFinanceOnly =
+    roleNames.includes('Finance') && !permissions.includes('system:manage_roles');
+
+  if (!isFinanceOnly) return undefined;
+
+  const ids = await getFinanceDocumentTypeIds(tenantId);
+  if (ids.length === 0) {
+    throw new AppError(403, 'Permission denied');
+  }
+
+  return ids;
+}
+
 export const documentService = {
   async listByStudent(studentId: string, tenantId: number, userId: string, permissions: string[]) {
     const docs = await documentsRepository.listByStudent(studentId, tenantId);
     const filtered = await filterDocumentsForRole(docs, userId, permissions);
     return filtered.map(serializeDocument);
+  },
+
+  async listQueue(
+    tenantId: number,
+    userId: string,
+    permissions: string[],
+    page: number,
+    limit: number,
+    status?: string,
+    search?: string,
+  ) {
+    const documentTypeIds = await resolveFinanceDocumentTypeIds(userId, permissions, tenantId);
+    const result = await documentsRepository.listByTenant(tenantId, page, limit, {
+      status,
+      search,
+      documentTypeIds,
+    });
+
+    return {
+      data: result.data.map(serializeDocumentWithStudent),
+      meta: result.meta,
+    };
   },
 
   async presign(studentId: string, tenantId: number, input: DocumentPresignInput) {

@@ -9,6 +9,13 @@ import { documentVerifySchema } from '../schemas/document.schemas';
 export const documentRoutes = Router();
 
 documentRoutes.get(
+  '/',
+  extractTenantMiddleware,
+  requirePermission('documents:view'),
+  asyncHandler(documentController.list),
+);
+
+documentRoutes.get(
   '/:id/download',
   extractTenantMiddleware,
   requirePermission('documents:download'),

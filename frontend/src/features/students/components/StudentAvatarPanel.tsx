@@ -1,16 +1,25 @@
-import { ImageIcon, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { useAvatarUpload, useStudentAvatarUrl } from '@/hooks/useStudent';
 
 type StudentAvatarPanelProps = {
   studentId: string;
+  firstName: string;
+  lastName: string | null;
   photoUrl: string | null;
   canEdit: boolean;
 };
 
-export function StudentAvatarPanel({ studentId, photoUrl, canEdit }: StudentAvatarPanelProps) {
+export function StudentAvatarPanel({
+  studentId,
+  firstName,
+  lastName,
+  photoUrl,
+  canEdit,
+}: StudentAvatarPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useAvatarUpload(studentId);
   const [loadRequested, setLoadRequested] = useState(false);
@@ -48,23 +57,19 @@ export function StudentAvatarPanel({ studentId, photoUrl, canEdit }: StudentAvat
     <div className="rounded-lg border p-6">
       <h3 className="font-medium">Student photo</h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Photos are loaded on demand to avoid unnecessary storage requests. Open this tab and click
-        &quot;View photo&quot; when needed.
+        The list uses free initials avatars. Uploaded photos are stored in R2 and load only when you
+        click &quot;View photo&quot; here.
       </p>
 
       <div className="mt-6 flex flex-col items-start gap-4">
-        {!hasPhoto && (
-          <div className="flex h-40 w-40 items-center justify-center rounded-lg border border-dashed bg-muted/40">
-            <ImageIcon className="size-10 text-muted-foreground" />
-          </div>
-        )}
-
-        {hasPhoto && !loadRequested && (
-          <div className="flex h-40 w-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-muted/40 p-4 text-center">
-            <ImageIcon className="size-8 text-muted-foreground" />
-            <Button type="button" size="sm" variant="secondary" onClick={() => setLoadRequested(true)}>
-              View photo
-            </Button>
+        {!loadRequested && (
+          <div className="flex flex-col items-start gap-3">
+            <StudentInitialsAvatar firstName={firstName} lastName={lastName} size="lg" />
+            {hasPhoto && (
+              <Button type="button" size="sm" variant="secondary" onClick={() => setLoadRequested(true)}>
+                View uploaded photo
+              </Button>
+            )}
           </div>
         )}
 
@@ -125,7 +130,7 @@ export function StudentAvatarPanel({ studentId, photoUrl, canEdit }: StudentAvat
         )}
 
         {!canEdit && !hasPhoto && (
-          <p className="text-sm text-muted-foreground">No photo uploaded for this student.</p>
+          <p className="text-sm text-muted-foreground">No uploaded photo for this student.</p>
         )}
       </div>
     </div>
