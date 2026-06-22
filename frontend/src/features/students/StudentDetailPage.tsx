@@ -12,6 +12,7 @@ import { StudentAvatarPanel } from '@/features/students/components/StudentAvatar
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
+import { formatDobDisplay } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
 type TabKey = 'profile' | 'documents' | 'avatar';
@@ -122,7 +123,7 @@ export function StudentDetailPage() {
             <h2 className="text-lg font-medium">Demographics</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <DetailField label="Admission number" value={student.admissionNumber} />
-              <DetailField label="Date of birth" value={student.dob} />
+              <DetailField label="Date of birth" value={formatDobDisplay(student.dob)} />
               <DetailField label="Gender" value={student.gender} />
               <DetailField label="Blood group" value={student.bloodGroup?.value} />
               <DetailField label="Category" value={student.admissionCategory?.value} />

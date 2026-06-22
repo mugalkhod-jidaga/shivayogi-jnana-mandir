@@ -57,7 +57,7 @@ export function DemographicsFields({
 
       <div className="space-y-2">
         <Label htmlFor="dob">Date of birth</Label>
-        <Input id="dob" type="date" {...register('dob')} />
+        <Input id="dob" placeholder="DD/MM/YYYY" inputMode="numeric" {...register('dob')} />
         {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
       </div>
 

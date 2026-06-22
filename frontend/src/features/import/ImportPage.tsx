@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { toCommitRows, useMigrationCommit, useMigrationParse } from '@/hooks/useMigration';
 import { ApiError } from '@/lib/api';
+import { formatDobDisplay } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import type { MigrationParseResult } from '@/types/migration';
 
@@ -119,8 +120,8 @@ export function ImportPage() {
             <div>
               <h2 className="text-lg font-medium">Upload spreadsheet</h2>
               <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                CSV or Excel (.xlsx / .xls), up to 5 MB. Required columns match the sample file
-                (admission number, name, DOB, blood group, category, contact, address fields).
+                CSV or Excel (.xlsx / .xls), up to 5 MB. Date of birth uses DD/MM/YYYY (e.g.
+                15/05/2010). Other columns match the sample file.
               </p>
             </div>
             <a
@@ -186,7 +187,7 @@ export function ImportPage() {
                         <td className="px-4 py-3">{row.row}</td>
                         <td className="px-4 py-3">{row.admission_number}</td>
                         <td className="px-4 py-3">{formatName(row.first_name, row.last_name)}</td>
-                        <td className="px-4 py-3">{row.dob}</td>
+                        <td className="px-4 py-3">{formatDobDisplay(row.dob)}</td>
                         <td className="px-4 py-3">{row.district}</td>
                         <td className="px-4 py-3">{row.primary_contact}</td>
                       </tr>

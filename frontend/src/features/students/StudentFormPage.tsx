@@ -18,6 +18,7 @@ import {
 } from '@/features/students/schemas/studentForm.schema';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useCreateStudent, useStudent, useUpdateStudent } from '@/hooks/useStudent';
+import { formatDobDisplay } from '@/lib/date';
 import { phoneToDisplay } from '@/lib/phone';
 import { ApiError } from '@/lib/api';
 
@@ -54,7 +55,7 @@ export function StudentFormPage() {
     editForm.reset({
       firstName: student.firstName,
       lastName: student.lastName ?? '',
-      dob: student.dob,
+      dob: formatDobDisplay(student.dob),
       gender: student.gender,
       medicalAlerts: student.medicalAlerts ?? '',
       familyDetails: student.familyDetails

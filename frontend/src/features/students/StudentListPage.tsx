@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { useStudentsList } from '@/hooks/useStudents';
+import { formatDobDisplay } from '@/lib/date';
 
 function formatName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
@@ -124,7 +125,7 @@ export function StudentListPage() {
                 </td>
                 <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
                 <td className="px-4 py-3">{formatName(student.firstName, student.lastName)}</td>
-                <td className="px-4 py-3">{student.dob}</td>
+                <td className="px-4 py-3">{formatDobDisplay(student.dob)}</td>
                 <td className="px-4 py-3">{student.gender}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={student.status} />

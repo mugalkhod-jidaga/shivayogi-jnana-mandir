@@ -1,6 +1,6 @@
 # Frontend Plan — Shivayogi Jnana Mandir ERP
 
-**Status:** FE-8 complete — bulk CSV import in `frontend/`  
+**Status:** FE-9 complete — dashboard and audit logs in `frontend/`  
 **Backend:** Phase 1 API complete — frontend can be built against `http://localhost:4000/api/v1`  
 **Spec reference:** [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) Section 17
 
@@ -298,8 +298,8 @@ POST .../documents/confirm  →  DB row
 
 ### Done when
 
-- [ ] Super Admin sees live counts after import
-- [ ] Compliance report links to student document tab
+- [x] Super Admin sees live counts after import
+- [x] Compliance report links to student document tab
 
 ---
 

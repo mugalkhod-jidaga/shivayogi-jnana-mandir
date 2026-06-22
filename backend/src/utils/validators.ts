@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { parseDobToIso } from './date';
 
 export const phoneSchema = z
   .string()
@@ -17,3 +18,19 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().trim().max(100).optional(),
 });
+
+export const dobInputSchema = z
+  .string()
+  .trim()
+  .min(1, 'Date of birth is required')
+  .transform((value, ctx) => {
+    try {
+      return parseDobToIso(value);
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        message: error instanceof Error ? error.message : 'Enter a valid date as DD/MM/YYYY',
+      });
+      return z.NEVER;
+    }
+  });

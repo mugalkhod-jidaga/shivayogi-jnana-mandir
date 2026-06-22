@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { phoneSchema } from '../../../utils/validators';
+import { dobInputSchema, phoneSchema } from '../../../utils/validators';
 
 export const migrationCsvRowSchema = z.object({
   admission_number: z.string().min(1).max(100),
   first_name: z.string().min(1).max(100),
   last_name: z.string().max(100).optional(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
+  dob: dobInputSchema,
   gender: z.string().max(20).optional(),
   blood_group: z.string().min(1).max(5),
   admission_category: z.string().min(1).max(100),
@@ -22,7 +22,7 @@ export const migrationCommitRowSchema = z.object({
   admission_number: z.string().min(1).max(100),
   first_name: z.string().min(1).max(100),
   last_name: z.string().max(100).optional(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  dob: dobInputSchema,
   gender: z.string().max(20).optional(),
   blood_group_id: z.number().int().positive(),
   admission_category_id: z.number().int().positive(),

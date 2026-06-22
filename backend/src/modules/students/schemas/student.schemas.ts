@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { phoneSchema } from '../../../utils/validators';
+import { dobInputSchema, phoneSchema } from '../../../utils/validators';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const studentStatusEnum = z.enum(['Active', 'Alumni', 'Discontinued']);
@@ -24,7 +24,7 @@ export const createStudentSchema = z.object({
   admissionNumber: z.string().trim().min(1).max(100),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'DOB must be YYYY-MM-DD'),
+  dob: dobInputSchema,
   gender: genderEnum.default('Male'),
   bloodGroupId: z.number().int().positive().optional(),
   admissionCategoryId: z.number().int().positive().optional(),
@@ -36,7 +36,7 @@ export const updateStudentSchema = z
   .object({
     firstName: z.string().trim().min(1).max(100).optional(),
     lastName: z.string().trim().max(100).nullable().optional(),
-    dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    dob: dobInputSchema.optional(),
     gender: genderEnum.optional(),
     bloodGroupId: z.number().int().positive().nullable().optional(),
     admissionCategoryId: z.number().int().positive().nullable().optional(),

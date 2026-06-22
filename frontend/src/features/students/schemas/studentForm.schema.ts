@@ -1,8 +1,25 @@
 import { z } from 'zod';
+import { parseDobToIso } from '@/lib/date';
 import { normalizeIndianPhone } from '@/lib/phone';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
+
+const dobFieldSchema = z
+  .string()
+  .trim()
+  .min(1, 'Date of birth is required')
+  .transform((value, ctx) => {
+    try {
+      return parseDobToIso(value);
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        message: error instanceof Error ? error.message : 'Enter a valid date as DD/MM/YYYY',
+      });
+      return z.NEVER;
+    }
+  });
 
 const familyDetailsFormSchema = z.object({
   fatherName: z.string().trim().max(100).optional(),
@@ -26,7 +43,7 @@ export const createStudentFormSchema = z.object({
   admissionNumber: z.string().trim().min(1, 'Admission number is required').max(100),
   firstName: z.string().trim().min(1, 'First name is required').max(100),
   lastName: z.string().trim().max(100).optional(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth must be YYYY-MM-DD'),
+  dob: dobFieldSchema,
   gender: genderEnum,
   medicalAlerts: z.string().trim().max(2000).optional(),
   familyDetails: familyDetailsFormSchema,
@@ -35,7 +52,7 @@ export const createStudentFormSchema = z.object({
 export const updateStudentFormSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required').max(100),
   lastName: z.string().trim().max(100).optional(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth must be YYYY-MM-DD'),
+  dob: dobFieldSchema,
   gender: genderEnum,
   medicalAlerts: z.string().trim().max(2000).optional(),
   familyDetails: familyDetailsFormSchema,
