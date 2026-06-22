@@ -76,3 +76,13 @@ Next: documents + R2 module.
 - [x] `PATCH /api/v1/documents/:id/verify` — Verified / Rejected / Renewal Needed
 
 Next: CSV migration module.
+
+## Migration + Dashboard + Audit (done)
+
+- [x] `POST /api/v1/migration/parse` — CSV/XLSX upload, validate, map lookups, preview
+- [x] `POST /api/v1/migration/commit` — bulk insert via RPC
+- [x] `GET /api/v1/dashboard/summary` — KPI counts
+- [x] `GET /api/v1/dashboard/compliance-report` — missing documents per student
+- [x] `GET /api/v1/audit-logs` — paginated audit trail
+
+**Phase 1 backend API is complete.** Next: frontend scaffold.

@@ -6,7 +6,8 @@ Enterprise student information system for **Shivayogi Jnana Mandir**, operated b
 
 | Document | Purpose |
 |---|---|
-| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | **Primary spec** — schema, API catalog, frontend plan, build order (v1.6) |
+| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | **Primary spec** — schema, API catalog, build order (v1.6) |
+| [FRONTEND_PLAN.md](./FRONTEND_PLAN.md) | **Frontend step-by-step plan** — phases FE-0 through FE-10 |
 | [supabase/migrations/](./supabase/migrations/) | SQL migrations to apply to existing Supabase project |
 | [backend/.env.example](./backend/.env.example) | Backend secrets template |
 | [frontend/.env.example](./frontend/.env.example) | Frontend public env template |
@@ -14,8 +15,8 @@ Enterprise student information system for **Shivayogi Jnana Mandir**, operated b
 ## Status
 
 - **Planning:** Complete — ready for spec review (Section 18 checklist)
-- **Supabase project:** Created — run migrations next
-- **Application code:** Not started
+- **Backend:** Phase 1 API complete
+- **Frontend:** Not started — see [FRONTEND_PLAN.md](./FRONTEND_PLAN.md)
 
 ## Quick start (after review)
 

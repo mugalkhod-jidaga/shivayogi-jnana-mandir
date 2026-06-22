@@ -12,6 +12,7 @@
     "test:lookups": "ts-node --project tsconfig.scripts.json scripts/test-lookups-api.ts",
     "test:students": "ts-node --project tsconfig.scripts.json scripts/test-students-api.ts",
     "test:documents": "ts-node --project tsconfig.scripts.json scripts/test-documents-api.ts",
+    "test:migration": "ts-node --project tsconfig.scripts.json scripts/test-migration-dashboard.ts",
     "admin:token": "node scripts/get-admin-token.js"
   },
   "keywords": [],
@@ -23,15 +24,19 @@
     "@aws-sdk/s3-request-presigner": "^3.1073.0",
     "@supabase/supabase-js": "^2.108.2",
     "cors": "^2.8.6",
+    "csv-parse": "^7.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
+    "multer": "^2.2.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
     "@types/node": "^26.0.0",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
