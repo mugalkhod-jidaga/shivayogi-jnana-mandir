@@ -9,6 +9,7 @@
     "bootstrap": "ts-node --project tsconfig.scripts.json scripts/bootstrap-first-admin.ts",
     "test:me": "ts-node --project tsconfig.scripts.json scripts/test-users-me.ts",
     "test:staff": "ts-node --project tsconfig.scripts.json scripts/test-staff-api.ts",
+    "test:lookups": "ts-node --project tsconfig.scripts.json scripts/test-lookups-api.ts",
     "admin:token": "node scripts/get-admin-token.js"
   },
   "keywords": [],

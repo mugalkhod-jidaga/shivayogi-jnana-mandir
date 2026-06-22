@@ -42,3 +42,15 @@ Health check: `GET http://localhost:4000/api/v1/health` → `{ "status": "ok" }`
 - [x] `GET /api/v1/roles`
 
 Next: lookups module.
+
+## Phase C — Lookups (done)
+
+- [x] `GET /api/v1/lookups/blood-groups`
+- [x] `GET /api/v1/lookups/admission-categories`
+- [x] `GET /api/v1/lookups/document-types`
+- [x] `POST /api/v1/lookups/admission-categories`
+- [x] `PATCH /api/v1/lookups/admission-categories/:id`
+- [x] `POST /api/v1/lookups/document-types`
+- [x] `PATCH /api/v1/lookups/document-types/:id`
+
+Next: students + family module.
