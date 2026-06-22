@@ -3,7 +3,7 @@
 **Project:** Divine Charitable Trust ERP System
 **Phase 1 Tenant:** Shivayogi Jnana Mandir (operated by Divine Charitable Trust)
 **Phase:** 1 (Core Foundation & Multi-Tenant Setup)
-**Version:** 1.4
+**Version:** 1.6
 
 ## Changelog
 
@@ -14,24 +14,28 @@
 | 1.2 | Supabase auth flow, RLS policy, R2 rules, CSV workflow |
 | 1.3 | Fixed invalid RLS/RPC assumptions, field-level RBAC, document type lookup, error handling, rate limiting, backup policy, master data seeding, dashboard endpoints |
 | 1.4 | Staff onboarding workflow, tenant/first-admin bootstrap, pagination standard, BaseRepository (structural audit logging), profile photo, status reason tracking, Phase 2+ roadmap (hostel + notifications), env var checklist |
+| 1.5 | Auto-seeded roles/permissions via DB trigger, pipeline CSV lookup mapping, centralized E.164 Zod validator, split FE/BE environment variables |
+| 1.6 | **(Current)** Merged v1.5 gaps from planning draft; complete API catalog; frontend screen plan; Finance document scoping; extended bulk RPC for family details; Supabase setup checklist; implementation build order |
+
+> **Planning status:** Spec is ready for review before implementation. Supabase project already exists — apply migrations per Section 5.7.
 
 ---
 
 ## 1. Project Vision & Architecture Context
 
-This software is an Enterprise Resource Planning (ERP) system initially built for the **Divine Charitable Trust**, which operates a free residential school — **Shivayogi Jnana Mandir** — providing education, food, and accommodation to male students from underprivileged backgrounds, single-parent homes, or families experiencing severe financial and social distress.
+This software is an Enterprise Resource Planning (ERP) system initially built for the **Divine Charitable Trust**, which operates a free residential school — **Shivayogi Jnana Mandir** — providing education, food, and accommodation to male students from underprivileged backgrounds.
 
-**Architectural Mandate:** This system is architected from Day 1 as a **Multi-Tenant SaaS**. Even though Phase 1 serves only one trust, the codebase and database must strictly isolate data using `tenant_id`. This allows the platform to be commercialized for other schools later — without a rewrite — to help fund the trust's charitable work.
+**Architectural Mandate:** This system is architected from Day 1 as a **Multi-Tenant SaaS**. Even though Phase 1 serves only one trust, the codebase and database must strictly isolate data using `tenant_id`.
 
 ### 1.1 Phase 1 Scope
 
 **In Scope:**
 1. Multi-tenant system initialization (`tenant_id` isolation).
-2. Role-Based Access Control (Super Admin, Admissions Clerk, Finance, Teacher/Warden).
+2. Role-Based Access Control (Super Admin, Admissions Clerk, Finance, Teacher/Warden) auto-seeded per tenant.
 3. Staff account lifecycle: bootstrap, creation, deactivation, password reset.
 4. Comprehensive student database (demographics, family background, emergency contacts).
 5. Digital document vault (Aadhaar, income certificates, BPL cards, etc.).
-6. Bulk CSV/Excel migration tool for existing student records.
+6. Bulk CSV/Excel migration tool with pipeline validation and lookup mapping.
 7. Super Admin monitoring dashboard (headcount, document compliance, capacity).
 
 **Out of Scope for Phase 1 (see Section 14 for the full roadmap):**
@@ -42,7 +46,16 @@ This software is an Enterprise Resource Planning (ERP) system initially built fo
 - **Notification service** — WhatsApp (Wati.io/Interakt) or email.
 - Payments (Razorpay/UPI) — relevant only once commercial tenants are onboarded.
 
-> **Cursor AI instruction:** Do not generate routes, tables, or UI for out-of-scope items, even if they seem like natural extensions of in-scope tables. Section 14 documents *why* certain schema/format decisions in Phase 1 are made with these future phases in mind — that section is for awareness only and should not be implemented now.
+> **Cursor AI instruction:** Do not generate routes, tables, or UI for out-of-scope items. Section 14 documents *why* certain schema decisions in Phase 1 are made — that section is for awareness only and should not be implemented now.
+
+### 1.2 Infrastructure Status (Phase 1)
+
+| Item | Status | Notes |
+| Supabase project | **Created** | Apply schema + seeds from Section 10 via `supabase/migrations/` (Section 15) |
+| Cloudflare R2 bucket | Pending | Private bucket required before document module |
+| Backend codebase | Not started | Scaffold per `backend/prompt.md` |
+| Frontend codebase | Not started | Scaffold per Section 17 |
+| First tenant + Super Admin | Pending | Run bootstrap after migrations (Section 5.4) |
 
 ---
 
@@ -81,6 +94,7 @@ When generating code for this project, the AI MUST adhere to the following stand
 9. **Pagination & Searching:** Any `GET` route returning a list (Students, Audit Logs, Users) MUST implement offset/limit pagination. Query params: `?page=1&limit=20&search=keyword`. Response metadata: `{ success: true, data: [...], meta: { total, page, limit } }`. `limit` is capped at 100 server-side regardless of what's requested.
 10. **Structural Audit Logging:** Audit logging for updates and soft-deletes on core entities (Students, Documents, Users) is NOT something to remember to call manually — it is inherited automatically by extending `BaseRepository` (Section 6.2). Do not write one-off update/delete logic in a repository that bypasses it.
 11. **Phone Number Format:** All phone numbers (`user_profiles.phone_number`, `student_family_details.primary_contact`) are stored in **E.164 format** (`+91XXXXXXXXXX`), validated via Zod regex at the API boundary. This is required for future WhatsApp notification integration — see Section 14.
+11. **Phone Number Format:** All phone numbers (`user_profiles.phone_number`, `student_family_details.primary_contact`) are stored in **E.164 format** (`+91XXXXXXXXXX`), validated via `/src/utils/validators.ts` (`phoneSchema`, `normalizeIndianPhone` for CSV). Required for future WhatsApp notification integration — see Section 14.
 
 ---
 
@@ -242,6 +256,7 @@ CREATE TABLE audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+*(Schema identical to Version 1.4 for `tenants`, `user_profiles`, `roles`, `permissions`, `role_permissions`, `user_roles`, `master_lookups`, `students`, `student_family_details`, `student_documents`, and `audit_logs`)*
 
 ---
 
@@ -305,10 +320,10 @@ if (error) redirectToLogin(); // refresh token also expired (>7 days)
 
 ### 5.4 Tenant & First Super Admin Bootstrap (Phase 1: Manual Seed, Not an API)
 
-Phase 1 has exactly one tenant. There is no public "create your school" signup flow, and none should be built — that's a Phase 3+ commercial-launch concern requiring billing and onboarding infrastructure. The tenant and its first Super Admin are created **once, manually**, via a script that is never exposed as an API route.
+Phase 1 has exactly one tenant. The tenant and its first Super Admin are created **once, manually**, via a script. Because the database trigger (Section 10) auto-creates all roles and permissions when the tenant is inserted, this script simply links the auth user to the newly created `Super Admin` role.
 
 ```sql
--- Run once in the Supabase SQL editor
+-- 1. Run once in the Supabase SQL editor to trigger role & lookup creation
 INSERT INTO tenants (name, subdomain)
 VALUES ('Shivayogi Jnana Mandir', 'shivayogi-jnana-mandir')
 RETURNING id; -- note this id for the script below
@@ -328,11 +343,14 @@ async function bootstrap() {
   });
   if (error) throw error;
 
-  const { data: role } = await supabase
+  // Role was auto-created by the DB trigger (Section 10) — fetch, do not insert
+  const { data: role, error: roleError } = await supabase
     .from('roles')
-    .insert({ tenant_id: TENANT_ID, name: 'Super Admin' })
-    .select()
+    .select('id')
+    .eq('tenant_id', TENANT_ID)
+    .eq('name', 'Super Admin')
     .single();
+  if (roleError || !role) throw new Error('Super Admin role not found — run tenant INSERT first');
 
   await supabase.from('user_profiles').insert({
     id: authUser.user.id,
@@ -400,6 +418,17 @@ The staff member logs in with the temp password and is forced to set a new one (
 
 * **Deactivation:** `PATCH /api/v1/users/:id/deactivate` (Super Admin only) sets `user_profiles.status = 'Inactive'` and disables sign-in on the Supabase Auth record. `extractTenantMiddleware` already rejects inactive profiles (Section 5.2), but also disabling the Auth account itself prevents a still-valid refresh token from minting new access tokens. Confirm the exact `supabase-js` admin method/parameter for this against current Supabase docs, since admin API surface changes between SDK versions.
 * **Password reset:** `POST /api/v1/users/:id/reset-password` (Super Admin only) issues a new temporary password via the Auth admin API and sets `must_reset_password = true` again.
+
+### 5.7 Supabase Project Setup (Existing Project)
+
+The Supabase project is already provisioned. Before writing application code, complete this checklist in the Supabase dashboard:
+
+1. **Authentication → Providers:** Enable **Phone** sign-in. Disable **Email** public signup if shown.
+2. **Authentication → Settings:** Disable **Enable sign ups** (staff accounts are admin-created only).
+3. **Authentication → URL configuration:** Set Site URL to the deployed frontend domain; add `http://localhost:5173` for local dev.
+4. **SQL Editor / Migrations:** Run migrations in order from `supabase/migrations/` (Section 15) — schema (Section 4), global seeds + trigger (Section 10), RPC (Section 8.3).
+5. **API keys:** Copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` → `backend/.env`. Copy `SUPABASE_URL` and **anon key** → `frontend/.env` as `VITE_SUPABASE_*`.
+6. **Optional defense-in-depth:** Enable RLS on all app tables with **no policies** for `anon`/`authenticated` roles so accidental direct client queries are denied. The backend `service_role` bypasses RLS regardless.
 
 ---
 
@@ -581,6 +610,31 @@ export function requirePermission(permission: string) {
 }
 ```
 
+### 6.7 Finance Role — Document Type Scoping
+
+The RBAC matrix grants Finance `documents:view` and `documents:download` for **Income Certificate** and **BPL Card** only. Enforce this in the **documents service layer**, not the controller:
+
+```typescript
+// /src/modules/documents/documents.service.ts
+const FINANCE_ALLOWED_DOC_TYPES = ['Income Certificate', 'BPL Card'];
+
+function filterDocumentsForRole(docs, userPermissions: string[], userRoles: string[]) {
+  const isFinanceOnly =
+    userRoles.includes('Finance') &&
+    !userPermissions.includes('system:manage_roles');
+
+  if (!isFinanceOnly) return docs;
+
+  return docs.filter((d) => FINANCE_ALLOWED_DOC_TYPES.includes(d.document_type?.value));
+}
+```
+
+Resolve allowed types by joining `lookup_document_types` — never hardcode IDs. The filter applies to list and single-document fetch paths. Super Admin and Admissions Clerk see all document types.
+
+### 6.8 `student_documents` Tenant Isolation
+
+`student_documents` has no `tenant_id` column. Every repository query MUST join through `students` and filter `.eq('students.tenant_id', tenantId)` plus `.is('student_documents.deleted_at', null)`.
+
 ---
 
 ## 7. Cloudflare R2 Integration & File Access
@@ -637,11 +691,12 @@ export async function getDownloadUrl(documentId: string, tenantId: number, userI
 
 ### 8.2 Workflow
 
-1. **Upload** — accept `.csv` or `.xlsx`.
-2. **Validate** — Zod schema checks mandatory fields, formats, and normalizes phone numbers per row.
-3. **Check duplicates** — query existing `admission_number`s for this tenant.
-4. **Preview** — return `{ validRows: 140, errorRows: [{ row: 3, error: "Missing DOB" }] }`.
-5. **Commit** — only after the admin confirms, call the RPC function below.
+1. **Upload** — `POST /api/v1/migration/parse` accepts `.csv` or `.xlsx` (multipart).
+2. **Validate & Map (Pipeline)** — Zod schema checks mandatory fields and normalizes phone numbers (Section 9). The service layer maps text strings (e.g. `"O+"`, `"BPL"`) to integer IDs by querying `lookup_*` tables for the current tenant.
+   - *Error collection:* If a row fails Zod validation **or** lookup mapping fails (e.g. `"O Plus"` instead of `"O+"`), push to `errorRows`. Do **not** throw and abort the whole file.
+3. **Check duplicates** — query existing `admission_number`s for this tenant; add conflicts to `errorRows`.
+4. **Preview** — return `{ validRows: 140, errorRows: [{ row: 3, error: "Invalid Blood Group: O Plus" }], preview: [...] }`.
+5. **Commit** — `POST /api/v1/migration/commit` only after admin confirms. Valid rows are passed to `bulk_insert_students` RPC (Section 8.3).
 
 ### 8.3 Atomic Insert via Postgres RPC
 
@@ -653,6 +708,7 @@ CREATE OR REPLACE FUNCTION bulk_insert_students(
 ) RETURNS JSONB AS $$
 DECLARE
   v_student JSONB;
+  v_student_id UUID;
   v_count INT := 0;
 BEGIN
   FOR v_student IN SELECT * FROM jsonb_array_elements(p_students)
@@ -666,7 +722,20 @@ BEGIN
       (v_student->>'dob')::DATE, COALESCE(v_student->>'gender', 'Male'),
       (v_student->>'blood_group_id')::INT, (v_student->>'admission_category_id')::INT,
       p_created_by, p_created_by
+    ) RETURNING id INTO v_student_id;
+
+    INSERT INTO student_family_details (
+      student_id, father_name, mother_name, parent_status,
+      primary_contact, village_town, taluk_mandal, district, pincode
+    ) VALUES (
+      v_student_id,
+      v_student->>'father_name', v_student->>'mother_name',
+      COALESCE(v_student->>'parent_status', 'Both Alive'),
+      v_student->>'primary_contact',
+      v_student->>'village_town', v_student->>'taluk_mandal',
+      v_student->>'district', v_student->>'pincode'
     );
+
     v_count := v_count + 1;
   END LOOP;
   RETURN jsonb_build_object('success', true, 'inserted', v_count);
@@ -683,6 +752,32 @@ $$ LANGUAGE plpgsql;
 ---
 
 ## 9. Error Handling & Validation Standards
+
+### 9.1 Centralized Validators
+
+Phone validation is centralized in `/src/utils/validators.ts` to prevent regex drift between staff creation, student forms, and CSV imports.
+
+```typescript
+// /src/utils/validators.ts
+import { z } from 'zod';
+
+export const phoneSchema = z
+  .string()
+  .regex(/^\+[1-9]\d{1,14}$/, 'Must be a valid E.164 phone number (e.g., +919876543210)');
+
+/** Normalize legacy Indian phone formats for CSV import. */
+export function normalizeIndianPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.length === 12 && digits.startsWith('91')) return `+${digits}`;
+  if (raw.startsWith('+')) return raw;
+  throw new Error(`Unrecognized phone format: ${raw}`);
+}
+```
+
+Use `phoneSchema` in all POST/PATCH Zod bodies. Use `normalizeIndianPhone` in the CSV pipeline before `phoneSchema.parse`.
+
+### 9.2 AppError & Middleware
 
 ```typescript
 // /src/utils/AppError.ts
@@ -714,18 +809,43 @@ export function validateZod(schema: ZodSchema) {
 
 ---
 
-## 10. Master Data Seeding
+## 10. Master Data & RBAC Seeding (Database Triggers)
+
+Global permissions and blood groups are seeded once. Every new tenant row auto-seeds lookups, four roles, and role→permission mappings via a single trigger — no application-level setup scripts required.
 
 ```sql
--- Global lookups (run once)
+-- ==========================================
+-- GLOBAL SEEDS (run once per Supabase project)
+-- ==========================================
+INSERT INTO permissions (action, description) VALUES
+  ('students:read', 'View basic student profiles'),
+  ('students:create', 'Create new student records'),
+  ('students:edit', 'Edit basic student profiles'),
+  ('students:soft_delete', 'Deactivate student records'),
+  ('students:view_sensitive_data', 'View family income and guardian details'),
+  ('documents:upload', 'Upload verification documents'),
+  ('documents:view', 'View uploaded documents'),
+  ('documents:download', 'Download documents'),
+  ('documents:verify', 'Approve or reject documents'),
+  ('audit_logs:view', 'View system audit trails'),
+  ('system:manage_roles', 'Create and manage staff accounts'),
+  ('system:manage_lookups', 'Manage dropdown lists'),
+  ('dashboard:view', 'View KPI dashboard')
+ON CONFLICT (action) DO NOTHING;
+
 INSERT INTO lookup_blood_groups (value) VALUES
   ('O+'), ('O-'), ('A+'), ('A-'), ('B+'), ('B-'), ('AB+'), ('AB-')
 ON CONFLICT (value) DO NOTHING;
 
--- Tenant-scoped lookups, auto-seeded on tenant creation
-CREATE OR REPLACE FUNCTION seed_default_tenant_lookups()
+-- ==========================================
+-- TENANT TRIGGER (lookups + roles + permissions)
+-- ==========================================
+CREATE OR REPLACE FUNCTION seed_default_tenant_data()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_super_admin_id INT; v_clerk_id INT; v_finance_id INT; v_warden_id INT;
 BEGIN
+  -- A. Tenant-scoped lookups
   INSERT INTO lookup_admission_categories (tenant_id, value) VALUES
     (NEW.id, 'Orphan'), (NEW.id, 'Single Parent'), (NEW.id, 'BPL'), (NEW.id, 'Destitute')
   ON CONFLICT (tenant_id, value) DO NOTHING;
@@ -734,14 +854,39 @@ BEGIN
     (NEW.id, 'Aadhaar Card'), (NEW.id, 'Income Certificate'), (NEW.id, 'BPL Card'),
     (NEW.id, 'Birth Certificate'), (NEW.id, 'Caste Certificate'), (NEW.id, 'School Leaving Certificate')
   ON CONFLICT (tenant_id, value) DO NOTHING;
+
+  -- B. Roles
+  INSERT INTO roles (tenant_id, name) VALUES (NEW.id, 'Super Admin') RETURNING id INTO v_super_admin_id;
+  INSERT INTO roles (tenant_id, name) VALUES (NEW.id, 'Admissions Clerk') RETURNING id INTO v_clerk_id;
+  INSERT INTO roles (tenant_id, name) VALUES (NEW.id, 'Finance') RETURNING id INTO v_finance_id;
+  INSERT INTO roles (tenant_id, name) VALUES (NEW.id, 'Teacher/Warden') RETURNING id INTO v_warden_id;
+
+  -- C. Role → permission mappings (Section 6.4)
+  INSERT INTO role_permissions (role_id, permission_id)
+  SELECT v_super_admin_id, id FROM permissions;
+
+  INSERT INTO role_permissions (role_id, permission_id)
+  SELECT v_clerk_id, id FROM permissions WHERE action IN
+    ('students:read', 'students:create', 'students:edit', 'students:view_sensitive_data',
+     'documents:upload', 'documents:view', 'documents:download', 'documents:verify');
+
+  INSERT INTO role_permissions (role_id, permission_id)
+  SELECT v_finance_id, id FROM permissions WHERE action IN
+    ('students:read', 'students:view_sensitive_data', 'documents:view', 'documents:download', 'documents:verify');
+
+  INSERT INTO role_permissions (role_id, permission_id)
+  SELECT v_warden_id, id FROM permissions WHERE action IN ('students:read');
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_seed_tenant_lookups
+CREATE TRIGGER trg_seed_tenant_data
 AFTER INSERT ON tenants
-FOR EACH ROW EXECUTE FUNCTION seed_default_tenant_lookups();
+FOR EACH ROW EXECUTE FUNCTION seed_default_tenant_data();
 ```
+
+> If the old `trg_seed_tenant_lookups` trigger exists from an earlier draft, drop it before applying this migration: `DROP TRIGGER IF EXISTS trg_seed_tenant_lookups ON tenants;`
 
 ---
 
@@ -807,16 +952,222 @@ Razorpay/UPI — relevant once commercial (fee-charging) tenants are onboarded. 
 ## 15. Folder Structure
 
 ```text
-/src
-  /config          # Supabase client init, R2 credentials, env loading
-  /repositories     # BaseRepository (shared tenant/soft-delete/pagination/audit logic)
-  /middlewares     # extractTenant, requirePermission, validateZod, rateLimiters, globalErrorHandler
-  /modules
-    /auth          # Token verification, staff creation, deactivation, password reset
-    /students      # Routes, Controllers, Services, Repositories
-    /documents     # Presigned URL generation, upload confirmation, verification
-    /system        # Lookups, CSV migration, dashboard endpoints, audit log service
-  /utils           # AppError, logger
-/scripts
-  bootstrap-first-admin.ts  # one-time manual script, never an API route
+/supabase
+  /migrations
+    001_schema.sql          # Section 4 tables
+    002_seeds_and_trigger.sql # Section 10
+    003_bulk_insert_rpc.sql   # Section 8.3
+
+/backend
+  /src
+    /config          # Supabase client, R2 credentials, env loading
+    /repositories    # BaseRepository (shared tenant/soft-delete/pagination/audit)
+    /middlewares     # extractTenant, requirePermission, validateZod, rateLimiters, globalErrorHandler
+    /modules
+      /auth          # Staff creation, deactivation, password reset, /users/me
+      /students      # Routes, Controllers, Services, Repositories
+      /documents     # Presigned URLs, upload confirm, verification, download
+      /system        # Lookups, CSV migration, dashboard, audit logs
+    /utils           # AppError, validators.ts, logger
+  /scripts
+    bootstrap-first-admin.ts  # one-time manual script, never an API route
+
+/frontend
+  /src
+    /components      # shadcn/ui primitives + shared layout
+    /features        # auth, students, documents, staff, migration, dashboard
+    /hooks           # useAuth, usePermissions, useApi
+    /lib             # supabase client, api client (Bearer token + refresh)
+    /routes          # React Router route definitions + guards
 ```
+
+---
+
+## 16. Complete API Catalog (Phase 1)
+
+All routes except `GET /health` require `Authorization: Bearer <access_token>` and pass through `extractTenantMiddleware`. List endpoints use `paginationSchema` (Section 6.2).
+
+### 16.1 System
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/health` | — | `{ status: 'ok' }` — no auth |
+| GET | `/api/v1/users/me` | — (authenticated) | Current profile, roles, and permission list for FE guards |
+
+### 16.2 Staff / Users
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/users` | `system:manage_roles` | Paginated staff list (`?page&limit&search`) |
+| POST | `/api/v1/users` | `system:manage_roles` | Create staff (temp password, `must_reset_password`) |
+| GET | `/api/v1/users/:id` | `system:manage_roles` | Staff detail |
+| PATCH | `/api/v1/users/:id` | `system:manage_roles` | Update name / role |
+| PATCH | `/api/v1/users/:id/deactivate` | `system:manage_roles` | Set Inactive + disable Auth sign-in |
+| POST | `/api/v1/users/:id/reset-password` | `system:manage_roles` | Issue new temp password |
+| GET | `/api/v1/roles` | `system:manage_roles` | Tenant roles (for staff creation dropdown) |
+
+### 16.3 Lookups
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/lookups/blood-groups` | authenticated | Global blood groups (`is_active = true`) |
+| GET | `/api/v1/lookups/admission-categories` | authenticated | Tenant admission categories |
+| GET | `/api/v1/lookups/document-types` | authenticated | Tenant document types |
+| POST | `/api/v1/lookups/admission-categories` | `system:manage_lookups` | Add category |
+| PATCH | `/api/v1/lookups/admission-categories/:id` | `system:manage_lookups` | Update / deactivate |
+| POST | `/api/v1/lookups/document-types` | `system:manage_lookups` | Add document type |
+| PATCH | `/api/v1/lookups/document-types/:id` | `system:manage_lookups` | Update / deactivate |
+
+### 16.4 Students
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/students` | `students:read` | Paginated list; field-level filter (Section 6.5) |
+| POST | `/api/v1/students` | `students:create` | Create student + family details |
+| GET | `/api/v1/students/:id` | `students:read` | Detail with optional sensitive fields |
+| PATCH | `/api/v1/students/:id` | `students:edit` | Update demographics / family / status |
+| PATCH | `/api/v1/students/:id/deactivate` | `students:soft_delete` | Soft delete; requires `status_reason` |
+| POST | `/api/v1/students/:id/avatar/presign` | `students:edit` | Presigned PUT URL for profile photo |
+| POST | `/api/v1/students/:id/avatar/confirm` | `students:edit` | Save `photo_url` after R2 upload |
+
+### 16.5 Documents
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/students/:studentId/documents` | `documents:view` | List docs; Finance filter (Section 6.7) |
+| POST | `/api/v1/students/:studentId/documents/presign` | `documents:upload` | Presigned PUT URL (`uploadLimiter`) |
+| POST | `/api/v1/students/:studentId/documents/confirm` | `documents:upload` | Create `student_documents` row after upload |
+| GET | `/api/v1/documents/:id/download` | `documents:download` | Presigned GET URL + audit `download` |
+| PATCH | `/api/v1/documents/:id/verify` | `documents:verify` | Set `Verified` / `Rejected` / `Renewal Needed` |
+
+### 16.6 Bulk Migration
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| POST | `/api/v1/migration/parse` | `students:create` | Upload CSV/XLSX → validate, map lookups, preview |
+| POST | `/api/v1/migration/commit` | `students:create` | Commit previewed rows via RPC |
+
+### 16.7 Audit & Dashboard
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/api/v1/audit-logs` | `audit_logs:view` | Paginated audit trail (`?page&limit&search`) |
+| GET | `/api/v1/dashboard/summary` | `dashboard:view` | KPI counts |
+| GET | `/api/v1/dashboard/compliance-report` | `dashboard:view` | Per-student missing document types |
+
+### 16.8 Auth (Frontend Only — No Backend Routes)
+
+Login, logout, password change, and session refresh use the **Supabase client SDK** directly on the frontend. The backend only validates JWTs via `extractTenantMiddleware`.
+
+---
+
+## 17. Frontend Plan (Phase 1)
+
+### 17.1 Stack & Libraries
+
+| Layer | Choice |
+|---|---|
+| Build | Vite + React 18 + TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Routing | React Router v6 |
+| Server state | TanStack Query |
+| Forms | React Hook Form + Zod (mirror backend schemas) |
+| Auth | `@supabase/supabase-js` (phone + password) |
+
+### 17.2 App Shell & Navigation
+
+**Layout:** Sidebar + top bar with tenant name and signed-in user.
+
+**Role-based nav** (hide items the user lacks permission for — fetch from `GET /users/me`):
+
+| Nav item | Permission | Roles typically |
+|---|---|---|
+| Dashboard | `dashboard:view` | Super Admin |
+| Students | `students:read` | All staff |
+| Documents | `documents:view` | Super Admin, Admissions, Finance |
+| Bulk Import | `students:create` | Super Admin, Admissions |
+| Staff | `system:manage_roles` | Super Admin |
+| Lookups | `system:manage_lookups` | Super Admin |
+| Audit Logs | `audit_logs:view` | Super Admin |
+
+### 17.3 Screen Map
+
+| Route | Screen | Key behaviour |
+|---|---|---|
+| `/login` | Login | Phone + password via Supabase; public only route |
+| `/reset-password` | Force password change | Shown when `must_reset_password === true` after login |
+| `/` | Dashboard | KPI cards + compliance table link (Super Admin) |
+| `/students` | Student list | Search, pagination, status badges, create button |
+| `/students/new` | Add student | Multi-section form: demographics, family, lookups from API |
+| `/students/:id` | Student detail | Tabs: Profile · Documents · History (status/audit) |
+| `/students/:id/edit` | Edit student | Same form; status change requires reason |
+| `/documents` | Document queue | Filter by status (Pending / Verified / Rejected); verify actions |
+| `/import` | Bulk CSV wizard | 3 steps: Upload → Preview errors → Confirm commit |
+| `/staff` | Staff list | Create / deactivate / reset password |
+| `/lookups` | Lookup admin | Admission categories + document types CRUD |
+| `/audit-logs` | Audit log viewer | Paginated, searchable |
+
+### 17.4 Cross-Cutting Frontend Patterns
+
+1. **API client** (`/frontend/src/lib/api.ts`): Attach `Authorization: Bearer`; on `401` + `TOKEN_EXPIRED_OR_INVALID`, call `supabase.auth.refreshSession()` once, then retry; on failure → `/login`.
+2. **Permission guard:** `<RequirePermission permission="students:create">` wraps buttons and routes.
+3. **Sensitive fields:** Family/income section hidden unless `students:view_sensitive_data` in `/users/me` response.
+4. **File upload flow:** presign → `fetch(PUT)` to R2 URL → confirm endpoint (documents and avatar).
+5. **Phone inputs:** Display-friendly UI; normalize to E.164 before submit using shared regex logic.
+
+### 17.5 Frontend Build Order (mirrors backend)
+
+1. Vite scaffold + shadcn + Tailwind + env wiring
+2. Supabase auth (login, session, forced reset)
+3. API client + `/users/me` + permission hooks
+4. App shell + protected routes
+5. Students module (list → detail → form)
+6. Documents module (upload + verify queue)
+7. Staff admin
+8. Lookups admin
+9. CSV import wizard
+10. Dashboard + audit logs
+
+---
+
+## 18. Implementation Build Order & Review Checklist
+
+Use this sequence for implementation and for the **pre-code review** of this spec.
+
+```text
+Phase A — Database (Supabase project exists)
+  [ ] 001_schema.sql applied
+  [ ] 002_seeds_and_trigger.sql applied
+  [ ] 003_bulk_insert_rpc.sql applied
+  [ ] INSERT tenant row → verify roles + lookups seeded
+  [ ] bootstrap-first-admin.ts → first Super Admin can log in
+
+Phase B — Backend foundation
+  [ ] Express shell, helmet, CORS, rate limiters, health route
+  [ ] extractTenantMiddleware + requirePermission + AppError
+  [ ] BaseRepository + auditLogService
+  [ ] GET /users/me
+
+Phase C — Core modules (backend then frontend per module)
+  [ ] Users / staff
+  [ ] Lookups
+  [ ] Students + family
+  [ ] Documents + R2
+  [ ] CSV migration
+  [ ] Dashboard + audit logs
+
+Phase D — Hardening
+  [ ] Role permission matrix verified manually per role test account
+  [ ] Finance document scoping verified
+  [ ] CSV error-row preview tested with messy legacy data
+```
+
+**Review questions before coding:**
+
+1. Is the API catalog complete for your operational workflows?
+2. Are the four seeded roles sufficient for Phase 1 staff at the mandir?
+3. Is the Finance document restriction (Income + BPL only) correct?
+4. Which admission categories / document types need adding before go-live?
+5. R2 bucket region and backup export process — who owns ops?
+
+---
