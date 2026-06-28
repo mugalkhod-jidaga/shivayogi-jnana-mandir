@@ -2,13 +2,31 @@ import { supabase } from '../../../config/supabase';
 import { BaseRepository } from '../../../repositories/BaseRepository';
 import { AppError } from '../../../utils/AppError';
 import { auditLogService } from '../../system/services/auditLog.service';
-import type { FamilyDetailsInput } from '../schemas/student.schemas';
+import type {
+  AcademicPlacementInput,
+  EmergencyContactInput,
+  FamilyDetailsInput,
+  StudentListQuery,
+} from '../schemas/student.schemas';
+
+const ENROLLMENT_SELECT = `
+  id, roll_number, previous_school, last_class_studied, enrolled_at, is_current,
+  academic_year_id, standard_id, section_id,
+  academic_year:lookup_academic_years(id, label, is_current),
+  standard:lookup_academic_standards(id, value, sort_order),
+  section:lookup_sections(id, value)
+`;
 
 const STUDENT_SELECT = `
   *,
   blood_group:lookup_blood_groups(id, value),
   admission_category:lookup_admission_categories(id, value),
-  family_details:student_family_details(*)
+  mother_tongue:lookup_languages(id, value),
+  family_details:student_family_details(*),
+  current_enrollment:student_enrollments!left(
+    ${ENROLLMENT_SELECT}
+  ),
+  emergency_contacts:student_emergency_contacts(id, contact_name, relationship, phone_number)
 `;
 
 export interface StudentRow {
@@ -23,12 +41,40 @@ export interface StudentRow {
   blood_group_id: number | null;
   admission_category_id: number | null;
   medical_alerts: string | null;
+  admission_date: string;
+  mother_tongue_id: number | null;
+  aadhaar_number: string | null;
   status: string;
   status_reason: string | null;
   status_changed_at: string | null;
   blood_group?: { id: number; value: string } | null;
   admission_category?: { id: number; value: string } | null;
+  mother_tongue?: { id: number; value: string } | null;
   family_details?: FamilyDetailsRow | FamilyDetailsRow[] | null;
+  current_enrollment?: EnrollmentRow | EnrollmentRow[] | null;
+  emergency_contacts?: EmergencyContactRow[] | null;
+}
+
+export interface EnrollmentRow {
+  id: string;
+  roll_number: string | null;
+  previous_school: string | null;
+  last_class_studied: string | null;
+  enrolled_at: string;
+  is_current: boolean;
+  academic_year_id: number;
+  standard_id: number;
+  section_id: number | null;
+  academic_year?: { id: number; label: string; is_current: boolean } | null;
+  standard?: { id: number; value: string; sort_order: number } | null;
+  section?: { id: number; value: string } | null;
+}
+
+export interface EmergencyContactRow {
+  id: string;
+  contact_name: string;
+  relationship: string;
+  phone_number: string;
 }
 
 export interface FamilyDetailsRow {
@@ -65,10 +111,44 @@ function mapFamilyToDb(input: FamilyDetailsInput) {
   };
 }
 
+function mapEnrollmentToDb(input: AcademicPlacementInput, admissionDate: string) {
+  return {
+    academic_year_id: input.academicYearId,
+    standard_id: input.standardId,
+    section_id: input.sectionId ?? null,
+    roll_number: input.rollNumber,
+    previous_school: input.previousSchool ?? null,
+    last_class_studied: input.lastClassStudied ?? null,
+    is_current: true,
+    enrolled_at: input.enrolledAt ?? admissionDate,
+  };
+}
+
 function unwrapFamily(row: StudentRow): FamilyDetailsRow | null {
   if (!row.family_details) return null;
   if (Array.isArray(row.family_details)) return row.family_details[0] ?? null;
   return row.family_details;
+}
+
+function unwrapEnrollment(row: StudentRow): EnrollmentRow | null {
+  if (!row.current_enrollment) return null;
+  const enrollments = Array.isArray(row.current_enrollment)
+    ? row.current_enrollment
+    : [row.current_enrollment];
+  return enrollments.find((e) => e.is_current) ?? enrollments[0] ?? null;
+}
+
+function listSelect(useInnerEnrollment: boolean) {
+  const join = useInnerEnrollment ? 'student_enrollments!inner' : 'student_enrollments!left';
+  return `
+    *,
+    blood_group:lookup_blood_groups(id, value),
+    admission_category:lookup_admission_categories(id, value),
+    mother_tongue:lookup_languages(id, value),
+    current_enrollment:${join}(
+      ${ENROLLMENT_SELECT}
+    )
+  `;
 }
 
 export class StudentsRepository extends BaseRepository {
@@ -76,31 +156,52 @@ export class StudentsRepository extends BaseRepository {
     super('students');
   }
 
-  async list(tenantId: number, page: number, limit: number, search?: string) {
+  async list(tenantId: number, query: StudentListQuery, assignedStandardIds?: number[]) {
+    const { page, limit, search, status, standardId, sectionId, academicYearId, admissionCategoryId } =
+      query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
 
-    let query = supabase
+    const needsEnrollmentJoin = Boolean(
+      standardId || sectionId || academicYearId || (assignedStandardIds && assignedStandardIds.length > 0),
+    );
+
+    let dbQuery = supabase
       .from('students')
-      .select(
-        `*, blood_group:lookup_blood_groups(id, value), admission_category:lookup_admission_categories(id, value)`,
-        { count: 'exact' },
-      )
+      .select(listSelect(needsEnrollmentJoin), { count: 'exact' })
       .eq('tenant_id', tenantId)
       .is('deleted_at', null);
 
+    if (needsEnrollmentJoin) {
+      dbQuery = dbQuery
+        .eq('current_enrollment.is_current', true)
+        .is('current_enrollment.deleted_at', null);
+    }
+
     if (search) {
-      query = query.or(
+      dbQuery = dbQuery.or(
         `first_name.ilike.%${search}%,last_name.ilike.%${search}%,admission_number.ilike.%${search}%`,
       );
     }
 
-    const { data, count, error } = await query
+    if (status) dbQuery = dbQuery.eq('status', status);
+    if (admissionCategoryId) dbQuery = dbQuery.eq('admission_category_id', admissionCategoryId);
+    if (standardId) dbQuery = dbQuery.eq('current_enrollment.standard_id', standardId);
+    if (sectionId) dbQuery = dbQuery.eq('current_enrollment.section_id', sectionId);
+    if (academicYearId) dbQuery = dbQuery.eq('current_enrollment.academic_year_id', academicYearId);
+
+    if (assignedStandardIds && assignedStandardIds.length > 0) {
+      dbQuery = dbQuery.in('current_enrollment.standard_id', assignedStandardIds);
+    } else if (assignedStandardIds && assignedStandardIds.length === 0) {
+      return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+    }
+
+    const { data, count, error } = await dbQuery
       .order('admission_number')
       .range(offset, offset + cappedLimit - 1);
 
     if (error) throw new AppError(500, error.message);
-    return { data: (data ?? []) as StudentRow[], meta: { total: count ?? 0, page, limit: cappedLimit } };
+    return { data: (data ?? []) as unknown as StudentRow[], meta: { total: count ?? 0, page, limit: cappedLimit } };
   }
 
   async findByIdWithRelations(id: string, tenantId: number): Promise<StudentRow | null> {
@@ -117,13 +218,23 @@ export class StudentsRepository extends BaseRepository {
       throw new AppError(500, error.message);
     }
 
-    return data as StudentRow;
+    const row = data as StudentRow;
+    if (row.emergency_contacts) {
+      row.emergency_contacts = row.emergency_contacts.filter(
+        (c) => !(c as EmergencyContactRow & { deleted_at?: string | null }).deleted_at,
+      );
+    }
+
+    return row;
   }
 
   async create(
     tenantId: number,
     student: Record<string, unknown>,
     family: FamilyDetailsInput,
+    enrollment: AcademicPlacementInput,
+    emergencyContacts: EmergencyContactInput[],
+    admissionDate: string,
     userId: string,
   ): Promise<StudentRow> {
     const { data: created, error } = await supabase
@@ -139,23 +250,100 @@ export class StudentsRepository extends BaseRepository {
 
     if (error) {
       if (error.code === '23505') {
-        throw new AppError(409, 'Admission number already exists for this tenant');
+        throw new AppError(409, 'Admission number or Aadhaar already exists for this tenant');
       }
       throw new AppError(500, error.message);
     }
 
+    const studentId = created.id as string;
+
     const { error: familyError } = await supabase
       .from('student_family_details')
-      .insert({ student_id: created.id, ...mapFamilyToDb(family) });
+      .insert({ student_id: studentId, ...mapFamilyToDb(family) });
 
     if (familyError) {
-      await supabase.from('students').update({ deleted_at: new Date().toISOString() }).eq('id', created.id);
+      await supabase.from('students').update({ deleted_at: new Date().toISOString() }).eq('id', studentId);
       throw new AppError(500, `Failed to create family details: ${familyError.message}`);
     }
 
-    const full = await this.findByIdWithRelations(created.id, tenantId);
+    const { error: enrollmentError } = await supabase
+      .from('student_enrollments')
+      .insert({ student_id: studentId, ...mapEnrollmentToDb(enrollment, admissionDate) });
+
+    if (enrollmentError) {
+      await supabase.from('students').update({ deleted_at: new Date().toISOString() }).eq('id', studentId);
+      throw new AppError(500, `Failed to create enrollment: ${enrollmentError.message}`);
+    }
+
+    const contactRows = emergencyContacts.map((c) => ({
+      student_id: studentId,
+      contact_name: c.contactName,
+      relationship: c.relationship,
+      phone_number: c.phone,
+    }));
+
+    const { error: contactsError } = await supabase.from('student_emergency_contacts').insert(contactRows);
+
+    if (contactsError) {
+      await supabase.from('students').update({ deleted_at: new Date().toISOString() }).eq('id', studentId);
+      throw new AppError(500, `Failed to create emergency contacts: ${contactsError.message}`);
+    }
+
+    const full = await this.findByIdWithRelations(studentId, tenantId);
     if (!full) throw new AppError(500, 'Failed to load created student');
     return full;
+  }
+
+  async updateEnrollment(studentId: string, changes: Partial<AcademicPlacementInput>, admissionDate?: string) {
+    const enrollment = await supabase
+      .from('student_enrollments')
+      .select('id')
+      .eq('student_id', studentId)
+      .eq('is_current', true)
+      .is('deleted_at', null)
+      .single();
+
+    if (enrollment.error || !enrollment.data) {
+      throw new AppError(404, 'Current enrollment not found');
+    }
+
+    const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (changes.academicYearId !== undefined) dbChanges.academic_year_id = changes.academicYearId;
+    if (changes.standardId !== undefined) dbChanges.standard_id = changes.standardId;
+    if (changes.sectionId !== undefined) dbChanges.section_id = changes.sectionId;
+    if (changes.rollNumber !== undefined) dbChanges.roll_number = changes.rollNumber;
+    if (changes.previousSchool !== undefined) dbChanges.previous_school = changes.previousSchool;
+    if (changes.lastClassStudied !== undefined) dbChanges.last_class_studied = changes.lastClassStudied;
+    if (changes.enrolledAt !== undefined) dbChanges.enrolled_at = changes.enrolledAt;
+    else if (admissionDate !== undefined) dbChanges.enrolled_at = admissionDate;
+
+    const { error } = await supabase
+      .from('student_enrollments')
+      .update(dbChanges)
+      .eq('id', enrollment.data.id);
+
+    if (error) throw new AppError(500, error.message);
+  }
+
+  async replaceEmergencyContacts(studentId: string, contacts: EmergencyContactInput[]) {
+    const now = new Date().toISOString();
+    const { error: softDeleteError } = await supabase
+      .from('student_emergency_contacts')
+      .update({ deleted_at: now, updated_at: now })
+      .eq('student_id', studentId)
+      .is('deleted_at', null);
+
+    if (softDeleteError) throw new AppError(500, softDeleteError.message);
+
+    const rows = contacts.map((c) => ({
+      student_id: studentId,
+      contact_name: c.contactName,
+      relationship: c.relationship,
+      phone_number: c.phone,
+    }));
+
+    const { error } = await supabase.from('student_emergency_contacts').insert(rows);
+    if (error) throw new AppError(500, error.message);
   }
 
   async updateFamilyDetails(studentId: string, family: Partial<FamilyDetailsInput>) {
@@ -178,6 +366,31 @@ export class StudentsRepository extends BaseRepository {
       .update(dbChanges)
       .eq('student_id', studentId);
 
+    if (error) throw new AppError(500, error.message);
+  }
+
+  async getAssignedStandardIds(userId: string): Promise<number[]> {
+    const { data, error } = await supabase
+      .from('user_standard_assignments')
+      .select('standard_id')
+      .eq('user_id', userId);
+
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => row.standard_id as number);
+  }
+
+  async setAssignedStandardIds(userId: string, standardIds: number[]) {
+    const { error: deleteError } = await supabase
+      .from('user_standard_assignments')
+      .delete()
+      .eq('user_id', userId);
+
+    if (deleteError) throw new AppError(500, deleteError.message);
+
+    if (standardIds.length === 0) return;
+
+    const rows = standardIds.map((standardId) => ({ user_id: userId, standard_id: standardId }));
+    const { error } = await supabase.from('user_standard_assignments').insert(rows);
     if (error) throw new AppError(500, error.message);
   }
 
@@ -226,4 +439,4 @@ export class StudentsRepository extends BaseRepository {
 }
 
 export const studentsRepository = new StudentsRepository();
-export { unwrapFamily };
+export { unwrapFamily, unwrapEnrollment };

@@ -55,6 +55,8 @@ export function StudentDetailPage() {
 
   const displayName = [student.firstName, student.lastName].filter(Boolean).join(' ');
   const canViewFamily = hasPermission('students:view_sensitive_data') && student.familyDetails;
+  const enrollment = student.currentEnrollment;
+  const emergencyContact = student.emergencyContacts[0];
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'profile', label: 'Profile' },
@@ -74,27 +76,27 @@ export function StudentDetailPage() {
             size="lg"
           />
           <div className="flex flex-wrap gap-2">
-          <StatusBadge status={student.status} />
-          <RequirePermission permission="students:edit">
-            <Button asChild variant="outline" size="sm">
-              <Link to={`/students/${student.id}/edit`}>
-                <Pencil className="size-4" />
-                Edit
-              </Link>
-            </Button>
-          </RequirePermission>
-          <RequirePermission permission="students:soft_delete">
-            {student.status === 'Active' && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => setDeactivateOpen(true)}
-              >
-                Deactivate
+            <StatusBadge status={student.status} />
+            <RequirePermission permission="students:edit">
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/students/${student.id}/edit`}>
+                  <Pencil className="size-4" />
+                  Edit
+                </Link>
               </Button>
-            )}
-          </RequirePermission>
+            </RequirePermission>
+            <RequirePermission permission="students:soft_delete">
+              {student.status === 'Active' && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeactivateOpen(true)}
+                >
+                  Deactivate
+                </Button>
+              )}
+            </RequirePermission>
           </div>
         </div>
       </PageHeader>
@@ -120,15 +122,38 @@ export function StudentDetailPage() {
       {tab === 'profile' && (
         <div className="space-y-6">
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Demographics</h2>
+            <h2 className="text-lg font-medium">Basic information</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <DetailField label="Admission number" value={student.admissionNumber} />
               <DetailField label="Date of birth" value={formatDobDisplay(student.dob)} />
+              <DetailField label="Admission date" value={formatDobDisplay(student.admissionDate)} />
               <DetailField label="Gender" value={student.gender} />
+              <DetailField label="Mother tongue" value={student.motherTongue?.value} />
               <DetailField label="Blood group" value={student.bloodGroup?.value} />
               <DetailField label="Category" value={student.admissionCategory?.value} />
-              <DetailField label="Medical alerts" value={student.medicalAlerts} />
+              <DetailField label="Aadhaar" value={student.aadhaarNumber} />
               <DetailField label="Status reason" value={student.statusReason} />
+            </dl>
+          </section>
+
+          <section className="rounded-lg border p-6">
+            <h2 className="text-lg font-medium">Academic placement</h2>
+            <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailField label="Academic year" value={enrollment?.academicYear?.value ?? null} />
+              <DetailField label="Standard" value={enrollment?.standard?.value ?? null} />
+              <DetailField label="Section" value={enrollment?.section?.value ?? null} />
+              <DetailField label="Roll number" value={enrollment?.rollNumber} />
+              <DetailField label="Previous school" value={enrollment?.previousSchool} />
+              <DetailField label="Last class studied" value={enrollment?.lastClassStudied} />
+            </dl>
+          </section>
+
+          <section className="rounded-lg border p-6">
+            <h2 className="text-lg font-medium">Emergency contact</h2>
+            <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailField label="Name" value={emergencyContact?.contactName} />
+              <DetailField label="Relationship" value={emergencyContact?.relationship} />
+              <DetailField label="Phone" value={emergencyContact?.phone} />
             </dl>
           </section>
 

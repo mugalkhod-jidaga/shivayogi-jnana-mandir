@@ -7,3 +7,17 @@ export type LookupOption = {
 export type TenantLookupOption = LookupOption & {
   tenantId: number;
 };
+
+export type AcademicStandardOption = TenantLookupOption & {
+  sortOrder: number;
+};
+
+export type AcademicYearOption = {
+  id: number;
+  tenantId: number;
+  label: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
+  isActive: boolean;
+};

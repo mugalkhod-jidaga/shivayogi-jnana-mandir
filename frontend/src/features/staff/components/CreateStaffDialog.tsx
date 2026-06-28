@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import {
   createStaffFormSchema,
   type CreateStaffFormValues,
 } from '@/features/staff/schemas/staffForm.schema';
+import { useLookups } from '@/hooks/useLookups';
 import { useCreateStaff, useRoles } from '@/hooks/useStaff';
 import { ApiError } from '@/lib/api';
 import { formatPhoneInput } from '@/lib/phone';
@@ -23,6 +25,8 @@ type CreateStaffDialogProps = {
 export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaffDialogProps) {
   const createStaff = useCreateStaff();
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
+  const { academicStandards } = useLookups();
+  const [assignedStandardIds, setAssignedStandardIds] = useState<number[]>([]);
 
   const form = useForm<CreateStaffFormValues>({
     resolver: zodResolver(createStaffFormSchema),
@@ -34,13 +38,31 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
     },
   });
 
+  const selectedRoleId = form.watch('roleId');
+  const selectedRoleName = useMemo(
+    () => roles.find((role) => String(role.id) === selectedRoleId)?.name ?? '',
+    [roles, selectedRoleId],
+  );
+  const showStandardAssignments = selectedRoleName === 'Teacher/Warden';
+
+  const toggleStandard = (standardId: number) => {
+    setAssignedStandardIds((current) =>
+      current.includes(standardId)
+        ? current.filter((id) => id !== standardId)
+        : [...current, standardId],
+    );
+  };
+
   if (!open) return null;
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const { data, meta } = await createStaff.mutateAsync(buildCreateStaffPayload(values));
+      const { data, meta } = await createStaff.mutateAsync(
+        buildCreateStaffPayload(values, assignedStandardIds),
+      );
       const staffName = [data.firstName, data.lastName].filter(Boolean).join(' ');
       form.reset();
+      setAssignedStandardIds([]);
       onOpenChange(false);
       onCreated(staffName, meta.tempPassword);
       toast.success('Staff account created');
@@ -110,6 +132,27 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
               <p className="text-sm text-destructive">{form.formState.errors.roleId.message}</p>
             )}
           </div>
+
+          {showStandardAssignments && (
+            <div className="space-y-2">
+              <Label>Assigned standards</Label>
+              <p className="text-xs text-muted-foreground">
+                Teacher/Warden accounts only see students in the selected standards.
+              </p>
+              <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
+                {academicStandards.map((standard) => (
+                  <label key={standard.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={assignedStandardIds.includes(standard.id)}
+                      onChange={() => toggleStandard(standard.id)}
+                    />
+                    {standard.value}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

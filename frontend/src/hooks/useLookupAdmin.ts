@@ -3,11 +3,19 @@ import { apiFetch } from '@/lib/api';
 import { lookupKeys } from '@/hooks/useLookups';
 import type { TenantLookupOption } from '@/types/lookup';
 
-export type LookupResource = 'admission-categories' | 'document-types';
+export type LookupResource =
+  | 'admission-categories'
+  | 'document-types'
+  | 'academic-standards'
+  | 'sections'
+  | 'languages';
 
 const resourceKeys: Record<LookupResource, readonly ['lookups', string]> = {
   'admission-categories': lookupKeys.admissionCategories,
   'document-types': lookupKeys.documentTypes,
+  'academic-standards': lookupKeys.academicStandards,
+  sections: lookupKeys.sections,
+  languages: lookupKeys.languages,
 };
 
 export function useCreateLookupValue(resource: LookupResource) {

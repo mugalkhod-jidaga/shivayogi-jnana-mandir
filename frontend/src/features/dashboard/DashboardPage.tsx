@@ -2,116 +2,121 @@ import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { KpiCard } from '@/features/dashboard/components/KpiCard';
-import { useComplianceReport, useDashboardSummary } from '@/hooks/useDashboard';
+import { useDashboardSummary } from '@/hooks/useDashboard';
 
 export function DashboardPage() {
   const summary = useDashboardSummary();
-  const compliance = useComplianceReport();
-
-  const isLoading = summary.isLoading || compliance.isLoading;
-  const isError = summary.isError || compliance.isError;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
-        description="Tenant overview, document compliance, and student counts."
+        description="School operations overview — students, staff, and enrollment breakdown."
       />
 
-      {isError && (
+      {summary.isError && (
         <PlaceholderPanel
           title="Could not load dashboard"
           description="Check that the backend is running and you have dashboard access."
         />
       )}
 
-      {!isError && (
+      {!summary.isError && (
         <>
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <KpiCard
-              title="Total students"
-              value={isLoading ? '…' : (summary.data?.totalStudents ?? 0)}
+              title="Active students"
+              value={summary.isLoading ? '…' : (summary.data?.activeStudents ?? 0)}
+              description={`${summary.data?.totalStudents ?? 0} total enrolled`}
             />
             <KpiCard
-              title="Active"
-              value={isLoading ? '…' : (summary.data?.activeStudents ?? 0)}
+              title="Active staff"
+              value={summary.isLoading ? '…' : (summary.data?.activeStaff ?? 0)}
+              description={`${summary.data?.totalStaff ?? 0} staff accounts`}
             />
             <KpiCard
-              title="Alumni"
-              value={isLoading ? '…' : (summary.data?.alumniCount ?? 0)}
+              title="Admissions this month"
+              value={summary.isLoading ? '…' : (summary.data?.admissionsThisMonth ?? 0)}
             />
             <KpiCard
-              title="Docs complete"
-              value={isLoading ? '…' : (summary.data?.documentsComplete ?? 0)}
-              description="Active students with all document types verified"
-            />
-            <KpiCard
-              title="Docs pending"
-              value={isLoading ? '…' : (summary.data?.documentsPending ?? 0)}
-              description="Documents awaiting review"
+              title="Admissions this year"
+              value={summary.isLoading ? '…' : (summary.data?.admissionsThisAcademicYear ?? 0)}
+              description={summary.data?.currentAcademicYear ?? undefined}
             />
           </section>
 
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-lg font-medium">Document compliance</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Active students missing one or more verified document types.
-              </p>
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-lg border p-6">
+              <h2 className="text-lg font-medium">Students by standard</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Active students in current enrollment.</p>
+              {summary.isLoading && (
+                <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
+              )}
+              {!summary.isLoading && (summary.data?.studentsByStandard.length ?? 0) === 0 && (
+                <p className="mt-4 text-sm text-muted-foreground">No enrollment data yet.</p>
+              )}
+              {!summary.isLoading && (summary.data?.studentsByStandard.length ?? 0) > 0 && (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left">
+                        <th className="py-2 font-medium">Standard</th>
+                        <th className="py-2 font-medium text-right">Students</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summary.data?.studentsByStandard.map((row) => (
+                        <tr key={row.standardId} className="border-b last:border-b-0">
+                          <td className="py-2">{row.label}</td>
+                          <td className="py-2 text-right tabular-nums">{row.count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
-            {compliance.isLoading && (
-              <p className="text-sm text-muted-foreground">Loading compliance report…</p>
-            )}
-
-            {!compliance.isLoading && (compliance.data?.length ?? 0) === 0 && (
-              <p className="rounded-lg border p-6 text-sm text-muted-foreground">
-                All active students have verified documents for every required type.
-              </p>
-            )}
-
-            {!compliance.isLoading && (compliance.data?.length ?? 0) > 0 && (
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium">Student</th>
-                      <th className="px-4 py-3 font-medium">Admission #</th>
-                      <th className="px-4 py-3 font-medium">Missing documents</th>
-                      <th className="px-4 py-3 font-medium">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {compliance.data?.map((row) => (
-                      <tr key={row.studentId} className="border-b last:border-b-0">
-                        <td className="px-4 py-3 font-medium">{row.name}</td>
-                        <td className="px-4 py-3">{row.admissionNumber}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {row.missingDocumentTypes.map((type) => (
-                              <span
-                                key={type}
-                                className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                              >
-                                {type}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Link
-                            to={`/students/${row.studentId}?tab=documents`}
-                            className="font-medium text-primary hover:underline"
-                          >
-                            View documents
-                          </Link>
-                        </td>
+            <div className="rounded-lg border p-6">
+              <h2 className="text-lg font-medium">Students by category</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Active students by admission category.</p>
+              {summary.isLoading && (
+                <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
+              )}
+              {!summary.isLoading && (summary.data?.studentsByCategory.length ?? 0) === 0 && (
+                <p className="mt-4 text-sm text-muted-foreground">No category data yet.</p>
+              )}
+              {!summary.isLoading && (summary.data?.studentsByCategory.length ?? 0) > 0 && (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left">
+                        <th className="py-2 font-medium">Category</th>
+                        <th className="py-2 font-medium text-right">Students</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                    </thead>
+                    <tbody>
+                      {summary.data?.studentsByCategory.map((row) => (
+                        <tr key={row.categoryId} className="border-b last:border-b-0">
+                          <td className="py-2">{row.label}</td>
+                          <td className="py-2 text-right tabular-nums">{row.count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-lg border p-6">
+            <h2 className="text-lg font-medium">Document compliance</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Review pending uploads and missing verified documents from the documents queue.
+            </p>
+            <Link to="/documents" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+              Open document queue →
+            </Link>
           </section>
         </>
       )}

@@ -1,6 +1,12 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
-import type { CreateLookupValueInput, UpdateLookupValueInput } from '../schemas/lookup.schemas';
+import type {
+  CreateAcademicStandardInput,
+  CreateAcademicYearInput,
+  CreateLookupValueInput,
+  UpdateAcademicYearInput,
+  UpdateLookupValueInput,
+} from '../schemas/lookup.schemas';
 import { lookupService } from '../services/lookup.service';
 
 function requireAuthContext(req: Request): { tenantId: number } {
@@ -38,6 +44,30 @@ export const lookupController = {
     res.json({ success: true, data });
   },
 
+  async listAcademicStandards(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.listAcademicStandards(tenantId);
+    res.json({ success: true, data });
+  },
+
+  async listSections(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.listSections(tenantId);
+    res.json({ success: true, data });
+  },
+
+  async listAcademicYears(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.listAcademicYears(tenantId);
+    res.json({ success: true, data });
+  },
+
+  async listLanguages(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.listLanguages(tenantId);
+    res.json({ success: true, data });
+  },
+
   async createAdmissionCategory(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await lookupService.createAdmissionCategory(
@@ -56,6 +86,36 @@ export const lookupController = {
     res.status(201).json({ success: true, data });
   },
 
+  async createAcademicStandard(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.createAcademicStandard(
+      tenantId,
+      req.body as CreateAcademicStandardInput,
+    );
+    res.status(201).json({ success: true, data });
+  },
+
+  async createSection(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.createSection(tenantId, req.body as CreateLookupValueInput);
+    res.status(201).json({ success: true, data });
+  },
+
+  async createAcademicYear(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.createAcademicYear(
+      tenantId,
+      req.body as CreateAcademicYearInput,
+    );
+    res.status(201).json({ success: true, data });
+  },
+
+  async createLanguage(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.createLanguage(tenantId, req.body as CreateLookupValueInput);
+    res.status(201).json({ success: true, data });
+  },
+
   async updateAdmissionCategory(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await lookupService.updateAdmissionCategory(
@@ -69,6 +129,46 @@ export const lookupController = {
   async updateDocumentType(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await lookupService.updateDocumentType(
+      paramLookupId(req),
+      tenantId,
+      req.body as UpdateLookupValueInput,
+    );
+    res.json({ success: true, data });
+  },
+
+  async updateAcademicStandard(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.updateAcademicStandard(
+      paramLookupId(req),
+      tenantId,
+      req.body as UpdateLookupValueInput & { sortOrder?: number },
+    );
+    res.json({ success: true, data });
+  },
+
+  async updateSection(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.updateSection(
+      paramLookupId(req),
+      tenantId,
+      req.body as UpdateLookupValueInput,
+    );
+    res.json({ success: true, data });
+  },
+
+  async updateAcademicYear(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.updateAcademicYear(
+      paramLookupId(req),
+      tenantId,
+      req.body as UpdateAcademicYearInput,
+    );
+    res.json({ success: true, data });
+  },
+
+  async updateLanguage(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await lookupService.updateLanguage(
       paramLookupId(req),
       tenantId,
       req.body as UpdateLookupValueInput,

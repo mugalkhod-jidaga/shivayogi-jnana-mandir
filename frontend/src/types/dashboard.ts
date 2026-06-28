@@ -1,9 +1,25 @@
+export type StandardBreakdown = {
+  standardId: number;
+  label: string;
+  count: number;
+};
+
+export type CategoryBreakdown = {
+  categoryId: number;
+  label: string;
+  count: number;
+};
+
 export type DashboardSummary = {
   totalStudents: number;
   activeStudents: number;
-  alumniCount: number;
-  documentsComplete: number;
-  documentsPending: number;
+  totalStaff: number;
+  activeStaff: number;
+  admissionsThisMonth: number;
+  admissionsThisAcademicYear: number;
+  currentAcademicYear: string | null;
+  studentsByStandard: StandardBreakdown[];
+  studentsByCategory: CategoryBreakdown[];
 };
 
 export type ComplianceReportRow = {
