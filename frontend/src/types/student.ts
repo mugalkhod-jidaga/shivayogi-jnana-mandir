@@ -7,6 +7,24 @@ export type StudentStatus = 'Active' | 'Alumni' | 'Discontinued';
 export type ParentStatus = 'Both Alive' | 'Single Mother' | 'Orphan';
 export type Gender = 'Male' | 'Female' | 'Other';
 
+export type CurrentEnrollment = {
+  id: string;
+  rollNumber: string | null;
+  previousSchool: string | null;
+  lastClassStudied: string | null;
+  enrolledAt: string;
+  academicYear: LookupRef & { isCurrent?: boolean };
+  standard: LookupRef & { sortOrder?: number };
+  section: LookupRef | null;
+};
+
+export type EmergencyContact = {
+  id?: string;
+  contactName: string;
+  relationship: string;
+  phone: string;
+};
+
 export type StudentSummary = {
   id: string;
   admissionNumber: string;
@@ -17,7 +35,11 @@ export type StudentSummary = {
   photoUrl: string | null;
   bloodGroup: LookupRef;
   admissionCategory: LookupRef;
-  medicalAlerts: string | null;
+  motherTongue: LookupRef;
+  admissionDate: string;
+  aadhaarNumber: string | null;
+  currentEnrollment: CurrentEnrollment | null;
+  emergencyContacts: EmergencyContact[];
   status: StudentStatus;
   statusReason: string | null;
   statusChangedAt: string | null;
@@ -42,6 +64,16 @@ export type StudentDetail = StudentSummary & {
   familyDetails?: FamilyDetails | null;
 };
 
+export type AcademicPlacementPayload = {
+  academicYearId: number;
+  standardId: number;
+  sectionId?: number;
+  rollNumber: string;
+  previousSchool?: string;
+  lastClassStudied?: string;
+  enrolledAt?: string;
+};
+
 export type CreateStudentPayload = {
   admissionNumber: string;
   firstName: string;
@@ -50,7 +82,11 @@ export type CreateStudentPayload = {
   gender: Gender;
   bloodGroupId?: number;
   admissionCategoryId?: number;
-  medicalAlerts?: string;
+  admissionDate: string;
+  motherTongueId?: number;
+  aadhaarNumber?: string;
+  academicPlacement: AcademicPlacementPayload;
+  emergencyContacts: EmergencyContact[];
   familyDetails: FamilyDetails;
 };
 
@@ -61,7 +97,11 @@ export type UpdateStudentPayload = {
   gender?: Gender;
   bloodGroupId?: number | null;
   admissionCategoryId?: number | null;
-  medicalAlerts?: string | null;
+  admissionDate?: string;
+  motherTongueId?: number | null;
+  aadhaarNumber?: string | null;
+  academicPlacement?: Partial<AcademicPlacementPayload>;
+  emergencyContacts?: EmergencyContact[];
   familyDetails?: Partial<FamilyDetails>;
 };
 
@@ -77,4 +117,15 @@ export type AvatarPresignResponse = {
 
 export type AvatarDownloadResponse = {
   downloadUrl: string;
+};
+
+export type StudentListFilters = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: StudentStatus;
+  standardId?: number;
+  sectionId?: number;
+  academicYearId?: number;
+  admissionCategoryId?: number;
 };

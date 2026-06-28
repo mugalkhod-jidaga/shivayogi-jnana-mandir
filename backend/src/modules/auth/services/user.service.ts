@@ -7,7 +7,11 @@ import { usersRepository } from '../repositories/users.repository';
 import type { UserProfileRow } from '../repositories/userProfile.repository';
 import { permissionService } from './permission.service';
 
-function serializeStaff(profile: UserProfileRow, roles: { id: number; name: string }[]) {
+function serializeStaff(
+  profile: UserProfileRow,
+  roles: { id: number; name: string }[],
+  assignedStandardIds: number[] = [],
+) {
   return {
     id: profile.id,
     tenantId: profile.tenant_id,
@@ -18,6 +22,7 @@ function serializeStaff(profile: UserProfileRow, roles: { id: number; name: stri
     status: profile.status,
     mustResetPassword: profile.must_reset_password,
     roles,
+    assignedStandardIds,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
   };
@@ -32,9 +37,10 @@ export const userService = {
 
     const roles = await usersRepository.findRoles(userId);
     const permissions = await permissionService.getUserPermissions(userId);
+    const assignedStandardIds = await usersRepository.findAssignedStandardIds(userId);
 
     return {
-      ...serializeStaff(profile, roles),
+      ...serializeStaff(profile, roles, assignedStandardIds),
       permissions,
     };
   },
@@ -46,7 +52,8 @@ export const userService = {
     const staff = await Promise.all(
       profiles.map(async (profile) => {
         const roles = await usersRepository.findRoles(profile.id);
-        return serializeStaff(profile, roles);
+        const assignedStandardIds = await usersRepository.findAssignedStandardIds(profile.id);
+        return serializeStaff(profile, roles, assignedStandardIds);
       }),
     );
 
@@ -60,7 +67,8 @@ export const userService = {
     }
 
     const roles = await usersRepository.findRoles(userId);
-    return serializeStaff(profile, roles);
+    const assignedStandardIds = await usersRepository.findAssignedStandardIds(userId);
+    return serializeStaff(profile, roles, assignedStandardIds);
   },
 
   async createStaff(tenantId: number, input: CreateStaffInput, _createdBy: string) {
@@ -99,13 +107,22 @@ export const userService = {
 
       if (roleError) throw roleError;
 
+      if (input.assignedStandardIds && input.assignedStandardIds.length > 0) {
+        await usersRepository.replaceAssignedStandardIds(
+          authUser.user.id,
+          input.assignedStandardIds,
+        );
+      }
+
       const profile = await usersRepository.findById(authUser.user.id, tenantId);
       if (!profile) {
         throw new AppError(500, 'Failed to load created staff profile');
       }
 
+      const assignedStandardIds = await usersRepository.findAssignedStandardIds(authUser.user.id);
+
       return {
-        staff: serializeStaff(profile, [role]),
+        staff: serializeStaff(profile, [role], assignedStandardIds),
         tempPassword,
       };
     } catch (err) {
@@ -134,6 +151,10 @@ export const userService = {
       await usersRepository.replaceRole(userId, input.roleId);
     }
 
+    if (input.assignedStandardIds !== undefined) {
+      await usersRepository.replaceAssignedStandardIds(userId, input.assignedStandardIds);
+    }
+
     const profileChanges: Record<string, unknown> = {};
     if (input.firstName !== undefined) profileChanges.first_name = input.firstName;
     if (input.lastName !== undefined) profileChanges.last_name = input.lastName;
@@ -149,7 +170,8 @@ export const userService = {
     }
 
     const roles = await usersRepository.findRoles(userId);
-    return serializeStaff(updatedProfile, roles);
+    const assignedStandardIds = await usersRepository.findAssignedStandardIds(userId);
+    return serializeStaff(updatedProfile, roles, assignedStandardIds);
   },
 
   async completePasswordReset(userId: string, tenantId: number) {

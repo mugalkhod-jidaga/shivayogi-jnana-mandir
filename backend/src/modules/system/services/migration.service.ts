@@ -8,6 +8,10 @@ import { migrationCsvRowSchema } from '../schemas/migration.schemas';
 interface LookupMaps {
   bloodGroups: Map<string, number>;
   admissionCategories: Map<string, number>;
+  academicYears: Map<string, number>;
+  standards: Map<string, number>;
+  sections: Map<string, number>;
+  languages: Map<string, number>;
 }
 
 interface ParseErrorRow {
@@ -26,10 +30,30 @@ export interface MigrationParseResult {
 }
 
 async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
-  const [bloodRes, categoryRes] = await Promise.all([
+  const [bloodRes, categoryRes, yearRes, standardRes, sectionRes, languageRes] = await Promise.all([
     supabase.from('lookup_blood_groups').select('id, value').eq('is_active', true),
     supabase
       .from('lookup_admission_categories')
+      .select('id, value')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true),
+    supabase
+      .from('lookup_academic_years')
+      .select('id, label')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true),
+    supabase
+      .from('lookup_academic_standards')
+      .select('id, value')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true),
+    supabase
+      .from('lookup_sections')
+      .select('id, value')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true),
+    supabase
+      .from('lookup_languages')
       .select('id, value')
       .eq('tenant_id', tenantId)
       .eq('is_active', true),
@@ -37,18 +61,22 @@ async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
 
   if (bloodRes.error) throw new AppError(500, bloodRes.error.message);
   if (categoryRes.error) throw new AppError(500, categoryRes.error.message);
+  if (yearRes.error) throw new AppError(500, yearRes.error.message);
+  if (standardRes.error) throw new AppError(500, standardRes.error.message);
+  if (sectionRes.error) throw new AppError(500, sectionRes.error.message);
+  if (languageRes.error) throw new AppError(500, languageRes.error.message);
 
-  const bloodGroups = new Map<string, number>();
-  for (const row of bloodRes.data ?? []) {
-    bloodGroups.set(row.value.toLowerCase(), row.id);
-  }
+  const toMap = (rows: { id: number; value?: string; label?: string }[], key: 'value' | 'label') =>
+    new Map(rows.map((row) => [(key === 'label' ? row.label! : row.value!).toLowerCase(), row.id]));
 
-  const admissionCategories = new Map<string, number>();
-  for (const row of categoryRes.data ?? []) {
-    admissionCategories.set(row.value.toLowerCase(), row.id);
-  }
-
-  return { bloodGroups, admissionCategories };
+  return {
+    bloodGroups: toMap(bloodRes.data ?? [], 'value'),
+    admissionCategories: toMap(categoryRes.data ?? [], 'value'),
+    academicYears: toMap(yearRes.data ?? [], 'label'),
+    standards: toMap(standardRes.data ?? [], 'value'),
+    sections: toMap(sectionRes.data ?? [], 'value'),
+    languages: toMap(languageRes.data ?? [], 'value'),
+  };
 }
 
 async function findExistingAdmissionNumbers(
@@ -82,11 +110,14 @@ function mapRow(
   const row = parsed.data;
 
   let primaryContact: string;
+  let emergencyPhone: string;
   try {
     primaryContact = normalizeIndianPhone(row.primary_contact);
     phoneSchema.parse(primaryContact);
+    emergencyPhone = normalizeIndianPhone(row.emergency_contact_phone);
+    phoneSchema.parse(emergencyPhone);
   } catch {
-    return { ok: false, error: `Invalid phone number: ${row.primary_contact}` };
+    return { ok: false, error: 'Invalid phone number in primary or emergency contact' };
   }
 
   const bloodGroupId = maps.bloodGroups.get(row.blood_group.toLowerCase());
@@ -97,6 +128,32 @@ function mapRow(
   const admissionCategoryId = maps.admissionCategories.get(row.admission_category.toLowerCase());
   if (!admissionCategoryId) {
     return { ok: false, error: `Invalid admission category: ${row.admission_category}` };
+  }
+
+  const academicYearId = maps.academicYears.get(row.academic_year.toLowerCase());
+  if (!academicYearId) {
+    return { ok: false, error: `Invalid academic year: ${row.academic_year}` };
+  }
+
+  const standardId = maps.standards.get(row.standard.toLowerCase());
+  if (!standardId) {
+    return { ok: false, error: `Invalid standard: ${row.standard}` };
+  }
+
+  let sectionId: number | undefined;
+  if (row.section) {
+    sectionId = maps.sections.get(row.section.toLowerCase());
+    if (!sectionId) {
+      return { ok: false, error: `Invalid section: ${row.section}` };
+    }
+  }
+
+  let motherTongueId: number | undefined;
+  if (row.mother_tongue) {
+    motherTongueId = maps.languages.get(row.mother_tongue.toLowerCase());
+    if (!motherTongueId) {
+      return { ok: false, error: `Invalid mother tongue: ${row.mother_tongue}` };
+    }
   }
 
   return {
@@ -110,6 +167,18 @@ function mapRow(
       gender: row.gender ?? 'Male',
       blood_group_id: bloodGroupId,
       admission_category_id: admissionCategoryId,
+      admission_date: row.admission_date,
+      mother_tongue_id: motherTongueId,
+      aadhaar_number: row.aadhaar_number,
+      academic_year_id: academicYearId,
+      standard_id: standardId,
+      section_id: sectionId,
+      roll_number: row.roll_number,
+      previous_school: row.previous_school,
+      last_class_studied: row.last_class_studied,
+      emergency_contact_name: row.emergency_contact_name,
+      emergency_contact_relationship: row.emergency_contact_relationship,
+      emergency_contact_phone: emergencyPhone,
       father_name: row.father_name,
       mother_name: row.mother_name,
       parent_status: 'Both Alive',
@@ -135,7 +204,7 @@ export const migrationService = {
     const seenInFile = new Set<string>();
 
     for (let i = 0; i < rows.length; i++) {
-      const rowNumber = i + 2; // header is row 1
+      const rowNumber = i + 2;
       const result = mapRow(rows[i], rowNumber, maps);
 
       if (!result.ok) {
@@ -198,10 +267,7 @@ export const migrationService = {
     };
 
     if (!result?.success) {
-      throw new AppError(
-        400,
-        result?.error ?? 'Bulk insert failed',
-      );
+      throw new AppError(400, result?.error ?? 'Bulk insert failed');
     }
 
     return { inserted: result.inserted ?? 0 };

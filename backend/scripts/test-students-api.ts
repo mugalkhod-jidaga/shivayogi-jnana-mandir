@@ -47,16 +47,45 @@ async function main(): Promise<void> {
   const bloodData = blood.body.data as { id: number }[] | undefined;
   const bloodGroupId = bloodData?.[0]?.id;
 
+  const years = await api(token, '/lookups/academic-years');
+  const yearData = years.body.data as { id: number }[] | undefined;
+  const academicYearId = yearData?.[0]?.id;
+
+  const standards = await api(token, '/lookups/academic-standards');
+  const standardData = (standards.body.data as { id: number; value: string }[] | undefined)?.filter(
+    (s) => s.value !== 'Unassigned',
+  );
+  const standardId = standardData?.[0]?.id;
+
+  if (!academicYearId || !standardId) {
+    throw new Error('Missing academic year or standard lookup — apply migration 004 first');
+  }
+
   const created = await api(token, '/students', {
     method: 'POST',
     body: JSON.stringify({
       admissionNumber: `ADM-${suffix}`,
       firstName: 'Test',
       lastName: 'Student',
-      dob: '2010-05-15',
+      dob: '15/05/2010',
       gender: 'Male',
+      admissionDate: '01/06/2025',
       bloodGroupId,
       admissionCategoryId: categoryId,
+      academicPlacement: {
+        academicYearId,
+        standardId,
+        rollNumber: `R-${suffix}`,
+        previousSchool: 'Previous School',
+        lastClassStudied: '4',
+      },
+      emergencyContacts: [
+        {
+          contactName: 'Emergency Contact',
+          relationship: 'Uncle',
+          phone: '+919988776644',
+        },
+      ],
       familyDetails: {
         fatherName: 'Father Name',
         motherName: 'Mother Name',
@@ -81,12 +110,19 @@ async function main(): Promise<void> {
   console.log('GET /students →', list.status, 'total=', (list.body.meta as { total?: number })?.total);
 
   const detail = await api(token, `/students/${createdData.id}`);
-  const detailData = detail.body.data as { familyDetails?: unknown } | undefined;
-  console.log('GET /students/:id →', detail.status, 'hasFamily=', !!detailData?.familyDetails);
+  const detailData = detail.body.data as { familyDetails?: unknown; currentEnrollment?: unknown } | undefined;
+  console.log(
+    'GET /students/:id →',
+    detail.status,
+    'hasFamily=',
+    !!detailData?.familyDetails,
+    'hasEnrollment=',
+    !!detailData?.currentEnrollment,
+  );
 
   const updated = await api(token, `/students/${createdData.id}`, {
     method: 'PATCH',
-    body: JSON.stringify({ medicalAlerts: 'No known allergies' }),
+    body: JSON.stringify({ firstName: 'TestUpdated' }),
   });
   console.log('PATCH /students/:id →', updated.status);
 

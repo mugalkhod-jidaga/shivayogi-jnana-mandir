@@ -51,6 +51,31 @@ export class UsersRepository extends BaseRepository {
       .filter((role): role is { id: number; name: string } => role !== null);
   }
 
+  async findAssignedStandardIds(userId: string): Promise<number[]> {
+    const { data, error } = await supabase
+      .from('user_standard_assignments')
+      .select('standard_id')
+      .eq('user_id', userId);
+
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => row.standard_id as number);
+  }
+
+  async replaceAssignedStandardIds(userId: string, standardIds: number[]): Promise<void> {
+    const { error: deleteError } = await supabase
+      .from('user_standard_assignments')
+      .delete()
+      .eq('user_id', userId);
+
+    if (deleteError) throw new AppError(500, deleteError.message);
+
+    if (standardIds.length === 0) return;
+
+    const rows = standardIds.map((standardId) => ({ user_id: userId, standard_id: standardId }));
+    const { error: insertError } = await supabase.from('user_standard_assignments').insert(rows);
+    if (insertError) throw new AppError(500, insertError.message);
+  }
+
   async replaceRole(userId: string, roleId: number): Promise<void> {
     const { error: deleteError } = await supabase.from('user_roles').delete().eq('user_id', userId);
     if (deleteError) throw new AppError(500, deleteError.message);

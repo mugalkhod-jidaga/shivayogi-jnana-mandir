@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
-import { paginationSchema } from '../../../utils/validators';
 import { permissionService } from '../../auth/services/permission.service';
 import type {
   CreateStudentInput,
   DeactivateStudentInput,
   UpdateStudentInput,
 } from '../schemas/student.schemas';
+import { studentListQuerySchema } from '../schemas/student.schemas';
 import { studentService } from '../services/student.service';
 
 function requireAuthContext(req: Request): { profileId: string; tenantId: number } {
@@ -29,16 +29,16 @@ async function getPermissions(profileId: string): Promise<string[]> {
 export const studentController = {
   async list(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
-    const { page, limit, search } = paginationSchema.parse(req.query);
+    const query = studentListQuerySchema.parse(req.query);
     const permissions = await getPermissions(profileId);
-    const { data, meta } = await studentService.list(tenantId, page, limit, search, permissions);
+    const { data, meta } = await studentService.list(tenantId, query, profileId, permissions);
     res.json({ success: true, data, meta });
   },
 
   async getById(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const permissions = await getPermissions(profileId);
-    const data = await studentService.getById(paramId(req), tenantId, permissions);
+    const data = await studentService.getById(paramId(req), tenantId, profileId, permissions);
     res.json({ success: true, data });
   },
 

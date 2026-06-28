@@ -19,6 +19,27 @@ export const paginationSchema = z.object({
   search: z.string().trim().max(100).optional(),
 });
 
+export const aadhaarSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits');
+
+export const dateInputSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .transform((value, ctx) => {
+    try {
+      return parseDobToIso(value);
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        message: error instanceof Error ? error.message : 'Enter a valid date as DD/MM/YYYY',
+      });
+      return z.NEVER;
+    }
+  });
+
 export const dobInputSchema = z
   .string()
   .trim()

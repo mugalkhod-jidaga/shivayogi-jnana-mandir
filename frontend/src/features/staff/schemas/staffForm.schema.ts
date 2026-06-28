@@ -15,11 +15,15 @@ export const createStaffFormSchema = z.object({
 
 export type CreateStaffFormValues = z.infer<typeof createStaffFormSchema>;
 
-export function buildCreateStaffPayload(values: CreateStaffFormValues) {
+export function buildCreateStaffPayload(
+  values: CreateStaffFormValues,
+  assignedStandardIds: number[] = [],
+) {
   return {
     firstName: values.firstName,
     lastName: values.lastName || undefined,
     phone: normalizeIndianPhone(values.phone),
     roleId: Number(values.roleId),
+    assignedStandardIds: assignedStandardIds.length > 0 ? assignedStandardIds : undefined,
   };
 }

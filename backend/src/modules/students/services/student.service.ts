@@ -1,18 +1,32 @@
 import { supabase } from '../../../config/supabase';
 import { AppError } from '../../../utils/AppError';
+import { usersRepository } from '../../auth/repositories/users.repository';
 import { getDownloadUrl, getUploadUrl } from '../../documents/services/presignedUrl.service';
 import type {
+  AcademicPlacementInput,
   CreateStudentInput,
   DeactivateStudentInput,
-  FamilyDetailsInput,
+  EmergencyContactInput,
+  StudentListQuery,
   UpdateStudentInput,
 } from '../schemas/student.schemas';
 import {
   studentsRepository,
+  unwrapEnrollment,
   unwrapFamily,
+  type EmergencyContactRow,
+  type EnrollmentRow,
   type FamilyDetailsRow,
   type StudentRow,
 } from '../repositories/students.repository';
+
+const FULL_ACCESS_ROLES = new Set(['Super Admin', 'Admissions Clerk', 'Finance']);
+
+function maskAadhaar(aadhaar: string | null, canViewFull: boolean): string | null {
+  if (!aadhaar) return null;
+  if (canViewFull) return aadhaar;
+  return `XXXX-XXXX-${aadhaar.slice(-4)}`;
+}
 
 function serializeFamily(family: FamilyDetailsRow) {
   return {
@@ -31,7 +45,35 @@ function serializeFamily(family: FamilyDetailsRow) {
   };
 }
 
+function serializeEnrollment(enrollment: EnrollmentRow) {
+  const academicYear = enrollment.academic_year;
+  return {
+    id: enrollment.id,
+    rollNumber: enrollment.roll_number,
+    previousSchool: enrollment.previous_school,
+    lastClassStudied: enrollment.last_class_studied,
+    enrolledAt: enrollment.enrolled_at,
+    academicYear: academicYear
+      ? { id: academicYear.id, value: academicYear.label, isCurrent: academicYear.is_current }
+      : null,
+    standard: enrollment.standard ?? null,
+    section: enrollment.section ?? null,
+  };
+}
+
+function serializeEmergencyContact(contact: EmergencyContactRow) {
+  return {
+    id: contact.id,
+    contactName: contact.contact_name,
+    relationship: contact.relationship,
+    phone: contact.phone_number,
+  };
+}
+
 function serializeStudent(student: StudentRow, permissions: string[], includeFamily = true) {
+  const canViewSensitive = permissions.includes('students:view_sensitive_data');
+  const enrollment = unwrapEnrollment(student);
+
   const base = {
     id: student.id,
     admissionNumber: student.admission_number,
@@ -42,13 +84,17 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     photoUrl: student.photo_url,
     bloodGroup: student.blood_group ?? null,
     admissionCategory: student.admission_category ?? null,
-    medicalAlerts: student.medical_alerts,
+    motherTongue: student.mother_tongue ?? null,
+    admissionDate: student.admission_date,
+    aadhaarNumber: maskAadhaar(student.aadhaar_number, canViewSensitive),
+    currentEnrollment: enrollment ? serializeEnrollment(enrollment) : null,
+    emergencyContacts: (student.emergency_contacts ?? []).map(serializeEmergencyContact),
     status: student.status,
     statusReason: student.status_reason,
     statusChangedAt: student.status_changed_at,
   };
 
-  if (!includeFamily || !permissions.includes('students:view_sensitive_data')) {
+  if (!includeFamily || !canViewSensitive) {
     return base;
   }
 
@@ -70,36 +116,96 @@ async function validateBloodGroupId(bloodGroupId: number) {
   if (error || !data) throw new AppError(400, 'Invalid blood group');
 }
 
-async function validateAdmissionCategoryId(categoryId: number, tenantId: number) {
+async function validateTenantLookup(
+  table: string,
+  id: number,
+  tenantId: number,
+  label: string,
+) {
   const { data, error } = await supabase
-    .from('lookup_admission_categories')
+    .from(table)
     .select('id')
-    .eq('id', categoryId)
+    .eq('id', id)
     .eq('tenant_id', tenantId)
     .eq('is_active', true)
     .single();
 
-  if (error || !data) throw new AppError(400, 'Invalid admission category for this tenant');
+  if (error || !data) throw new AppError(400, `Invalid ${label} for this tenant`);
+}
+
+async function validateAcademicPlacement(tenantId: number, placement: AcademicPlacementInput) {
+  await validateTenantLookup('lookup_academic_years', placement.academicYearId, tenantId, 'academic year');
+  await validateTenantLookup('lookup_academic_standards', placement.standardId, tenantId, 'standard');
+  if (placement.sectionId) {
+    await validateTenantLookup('lookup_sections', placement.sectionId, tenantId, 'section');
+  }
+}
+
+async function resolveStandardScope(userId: string): Promise<number[] | undefined> {
+  const roles = await usersRepository.findRoles(userId);
+  const roleNames = roles.map((r) => r.name);
+  if (roleNames.some((name) => FULL_ACCESS_ROLES.has(name))) {
+    return undefined;
+  }
+
+  if (roleNames.includes('Teacher/Warden')) {
+    return studentsRepository.getAssignedStandardIds(userId);
+  }
+
+  return undefined;
+}
+
+async function assertStudentStandardAccess(
+  student: StudentRow,
+  userId: string,
+  permissions: string[],
+): Promise<void> {
+  const assignedStandardIds = await resolveStandardScope(userId);
+  if (assignedStandardIds === undefined) return;
+
+  const enrollment = unwrapEnrollment(student);
+  if (!enrollment) {
+    throw new AppError(403, 'Access denied for this student');
+  }
+
+  if (!assignedStandardIds.includes(enrollment.standard_id)) {
+    throw new AppError(403, 'Access denied for this student standard');
+  }
+
+  void permissions;
 }
 
 export const studentService = {
-  async list(tenantId: number, page: number, limit: number, search: string | undefined, permissions: string[]) {
-    const { data, meta } = await studentsRepository.list(tenantId, page, limit, search);
+  async list(tenantId: number, query: StudentListQuery, userId: string, permissions: string[]) {
+    const assignedStandardIds = await resolveStandardScope(userId);
+    const { data, meta } = await studentsRepository.list(tenantId, query, assignedStandardIds);
     return {
       data: data.map((row) => serializeStudent(row, permissions, false)),
       meta,
     };
   },
 
-  async getById(id: string, tenantId: number, permissions: string[]) {
+  async getById(id: string, tenantId: number, userId: string, permissions: string[]) {
     const student = await studentsRepository.findByIdWithRelations(id, tenantId);
     if (!student) throw new AppError(404, 'Student not found');
+    await assertStudentStandardAccess(student, userId, permissions);
     return serializeStudent(student, permissions, true);
   },
 
   async create(tenantId: number, input: CreateStudentInput, userId: string, permissions: string[]) {
     if (input.bloodGroupId) await validateBloodGroupId(input.bloodGroupId);
-    if (input.admissionCategoryId) await validateAdmissionCategoryId(input.admissionCategoryId, tenantId);
+    if (input.admissionCategoryId) {
+      await validateTenantLookup(
+        'lookup_admission_categories',
+        input.admissionCategoryId,
+        tenantId,
+        'admission category',
+      );
+    }
+    if (input.motherTongueId) {
+      await validateTenantLookup('lookup_languages', input.motherTongueId, tenantId, 'language');
+    }
+    await validateAcademicPlacement(tenantId, input.academicPlacement);
 
     const student = await studentsRepository.create(
       tenantId,
@@ -111,9 +217,14 @@ export const studentService = {
         gender: input.gender,
         blood_group_id: input.bloodGroupId ?? null,
         admission_category_id: input.admissionCategoryId ?? null,
-        medical_alerts: input.medicalAlerts ?? null,
+        admission_date: input.admissionDate,
+        mother_tongue_id: input.motherTongueId ?? null,
+        aadhaar_number: input.aadhaarNumber ?? null,
       },
       input.familyDetails,
+      input.academicPlacement,
+      input.emergencyContacts,
+      input.admissionDate,
       userId,
     );
 
@@ -129,9 +240,23 @@ export const studentService = {
   ) {
     const existing = await studentsRepository.findByIdWithRelations(id, tenantId);
     if (!existing) throw new AppError(404, 'Student not found');
+    await assertStudentStandardAccess(existing, userId, permissions);
 
     if (input.bloodGroupId) await validateBloodGroupId(input.bloodGroupId);
-    if (input.admissionCategoryId) await validateAdmissionCategoryId(input.admissionCategoryId, tenantId);
+    if (input.admissionCategoryId) {
+      await validateTenantLookup(
+        'lookup_admission_categories',
+        input.admissionCategoryId,
+        tenantId,
+        'admission category',
+      );
+    }
+    if (input.motherTongueId) {
+      await validateTenantLookup('lookup_languages', input.motherTongueId, tenantId, 'language');
+    }
+    if (input.academicPlacement) {
+      await validateAcademicPlacement(tenantId, input.academicPlacement as AcademicPlacementInput);
+    }
 
     const changes: Record<string, unknown> = { updated_by: userId };
     if (input.firstName !== undefined) changes.first_name = input.firstName;
@@ -140,7 +265,9 @@ export const studentService = {
     if (input.gender !== undefined) changes.gender = input.gender;
     if (input.bloodGroupId !== undefined) changes.blood_group_id = input.bloodGroupId;
     if (input.admissionCategoryId !== undefined) changes.admission_category_id = input.admissionCategoryId;
-    if (input.medicalAlerts !== undefined) changes.medical_alerts = input.medicalAlerts;
+    if (input.admissionDate !== undefined) changes.admission_date = input.admissionDate;
+    if (input.motherTongueId !== undefined) changes.mother_tongue_id = input.motherTongueId;
+    if (input.aadhaarNumber !== undefined) changes.aadhaar_number = input.aadhaarNumber;
 
     if (input.status !== undefined) {
       changes.status = input.status;
@@ -155,11 +282,19 @@ export const studentService = {
       await studentsRepository.update(id, tenantId, changes, userId);
     }
 
+    if (input.academicPlacement) {
+      await studentsRepository.updateEnrollment(id, input.academicPlacement, input.admissionDate);
+    }
+
+    if (input.emergencyContacts) {
+      await studentsRepository.replaceEmergencyContacts(id, input.emergencyContacts);
+    }
+
     if (input.familyDetails) {
       if (!permissions.includes('students:view_sensitive_data')) {
         throw new AppError(403, 'Permission denied to update family details');
       }
-      await studentsRepository.updateFamilyDetails(id, input.familyDetails as Partial<FamilyDetailsInput>);
+      await studentsRepository.updateFamilyDetails(id, input.familyDetails);
     }
 
     const updated = await studentsRepository.findByIdWithRelations(id, tenantId);
@@ -174,6 +309,10 @@ export const studentService = {
     userId: string,
     permissions: string[],
   ) {
+    const existing = await studentsRepository.findByIdWithRelations(id, tenantId);
+    if (!existing) throw new AppError(404, 'Student not found');
+    await assertStudentStandardAccess(existing, userId, permissions);
+
     const student = await studentsRepository.deactivate(
       id,
       tenantId,

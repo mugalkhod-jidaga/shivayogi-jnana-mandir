@@ -6,6 +6,7 @@ export const createStaffSchema = z.object({
   lastName: z.string().trim().max(100).optional(),
   phone: phoneSchema,
   roleId: z.number().int().positive(),
+  assignedStandardIds: z.array(z.number().int().positive()).optional(),
 });
 
 export const updateStaffSchema = z
@@ -13,10 +14,16 @@ export const updateStaffSchema = z
     firstName: z.string().trim().min(1).max(100).optional(),
     lastName: z.string().trim().max(100).nullable().optional(),
     roleId: z.number().int().positive().optional(),
+    assignedStandardIds: z.array(z.number().int().positive()).optional(),
   })
-  .refine((data) => data.firstName !== undefined || data.lastName !== undefined || data.roleId !== undefined, {
-    message: 'At least one field must be provided',
-  });
+  .refine(
+    (data) =>
+      data.firstName !== undefined ||
+      data.lastName !== undefined ||
+      data.roleId !== undefined ||
+      data.assignedStandardIds !== undefined,
+    { message: 'At least one field must be provided' },
+  );
 
 export type CreateStaffInput = z.infer<typeof createStaffSchema>;
 export type UpdateStaffInput = z.infer<typeof updateStaffSchema>;

@@ -1,10 +1,10 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { BloodGroupSelect } from '@/components/lookups/BloodGroupSelect';
+import { LanguageSelect } from '@/components/lookups/LanguageSelect';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import type {
   CreateStudentFormValues,
   UpdateStudentFormValues,
@@ -15,8 +15,10 @@ type DemographicsFieldsProps = {
   errors: FieldErrors<CreateStudentFormValues | UpdateStudentFormValues>;
   bloodGroupId?: string;
   admissionCategoryId?: string;
+  motherTongueId?: string;
   onBloodGroupChange: (value: string) => void;
   onAdmissionCategoryChange: (value: string) => void;
+  onMotherTongueChange: (value: string) => void;
   isCreate?: boolean;
   createRegister?: UseFormRegister<CreateStudentFormValues>;
 };
@@ -26,14 +28,16 @@ export function DemographicsFields({
   errors,
   bloodGroupId,
   admissionCategoryId,
+  motherTongueId,
   onBloodGroupChange,
   onAdmissionCategoryChange,
+  onMotherTongueChange,
   isCreate = false,
   createRegister,
 }: DemographicsFieldsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-          {isCreate && createRegister && (
+      {isCreate && createRegister && (
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="admissionNumber">Admission number</Label>
           <Input id="admissionNumber" {...createRegister('admissionNumber')} />
@@ -62,12 +66,35 @@ export function DemographicsFields({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="admissionDate">Admission date</Label>
+        <Input
+          id="admissionDate"
+          placeholder="DD/MM/YYYY"
+          inputMode="numeric"
+          {...register('admissionDate')}
+        />
+        {errors.admissionDate && (
+          <p className="text-sm text-destructive">{errors.admissionDate.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="gender">Gender</Label>
         <Select id="gender" {...register('gender')}>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
           <option value="Other">Other</option>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="motherTongueId">Mother tongue</Label>
+        <LanguageSelect
+          id="motherTongueId"
+          value={motherTongueId}
+          onChange={onMotherTongueChange}
+          placeholder="Optional"
+        />
       </div>
 
       <div className="space-y-2">
@@ -91,10 +118,16 @@ export function DemographicsFields({
       </div>
 
       <div className="space-y-2 sm:col-span-2">
-        <Label htmlFor="medicalAlerts">Medical alerts</Label>
-        <Textarea id="medicalAlerts" rows={3} {...register('medicalAlerts')} />
-        {errors.medicalAlerts && (
-          <p className="text-sm text-destructive">{errors.medicalAlerts.message}</p>
+        <Label htmlFor="aadhaarNumber">Aadhaar number</Label>
+        <Input
+          id="aadhaarNumber"
+          inputMode="numeric"
+          maxLength={12}
+          placeholder="12-digit Aadhaar (optional)"
+          {...register('aadhaarNumber')}
+        />
+        {errors.aadhaarNumber && (
+          <p className="text-sm text-destructive">{errors.aadhaarNumber.message}</p>
         )}
       </div>
     </div>
