@@ -1,6 +1,7 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { AcademicYearSelect } from '@/components/lookups/AcademicYearSelect';
 import { SectionSelect } from '@/components/lookups/SectionSelect';
@@ -64,6 +65,15 @@ export function AcademicPlacementFields({
       <div className="space-y-2 sm:col-span-2">
         <Label htmlFor="previousSchool">Previous school</Label>
         <Input id="previousSchool" {...register('academicPlacement.previousSchool')} />
+      </div>
+
+      <div className="space-y-2 sm:col-span-2">
+        <Label htmlFor="previousSchoolAddress">Previous school address</Label>
+        <Textarea
+          id="previousSchoolAddress"
+          rows={3}
+          {...register('academicPlacement.previousSchoolAddress')}
+        />
       </div>
 
       <div className="space-y-2 sm:col-span-2">

@@ -1,4 +1,5 @@
 import { env } from '@/lib/env';
+import { getApiLocale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import type { ApiResponse, PaginatedList, PaginationMeta } from '@/types/api';
 
@@ -41,6 +42,7 @@ async function apiRequest<T>(
     ...rest,
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': getApiLocale(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },

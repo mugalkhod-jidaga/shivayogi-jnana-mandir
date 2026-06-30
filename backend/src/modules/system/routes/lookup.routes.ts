@@ -136,6 +136,18 @@ lookupRoutes.get(
   asyncHandler(lookupController.listLanguages),
 );
 
+lookupRoutes.get(
+  '/religions',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listReligions),
+);
+
+lookupRoutes.get(
+  '/social-categories',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listSocialCategories),
+);
+
 lookupRoutes.post(
   '/languages',
   extractTenantMiddleware,

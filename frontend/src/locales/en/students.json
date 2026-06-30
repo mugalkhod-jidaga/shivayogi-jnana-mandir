@@ -1,0 +1,50 @@
+{
+  "list": {
+    "title": "Students",
+    "description": "Search, filter, and manage student records.",
+    "addStudent": "Add student",
+    "searchPlaceholder": "Search by name or admission number",
+    "allStatuses": "All statuses",
+    "noResults": "No students found.",
+    "loading": "Loading students…",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "columns": {
+      "admissionNumber": "Admission #",
+      "name": "Name",
+      "standard": "Standard",
+      "rollNumber": "Roll #",
+      "admissionDate": "Admission date",
+      "status": "Status"
+    }
+  },
+  "form": {
+    "addTitle": "Add student",
+    "editTitle": "Edit student",
+    "addDescription": "Create a student record. Documents and photo can be added after saving.",
+    "nextAdmissionNumber": "Next admission number",
+    "sections": {
+      "basic": "Basic information",
+      "academic": "Academic placement",
+      "emergency": "Emergency contact",
+      "social": "Social & caste details",
+      "family": "Family & address"
+    },
+    "satsId": "SATS ID",
+    "satsIdHelp": "Enter after the student is transferred on the Karnataka SATS portal (9 digits).",
+    "satsTransferStatus": "SATS transfer status",
+    "previousSchoolAddress": "Previous school address",
+    "religion": "Religion",
+    "socialCategory": "Social category",
+    "caste": "Caste",
+    "subCaste": "Sub-caste",
+    "rdNumber": "RD number",
+    "rdNumberSecondary": "RD number (secondary)",
+    "createSuccess": "Student created. Add documents and photo from the student profile.",
+    "createSubmit": "Create student"
+  },
+  "satsStatus": {
+    "pending": "Pending SATS transfer",
+    "transferred": "Transferred on SATS",
+    "notApplicable": "Not applicable"
+  }
+}

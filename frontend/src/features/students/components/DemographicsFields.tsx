@@ -20,7 +20,8 @@ type DemographicsFieldsProps = {
   onAdmissionCategoryChange: (value: string) => void;
   onMotherTongueChange: (value: string) => void;
   isCreate?: boolean;
-  createRegister?: UseFormRegister<CreateStudentFormValues>;
+  nextAdmissionNumber?: string;
+  isLoadingAdmissionNumber?: boolean;
 };
 
 export function DemographicsFields({
@@ -33,17 +34,23 @@ export function DemographicsFields({
   onAdmissionCategoryChange,
   onMotherTongueChange,
   isCreate = false,
-  createRegister,
+  nextAdmissionNumber,
+  isLoadingAdmissionNumber,
 }: DemographicsFieldsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      {isCreate && createRegister && (
+      {isCreate && (
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="admissionNumber">Admission number</Label>
-          <Input id="admissionNumber" {...createRegister('admissionNumber')} />
-          {'admissionNumber' in errors && errors.admissionNumber && (
-            <p className="text-sm text-destructive">{errors.admissionNumber.message}</p>
-          )}
+          <Label htmlFor="admissionNumberPreview">Admission number</Label>
+          <Input
+            id="admissionNumberPreview"
+            readOnly
+            value={isLoadingAdmissionNumber ? 'Loading…' : (nextAdmissionNumber ?? '—')}
+            className="bg-muted"
+          />
+          <p className="text-xs text-muted-foreground">
+            Assigned automatically when you save (SJM format).
+          </p>
         </div>
       )}
 
@@ -128,6 +135,31 @@ export function DemographicsFields({
         />
         {errors.aadhaarNumber && (
           <p className="text-sm text-destructive">{errors.aadhaarNumber.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="satsId">SATS ID</Label>
+        <Input
+          id="satsId"
+          inputMode="numeric"
+          maxLength={9}
+          placeholder="9-digit Karnataka SATS ID (optional)"
+          {...register('satsId')}
+        />
+        {errors.satsId && <p className="text-sm text-destructive">{errors.satsId.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="satsTransferStatus">SATS transfer status</Label>
+        <Select id="satsTransferStatus" {...register('satsTransferStatus')}>
+          <option value="">Not set</option>
+          <option value="Pending">Pending</option>
+          <option value="Transferred">Transferred</option>
+          <option value="NotApplicable">Not applicable</option>
+        </Select>
+        {errors.satsTransferStatus && (
+          <p className="text-sm text-destructive">{errors.satsTransferStatus.message}</p>
         )}
       </div>
     </div>

@@ -34,13 +34,29 @@ export const lookupController = {
 
   async listAdmissionCategories(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listAdmissionCategories(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listAdmissionCategories(tenantId, locale);
     res.json({ success: true, data });
   },
 
   async listDocumentTypes(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listDocumentTypes(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listDocumentTypes(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listReligions(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listReligions(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listSocialCategories(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listSocialCategories(tenantId, locale);
     res.json({ success: true, data });
   },
 

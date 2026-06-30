@@ -14,9 +14,11 @@ import {
   studentsRepository,
   unwrapEnrollment,
   unwrapFamily,
+  unwrapSocial,
   type EmergencyContactRow,
   type EnrollmentRow,
   type FamilyDetailsRow,
+  type SocialDetailsRow,
   type StudentRow,
 } from '../repositories/students.repository';
 
@@ -51,6 +53,7 @@ function serializeEnrollment(enrollment: EnrollmentRow) {
     id: enrollment.id,
     rollNumber: enrollment.roll_number,
     previousSchool: enrollment.previous_school,
+    previousSchoolAddress: enrollment.previous_school_address,
     lastClassStudied: enrollment.last_class_studied,
     enrolledAt: enrollment.enrolled_at,
     academicYear: academicYear
@@ -58,6 +61,17 @@ function serializeEnrollment(enrollment: EnrollmentRow) {
       : null,
     standard: enrollment.standard ?? null,
     section: enrollment.section ?? null,
+  };
+}
+
+function serializeSocial(social: SocialDetailsRow) {
+  return {
+    religion: social.religion ?? null,
+    socialCategory: social.social_category ?? null,
+    caste: social.caste,
+    subCaste: social.sub_caste,
+    rdNumber: social.rd_number,
+    rdNumberSecondary: social.rd_number_secondary,
   };
 }
 
@@ -87,6 +101,8 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     motherTongue: student.mother_tongue ?? null,
     admissionDate: student.admission_date,
     aadhaarNumber: maskAadhaar(student.aadhaar_number, canViewSensitive),
+    satsId: student.sats_id,
+    satsTransferStatus: student.sats_transfer_status,
     currentEnrollment: enrollment ? serializeEnrollment(enrollment) : null,
     emergencyContacts: (student.emergency_contacts ?? []).map(serializeEmergencyContact),
     status: student.status,
@@ -99,9 +115,11 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
   }
 
   const family = unwrapFamily(student);
+  const social = unwrapSocial(student);
   return {
     ...base,
     familyDetails: family ? serializeFamily(family) : null,
+    socialDetails: social ? serializeSocial(social) : null,
   };
 }
 
@@ -176,6 +194,11 @@ async function assertStudentStandardAccess(
 }
 
 export const studentService = {
+  async getNextAdmissionNumber(tenantId: number) {
+    const admissionNumber = await studentsRepository.peekNextAdmissionNumber(tenantId);
+    return { admissionNumber };
+  },
+
   async list(tenantId: number, query: StudentListQuery, userId: string, permissions: string[]) {
     const assignedStandardIds = await resolveStandardScope(userId);
     const { data, meta } = await studentsRepository.list(tenantId, query, assignedStandardIds);
@@ -205,12 +228,26 @@ export const studentService = {
     if (input.motherTongueId) {
       await validateTenantLookup('lookup_languages', input.motherTongueId, tenantId, 'language');
     }
+    if (input.socialDetails?.religionId) {
+      await validateTenantLookup('lookup_religions', input.socialDetails.religionId, tenantId, 'religion');
+    }
+    if (input.socialDetails?.socialCategoryId) {
+      await validateTenantLookup(
+        'lookup_social_categories',
+        input.socialDetails.socialCategoryId,
+        tenantId,
+        'social category',
+      );
+    }
     await validateAcademicPlacement(tenantId, input.academicPlacement);
+
+    const admissionNumber =
+      input.admissionNumber ?? (await studentsRepository.allocateAdmissionNumber(tenantId));
 
     const student = await studentsRepository.create(
       tenantId,
       {
-        admission_number: input.admissionNumber,
+        admission_number: admissionNumber,
         first_name: input.firstName,
         last_name: input.lastName ?? null,
         dob: input.dob,
@@ -220,12 +257,15 @@ export const studentService = {
         admission_date: input.admissionDate,
         mother_tongue_id: input.motherTongueId ?? null,
         aadhaar_number: input.aadhaarNumber ?? null,
+        sats_id: input.satsId ?? null,
+        sats_transfer_status: input.satsTransferStatus ?? (input.satsId ? 'Transferred' : 'Pending'),
       },
       input.familyDetails,
       input.academicPlacement,
       input.emergencyContacts,
       input.admissionDate,
       userId,
+      input.socialDetails,
     );
 
     return serializeStudent(student, permissions, true);
@@ -268,6 +308,8 @@ export const studentService = {
     if (input.admissionDate !== undefined) changes.admission_date = input.admissionDate;
     if (input.motherTongueId !== undefined) changes.mother_tongue_id = input.motherTongueId;
     if (input.aadhaarNumber !== undefined) changes.aadhaar_number = input.aadhaarNumber;
+    if (input.satsId !== undefined) changes.sats_id = input.satsId;
+    if (input.satsTransferStatus !== undefined) changes.sats_transfer_status = input.satsTransferStatus;
 
     if (input.status !== undefined) {
       changes.status = input.status;
@@ -295,6 +337,13 @@ export const studentService = {
         throw new AppError(403, 'Permission denied to update family details');
       }
       await studentsRepository.updateFamilyDetails(id, input.familyDetails);
+    }
+
+    if (input.socialDetails) {
+      if (!permissions.includes('students:view_sensitive_data')) {
+        throw new AppError(403, 'Permission denied to update social details');
+      }
+      await studentsRepository.updateSocialDetails(id, input.socialDetails);
     }
 
     const updated = await studentsRepository.findByIdWithRelations(id, tenantId);

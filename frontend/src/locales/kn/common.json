@@ -1,0 +1,33 @@
+{
+  "appName": "ಶಿವಯೋಗಿ ಜ್ಞಾನ ಮಂದಿರ",
+  "appSubtitle": "ಟ್ರಸ್ಟ್ ಇಆರ್‌ಪಿ",
+  "nav": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "documents": "ದಾಖಲೆಗಳು",
+    "import": "ಬಲ್ಕ್ ಆಮದು",
+    "staff": "ಸಿಬ್ಬಂದಿ",
+    "lookups": "ಲುಕಪ್‌ಗಳು",
+    "auditLogs": "ಆಡಿಟ್ ಲಾಗ್‌ಗಳು"
+  },
+  "actions": {
+    "signOut": "ಸೈನ್ ಔಟ್",
+    "cancel": "ರದ್ದು",
+    "save": "ಉಳಿಸಿ",
+    "apply": "ಅನ್ವಯಿಸಿ",
+    "search": "ಹುಡುಕಿ",
+    "add": "ಸೇರಿಸಿ",
+    "view": "ನೋಡಿ",
+    "previous": "ಹಿಂದಿನ",
+    "next": "ಮುಂದಿನ"
+  },
+  "language": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ"
+  },
+  "status": {
+    "active": "ಸಕ್ರಿಯ",
+    "alumni": "ಪೂರ್ವ ವಿದ್ಯಾರ್ಥಿ",
+    "discontinued": "ನಿಲ್ಲಿಸಲಾಗಿದೆ"
+  }
+}

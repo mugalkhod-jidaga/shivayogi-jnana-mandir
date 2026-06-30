@@ -1,0 +1,50 @@
+{
+  "list": {
+    "title": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "description": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ, ಫಿಲ್ಟರ್ ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ.",
+    "addStudent": "ವಿದ್ಯಾರ್ಥಿ ಸೇರಿಸಿ",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಪ್ರವೇಶ ಸಂಖ್ಯೆಯಿಂದ ಹುಡುಕಿ",
+    "allStatuses": "ಎಲ್ಲಾ ಸ್ಥಿತಿಗಳು",
+    "noResults": "ವಿದ್ಯಾರ್ಥಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "loading": "ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "pageOf": "ಪುಟ {{page}} / {{totalPages}} · ಒಟ್ಟು {{total}}",
+    "columns": {
+      "admissionNumber": "ಪ್ರವೇಶ #",
+      "name": "ಹೆಸರು",
+      "standard": "ತರಗತಿ",
+      "rollNumber": "ರೋಲ್ #",
+      "admissionDate": "ಪ್ರವೇಶ ದಿನಾಂಕ",
+      "status": "ಸ್ಥಿತಿ"
+    }
+  },
+  "form": {
+    "addTitle": "ವಿದ್ಯಾರ್ಥಿ ಸೇರಿಸಿ",
+    "editTitle": "ವಿದ್ಯಾರ್ಥಿ ಸಂಪಾದಿಸಿ",
+    "addDescription": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆ ರಚಿಸಿ. ಉಳಿಸಿದ ನಂತರ ದಾಖಲೆಗಳು ಮತ್ತು ಫೋಟೋ ಸೇರಿಸಬಹುದು.",
+    "nextAdmissionNumber": "ಮುಂದಿನ ಪ್ರವೇಶ ಸಂಖ್ಯೆ",
+    "sections": {
+      "basic": "ಮೂಲ ಮಾಹಿತಿ",
+      "academic": "ಶೈಕ್ಷಣಿಕ ವಿವರ",
+      "emergency": "ತುರ್ತು ಸಂಪರ್ಕ",
+      "social": "ಸಾಮಾಜಿಕ ಮತ್ತು ಜಾತಿ ವಿವರ",
+      "family": "ಕುಟುಂಬ ಮತ್ತು ವಿಳಾಸ"
+    },
+    "satsId": "SATS ಐಡಿ",
+    "satsIdHelp": "ಕರ್ನಾಟಕ SATS ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ವರ್ಗಾವಣೆ ನಂತರ ನಮೂದಿಸಿ (9 ಅಂಕೆಗಳು).",
+    "satsTransferStatus": "SATS ವರ್ಗಾವಣೆ ಸ್ಥಿತಿ",
+    "previousSchoolAddress": "ಹಿಂದಿನ ಶಾಲೆಯ ವಿಳಾಸ",
+    "religion": "ಧರ್ಮ",
+    "socialCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ",
+    "caste": "ಜಾತಿ",
+    "subCaste": "ಉಪಜಾತಿ",
+    "rdNumber": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ",
+    "rdNumberSecondary": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ (ದ್ವಿತೀಯ)",
+    "createSuccess": "ವಿದ್ಯಾರ್ಥಿ ರಚಿಸಲಾಗಿದೆ. ಪ್ರೊಫೈಲ್‌ನಿಂದ ದಾಖಲೆಗಳು ಮತ್ತು ಫೋಟೋ ಸೇರಿಸಿ.",
+    "createSubmit": "ವಿದ್ಯಾರ್ಥಿ ರಚಿಸಿ"
+  },
+  "satsStatus": {
+    "pending": "SATS ವರ್ಗಾವಣೆ ಬಾಕಿ",
+    "transferred": "SATS ನಲ್ಲಿ ವರ್ಗಾಯಿಸಲಾಗಿದೆ",
+    "notApplicable": "ಅನ್ವಯಿಸುವುದಿಲ್ಲ"
+  }
+}

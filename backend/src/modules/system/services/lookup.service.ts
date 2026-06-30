@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import type {
   CreateAcademicStandardInput,
   CreateAcademicYearInput,
@@ -6,18 +7,34 @@ import type {
   UpdateLookupValueInput,
 } from '../schemas/lookup.schemas';
 import { lookupRepository } from '../repositories/lookup.repository';
+import { parseLocale, type SupportedLocale } from '../../../utils/locale';
+
+function localeFromRequest(req: Request): SupportedLocale {
+  const queryLocale = typeof req.query.locale === 'string' ? req.query.locale : undefined;
+  const headerLocale = req.headers['accept-language'];
+  return parseLocale(queryLocale ?? (typeof headerLocale === 'string' ? headerLocale : undefined));
+}
 
 export const lookupService = {
+  localeFromRequest,
   listBloodGroups() {
     return lookupRepository.listBloodGroups();
   },
 
-  listAdmissionCategories(tenantId: number) {
-    return lookupRepository.listAdmissionCategories(tenantId);
+  listAdmissionCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listAdmissionCategories(tenantId, locale);
   },
 
-  listDocumentTypes(tenantId: number) {
-    return lookupRepository.listDocumentTypes(tenantId);
+  listDocumentTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listDocumentTypes(tenantId, locale);
+  },
+
+  listReligions(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listReligions(tenantId, locale);
+  },
+
+  listSocialCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listSocialCategories(tenantId, locale);
   },
 
   listAcademicStandards(tenantId: number) {

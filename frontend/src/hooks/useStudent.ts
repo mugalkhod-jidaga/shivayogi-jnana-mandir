@@ -18,6 +18,15 @@ export function useStudent(id: string | undefined) {
   });
 }
 
+export function useNextAdmissionNumber(enabled = true) {
+  return useQuery({
+    queryKey: ['students', 'next-admission-number'],
+    queryFn: () => apiFetch<{ admissionNumber: string }>('/students/admission-number/next'),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
 export function useCreateStudent() {
   const queryClient = useQueryClient();
 

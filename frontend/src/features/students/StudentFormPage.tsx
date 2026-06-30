@@ -9,6 +9,7 @@ import { AcademicPlacementFields } from '@/features/students/components/Academic
 import { DemographicsFields } from '@/features/students/components/DemographicsFields';
 import { EmergencyContactFields } from '@/features/students/components/EmergencyContactFields';
 import { FamilyDetailsFields } from '@/features/students/components/FamilyDetailsFields';
+import { SocialDetailsFields } from '@/features/students/components/SocialDetailsFields';
 import {
   buildCreateStudentPayload,
   buildUpdateStudentPayload,
@@ -16,13 +17,14 @@ import {
   defaultAcademicPlacement,
   defaultEmergencyContact,
   defaultFamilyDetails,
+  defaultSocialDetails,
   updateStudentFormSchema,
   type CreateStudentFormValues,
   type UpdateStudentFormValues,
 } from '@/features/students/schemas/studentForm.schema';
 import { useLookups } from '@/hooks/useLookups';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useCreateStudent, useStudent, useUpdateStudent } from '@/hooks/useStudent';
+import { useCreateStudent, useNextAdmissionNumber, useStudent, useUpdateStudent } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
 import { phoneToDisplay } from '@/lib/phone';
 import { ApiError } from '@/lib/api';
@@ -36,6 +38,9 @@ export function StudentFormPage() {
   const { currentAcademicYear } = useLookups();
 
   const { data: student, isLoading } = useStudent(isEdit ? id : undefined);
+  const { data: nextAdmission, isLoading: isLoadingAdmissionNumber } = useNextAdmissionNumber(
+    !isEdit,
+  );
   const createStudent = useCreateStudent();
   const updateStudent = useUpdateStudent(id ?? '');
 
@@ -46,6 +51,7 @@ export function StudentFormPage() {
       admissionDate: formatDobDisplay(new Date().toISOString().slice(0, 10)),
       academicPlacement: defaultAcademicPlacement,
       emergencyContacts: [defaultEmergencyContact],
+      socialDetails: defaultSocialDetails,
       familyDetails: defaultFamilyDetails,
     },
   });
@@ -56,6 +62,7 @@ export function StudentFormPage() {
       gender: 'Male',
       academicPlacement: defaultAcademicPlacement,
       emergencyContacts: [defaultEmergencyContact],
+      socialDetails: defaultSocialDetails,
     },
   });
 
@@ -65,6 +72,8 @@ export function StudentFormPage() {
   const [academicYearId, setAcademicYearId] = useState('');
   const [standardId, setStandardId] = useState('');
   const [sectionId, setSectionId] = useState('');
+  const [religionId, setReligionId] = useState('');
+  const [socialCategoryId, setSocialCategoryId] = useState('');
 
   useEffect(() => {
     if (!isEdit && currentAcademicYear && !academicYearId) {
@@ -84,9 +93,14 @@ export function StudentFormPage() {
       aadhaarNumber: student.aadhaarNumber?.replace(/\D/g, '').length === 12
         ? student.aadhaarNumber.replace(/\D/g, '')
         : '',
+      satsId: student.satsId?.replace(/\D/g, '').length === 9
+        ? student.satsId.replace(/\D/g, '')
+        : '',
+      satsTransferStatus: student.satsTransferStatus ?? undefined,
       academicPlacement: {
         rollNumber: student.currentEnrollment?.rollNumber ?? '',
         previousSchool: student.currentEnrollment?.previousSchool ?? '',
+        previousSchoolAddress: student.currentEnrollment?.previousSchoolAddress ?? '',
         lastClassStudied: student.currentEnrollment?.lastClassStudied ?? '',
       },
       emergencyContacts:
@@ -116,6 +130,14 @@ export function StudentFormPage() {
             pincode: student.familyDetails.pincode,
           }
         : defaultFamilyDetails,
+      socialDetails: student.socialDetails
+        ? {
+            caste: student.socialDetails.caste ?? '',
+            subCaste: student.socialDetails.subCaste ?? '',
+            rdNumber: student.socialDetails.rdNumber ?? '',
+            rdNumberSecondary: student.socialDetails.rdNumberSecondary ?? '',
+          }
+        : defaultSocialDetails,
     });
 
     setBloodGroupId(student.bloodGroup ? String(student.bloodGroup.id) : '');
@@ -133,6 +155,12 @@ export function StudentFormPage() {
     );
     setSectionId(
       student.currentEnrollment?.section ? String(student.currentEnrollment.section.id) : '',
+    );
+    setReligionId(student.socialDetails?.religion ? String(student.socialDetails.religion.id) : '');
+    setSocialCategoryId(
+      student.socialDetails?.socialCategory
+        ? String(student.socialDetails.socialCategory.id)
+        : '',
     );
   }, [isEdit, student, editForm]);
 
@@ -156,6 +184,8 @@ export function StudentFormPage() {
     bloodGroupId,
     admissionCategoryId,
     motherTongueId,
+    religionId,
+    socialCategoryId,
     academicYearId,
     standardId,
     sectionId: sectionId || undefined,
@@ -218,6 +248,13 @@ export function StudentFormPage() {
     onSectionChange: setSectionId,
   };
 
+  const socialProps = {
+    religionId,
+    socialCategoryId,
+    onReligionChange: setReligionId,
+    onSocialCategoryChange: setSocialCategoryId,
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -246,10 +283,11 @@ export function StudentFormPage() {
             ) : (
               <DemographicsFields
                 register={createForm.register}
-                createRegister={createForm.register}
                 errors={createForm.formState.errors}
                 {...demographicsProps}
                 isCreate
+                nextAdmissionNumber={nextAdmission?.admissionNumber}
+                isLoadingAdmissionNumber={isLoadingAdmissionNumber}
               />
             )}
           </div>
@@ -293,6 +331,30 @@ export function StudentFormPage() {
             )}
           </div>
         </section>
+
+        {canViewFamily && (
+          <section className="rounded-lg border p-6">
+            <h2 className="text-lg font-medium">Social & caste details</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sensitive information — visible only to authorized staff.
+            </p>
+            <div className="mt-4">
+              {isEdit ? (
+                <SocialDetailsFields
+                  register={editForm.register}
+                  errors={editForm.formState.errors}
+                  {...socialProps}
+                />
+              ) : (
+                <SocialDetailsFields
+                  register={createForm.register}
+                  errors={createForm.formState.errors}
+                  {...socialProps}
+                />
+              )}
+            </div>
+          </section>
+        )}
 
         {canViewFamily && (
           <section className="rounded-lg border p-6">

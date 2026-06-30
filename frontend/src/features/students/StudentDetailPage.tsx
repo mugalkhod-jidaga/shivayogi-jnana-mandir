@@ -132,6 +132,8 @@ export function StudentDetailPage() {
               <DetailField label="Blood group" value={student.bloodGroup?.value} />
               <DetailField label="Category" value={student.admissionCategory?.value} />
               <DetailField label="Aadhaar" value={student.aadhaarNumber} />
+              <DetailField label="SATS ID" value={student.satsId} />
+              <DetailField label="SATS transfer status" value={student.satsTransferStatus} />
               <DetailField label="Status reason" value={student.statusReason} />
             </dl>
           </section>
@@ -144,6 +146,10 @@ export function StudentDetailPage() {
               <DetailField label="Section" value={enrollment?.section?.value ?? null} />
               <DetailField label="Roll number" value={enrollment?.rollNumber} />
               <DetailField label="Previous school" value={enrollment?.previousSchool} />
+              <DetailField
+                label="Previous school address"
+                value={enrollment?.previousSchoolAddress}
+              />
               <DetailField label="Last class studied" value={enrollment?.lastClassStudied} />
             </dl>
           </section>
@@ -156,6 +162,26 @@ export function StudentDetailPage() {
               <DetailField label="Phone" value={emergencyContact?.phone} />
             </dl>
           </section>
+
+          {canViewFamily && student.socialDetails && (
+            <section className="rounded-lg border p-6">
+              <h2 className="text-lg font-medium">Social & caste details</h2>
+              <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <DetailField label="Religion" value={student.socialDetails.religion?.value} />
+                <DetailField
+                  label="Social category"
+                  value={student.socialDetails.socialCategory?.value}
+                />
+                <DetailField label="Caste" value={student.socialDetails.caste} />
+                <DetailField label="Sub-caste" value={student.socialDetails.subCaste} />
+                <DetailField label="RD number" value={student.socialDetails.rdNumber} />
+                <DetailField
+                  label="RD number (secondary)"
+                  value={student.socialDetails.rdNumberSecondary}
+                />
+              </dl>
+            </section>
+          )}
 
           {canViewFamily && student.familyDetails && (
             <section className="rounded-lg border p-6">

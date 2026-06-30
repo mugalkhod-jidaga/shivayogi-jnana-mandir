@@ -11,11 +11,23 @@ export type CurrentEnrollment = {
   id: string;
   rollNumber: string | null;
   previousSchool: string | null;
+  previousSchoolAddress: string | null;
   lastClassStudied: string | null;
   enrolledAt: string;
   academicYear: LookupRef & { isCurrent?: boolean };
   standard: LookupRef & { sortOrder?: number };
   section: LookupRef | null;
+};
+
+export type SatsTransferStatus = 'Pending' | 'Transferred' | 'NotApplicable';
+
+export type SocialDetails = {
+  religion?: LookupRef;
+  socialCategory?: LookupRef;
+  caste?: string | null;
+  subCaste?: string | null;
+  rdNumber?: string | null;
+  rdNumberSecondary?: string | null;
 };
 
 export type EmergencyContact = {
@@ -38,6 +50,8 @@ export type StudentSummary = {
   motherTongue: LookupRef;
   admissionDate: string;
   aadhaarNumber: string | null;
+  satsId: string | null;
+  satsTransferStatus: SatsTransferStatus | null;
   currentEnrollment: CurrentEnrollment | null;
   emergencyContacts: EmergencyContact[];
   status: StudentStatus;
@@ -62,6 +76,16 @@ export type FamilyDetails = {
 
 export type StudentDetail = StudentSummary & {
   familyDetails?: FamilyDetails | null;
+  socialDetails?: SocialDetails | null;
+};
+
+export type SocialDetailsPayload = {
+  religionId?: number;
+  socialCategoryId?: number;
+  caste?: string;
+  subCaste?: string;
+  rdNumber?: string;
+  rdNumberSecondary?: string;
 };
 
 export type AcademicPlacementPayload = {
@@ -70,12 +94,13 @@ export type AcademicPlacementPayload = {
   sectionId?: number;
   rollNumber: string;
   previousSchool?: string;
+  previousSchoolAddress?: string;
   lastClassStudied?: string;
   enrolledAt?: string;
 };
 
 export type CreateStudentPayload = {
-  admissionNumber: string;
+  admissionNumber?: string;
   firstName: string;
   lastName?: string;
   dob: string;
@@ -85,8 +110,11 @@ export type CreateStudentPayload = {
   admissionDate: string;
   motherTongueId?: number;
   aadhaarNumber?: string;
+  satsId?: string;
+  satsTransferStatus?: SatsTransferStatus;
   academicPlacement: AcademicPlacementPayload;
   emergencyContacts: EmergencyContact[];
+  socialDetails?: SocialDetailsPayload;
   familyDetails: FamilyDetails;
 };
 
@@ -100,8 +128,11 @@ export type UpdateStudentPayload = {
   admissionDate?: string;
   motherTongueId?: number | null;
   aadhaarNumber?: string | null;
+  satsId?: string | null;
+  satsTransferStatus?: SatsTransferStatus;
   academicPlacement?: Partial<AcademicPlacementPayload>;
   emergencyContacts?: EmergencyContact[];
+  socialDetails?: Partial<SocialDetailsPayload>;
   familyDetails?: Partial<FamilyDetails>;
 };
 

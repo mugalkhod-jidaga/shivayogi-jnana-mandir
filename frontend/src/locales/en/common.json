@@ -1,0 +1,33 @@
+{
+  "appName": "Shivayogi Jnana Mandir",
+  "appSubtitle": "Trust ERP",
+  "nav": {
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "documents": "Documents",
+    "import": "Bulk Import",
+    "staff": "Staff",
+    "lookups": "Lookups",
+    "auditLogs": "Audit Logs"
+  },
+  "actions": {
+    "signOut": "Sign out",
+    "cancel": "Cancel",
+    "save": "Save",
+    "apply": "Apply",
+    "search": "Search",
+    "add": "Add",
+    "view": "View",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "language": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ"
+  },
+  "status": {
+    "active": "Active",
+    "alumni": "Alumni",
+    "discontinued": "Discontinued"
+  }
+}

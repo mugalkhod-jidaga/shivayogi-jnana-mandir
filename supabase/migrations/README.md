@@ -7,6 +7,8 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 3. `003_bulk_insert_rpc.sql` — CSV bulk import RPC (Section 8.3)
 4. `004_academic_and_identity.sql` — academic lookups, enrollments, emergency contacts, identity fields
 5. `005_bulk_insert_extended.sql` — extended bulk RPC for new student fields
+6. `006_fix_deactivated_students_visibility.sql` — restore Alumni/Discontinued students to list queries
+7. `007_sats_social_admission_seq.sql` — SATS ID, social/caste details, SJM admission sequence, lookup i18n labels
 
 After migrations, insert the Phase 1 tenant (Section 5.4):
 

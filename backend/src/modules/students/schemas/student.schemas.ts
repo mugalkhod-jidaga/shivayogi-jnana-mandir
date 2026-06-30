@@ -1,9 +1,19 @@
 import { z } from 'zod';
-import { aadhaarSchema, dateInputSchema, dobInputSchema, phoneSchema } from '../../../utils/validators';
+import { aadhaarSchema, dateInputSchema, dobInputSchema, phoneSchema, satsIdSchema } from '../../../utils/validators';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const studentStatusEnum = z.enum(['Active', 'Alumni', 'Discontinued']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
+const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+
+export const socialDetailsSchema = z.object({
+  religionId: z.number().int().positive().optional(),
+  socialCategoryId: z.number().int().positive().optional(),
+  caste: z.string().trim().max(100).optional(),
+  subCaste: z.string().trim().max(100).optional(),
+  rdNumber: z.string().trim().max(50).optional(),
+  rdNumberSecondary: z.string().trim().max(50).optional(),
+});
 
 export const familyDetailsSchema = z.object({
   fatherName: z.string().trim().max(100).optional(),
@@ -32,12 +42,13 @@ export const academicPlacementSchema = z.object({
   sectionId: z.number().int().positive().optional(),
   rollNumber: z.string().trim().min(1).max(20),
   previousSchool: z.string().trim().max(255).optional(),
+  previousSchoolAddress: z.string().trim().max(2000).optional(),
   lastClassStudied: z.string().trim().max(100).optional(),
   enrolledAt: dateInputSchema.optional(),
 });
 
 export const createStudentSchema = z.object({
-  admissionNumber: z.string().trim().min(1).max(100),
+  admissionNumber: z.string().trim().min(1).max(100).optional(),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional(),
   dob: dobInputSchema,
@@ -47,8 +58,11 @@ export const createStudentSchema = z.object({
   admissionDate: dateInputSchema,
   motherTongueId: z.number().int().positive().optional(),
   aadhaarNumber: aadhaarSchema.optional(),
+  satsId: satsIdSchema.optional(),
+  satsTransferStatus: satsTransferStatusEnum.optional(),
   academicPlacement: academicPlacementSchema,
   emergencyContacts: z.array(emergencyContactSchema).min(1),
+  socialDetails: socialDetailsSchema.optional(),
   familyDetails: familyDetailsSchema,
 });
 
@@ -63,8 +77,11 @@ export const updateStudentSchema = z
     admissionDate: dateInputSchema.optional(),
     motherTongueId: z.number().int().positive().nullable().optional(),
     aadhaarNumber: aadhaarSchema.nullable().optional(),
+    satsId: satsIdSchema.nullable().optional(),
+    satsTransferStatus: satsTransferStatusEnum.optional(),
     academicPlacement: academicPlacementSchema.partial().optional(),
     emergencyContacts: z.array(emergencyContactSchema).min(1).optional(),
+    socialDetails: socialDetailsSchema.partial().optional(),
     status: studentStatusEnum.optional(),
     statusReason: z.string().trim().max(500).optional(),
     familyDetails: familyDetailsSchema.partial().optional(),
@@ -104,4 +121,5 @@ export type DeactivateStudentInput = z.infer<typeof deactivateStudentSchema>;
 export type FamilyDetailsInput = z.infer<typeof familyDetailsSchema>;
 export type EmergencyContactInput = z.infer<typeof emergencyContactSchema>;
 export type AcademicPlacementInput = z.infer<typeof academicPlacementSchema>;
+export type SocialDetailsInput = z.infer<typeof socialDetailsSchema>;
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;

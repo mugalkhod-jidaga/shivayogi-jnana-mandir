@@ -50,11 +50,20 @@ const emergencyContactFormSchema = z.object({
 const academicPlacementFormSchema = z.object({
   rollNumber: z.string().trim().min(1, 'Roll number is required').max(20),
   previousSchool: z.string().trim().max(255).optional(),
+  previousSchoolAddress: z.string().trim().max(2000).optional(),
   lastClassStudied: z.string().trim().max(100).optional(),
 });
 
+const socialDetailsFormSchema = z.object({
+  caste: z.string().trim().max(100).optional(),
+  subCaste: z.string().trim().max(100).optional(),
+  rdNumber: z.string().trim().max(50).optional(),
+  rdNumberSecondary: z.string().trim().max(50).optional(),
+});
+
+const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+
 export const createStudentFormSchema = z.object({
-  admissionNumber: z.string().trim().min(1, 'Admission number is required').max(100),
   firstName: z.string().trim().min(1, 'First name is required').max(100),
   lastName: z.string().trim().max(100).optional(),
   dob: dobFieldSchema,
@@ -66,8 +75,16 @@ export const createStudentFormSchema = z.object({
     .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
     .optional()
     .or(z.literal('')),
+  satsId: z
+    .string()
+    .trim()
+    .regex(/^\d{9}$/, 'SATS ID must be exactly 9 digits')
+    .optional()
+    .or(z.literal('')),
+  satsTransferStatus: satsTransferStatusEnum.optional(),
   academicPlacement: academicPlacementFormSchema,
   emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+  socialDetails: socialDetailsFormSchema.optional(),
   familyDetails: familyDetailsFormSchema,
 });
 
@@ -83,8 +100,16 @@ export const updateStudentFormSchema = z.object({
     .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
     .optional()
     .or(z.literal('')),
+  satsId: z
+    .string()
+    .trim()
+    .regex(/^\d{9}$/, 'SATS ID must be exactly 9 digits')
+    .optional()
+    .or(z.literal('')),
+  satsTransferStatus: satsTransferStatusEnum.optional(),
   academicPlacement: academicPlacementFormSchema,
   emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+  socialDetails: socialDetailsFormSchema.optional(),
   familyDetails: familyDetailsFormSchema,
 });
 
@@ -114,6 +139,8 @@ type LookupIds = {
   bloodGroupId?: string;
   admissionCategoryId?: string;
   motherTongueId?: string;
+  religionId?: string;
+  socialCategoryId?: string;
   academicYearId: string;
   standardId: string;
   sectionId?: string;
@@ -124,7 +151,6 @@ export function buildCreateStudentPayload(
   lookupIds: LookupIds,
 ) {
   return {
-    admissionNumber: values.admissionNumber,
     firstName: values.firstName,
     lastName: values.lastName || undefined,
     dob: values.dob,
@@ -136,16 +162,31 @@ export function buildCreateStudentPayload(
       : undefined,
     motherTongueId: lookupIds.motherTongueId ? Number(lookupIds.motherTongueId) : undefined,
     aadhaarNumber: values.aadhaarNumber?.trim() || undefined,
+    satsId: values.satsId?.trim() || undefined,
+    satsTransferStatus: values.satsTransferStatus,
     academicPlacement: {
       academicYearId: Number(lookupIds.academicYearId),
       standardId: Number(lookupIds.standardId),
       sectionId: lookupIds.sectionId ? Number(lookupIds.sectionId) : undefined,
       rollNumber: values.academicPlacement.rollNumber,
       previousSchool: values.academicPlacement.previousSchool || undefined,
+      previousSchoolAddress: values.academicPlacement.previousSchoolAddress || undefined,
       lastClassStudied: values.academicPlacement.lastClassStudied || undefined,
       enrolledAt: values.admissionDate,
     },
     emergencyContacts: mapEmergencyContacts(values.emergencyContacts),
+    socialDetails: values.socialDetails
+      ? {
+          religionId: lookupIds.religionId ? Number(lookupIds.religionId) : undefined,
+          socialCategoryId: lookupIds.socialCategoryId
+            ? Number(lookupIds.socialCategoryId)
+            : undefined,
+          caste: values.socialDetails.caste || undefined,
+          subCaste: values.socialDetails.subCaste || undefined,
+          rdNumber: values.socialDetails.rdNumber || undefined,
+          rdNumberSecondary: values.socialDetails.rdNumberSecondary || undefined,
+        }
+      : undefined,
     familyDetails: mapFamilyDetails(values.familyDetails),
   };
 }
@@ -167,12 +208,15 @@ export function buildUpdateStudentPayload(
       : null,
     motherTongueId: lookupIds.motherTongueId ? Number(lookupIds.motherTongueId) : null,
     aadhaarNumber: values.aadhaarNumber?.trim() || null,
+    satsId: values.satsId?.trim() || null,
+    satsTransferStatus: values.satsTransferStatus,
     academicPlacement: {
       academicYearId: Number(lookupIds.academicYearId),
       standardId: Number(lookupIds.standardId),
       sectionId: lookupIds.sectionId ? Number(lookupIds.sectionId) : null,
       rollNumber: values.academicPlacement.rollNumber,
       previousSchool: values.academicPlacement.previousSchool || null,
+      previousSchoolAddress: values.academicPlacement.previousSchoolAddress || null,
       lastClassStudied: values.academicPlacement.lastClassStudied || null,
       enrolledAt: values.admissionDate,
     },
@@ -181,6 +225,18 @@ export function buildUpdateStudentPayload(
 
   if (includeFamily) {
     payload.familyDetails = mapFamilyDetails(values.familyDetails);
+    if (values.socialDetails) {
+      payload.socialDetails = {
+        religionId: lookupIds.religionId ? Number(lookupIds.religionId) : null,
+        socialCategoryId: lookupIds.socialCategoryId
+          ? Number(lookupIds.socialCategoryId)
+          : null,
+        caste: values.socialDetails.caste || null,
+        subCaste: values.socialDetails.subCaste || null,
+        rdNumber: values.socialDetails.rdNumber || null,
+        rdNumberSecondary: values.socialDetails.rdNumberSecondary || null,
+      };
+    }
   }
 
   return payload;
@@ -212,5 +268,13 @@ export const defaultEmergencyContact: CreateStudentFormValues['emergencyContacts
 export const defaultAcademicPlacement: CreateStudentFormValues['academicPlacement'] = {
   rollNumber: '',
   previousSchool: '',
+  previousSchoolAddress: '',
   lastClassStudied: '',
+};
+
+export const defaultSocialDetails: NonNullable<CreateStudentFormValues['socialDetails']> = {
+  caste: '',
+  subCaste: '',
+  rdNumber: '',
+  rdNumberSecondary: '',
 };

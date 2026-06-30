@@ -19,6 +19,8 @@ export const lookupKeys = {
   sections: ['lookups', 'sections'] as const,
   academicYears: ['lookups', 'academic-years'] as const,
   languages: ['lookups', 'languages'] as const,
+  religions: ['lookups', 'religions'] as const,
+  socialCategories: ['lookups', 'social-categories'] as const,
 };
 
 export function useLookups() {
@@ -74,6 +76,20 @@ export function useLookups() {
     staleTime: LOOKUPS_STALE_TIME,
   });
 
+  const religionsQuery = useQuery({
+    queryKey: lookupKeys.religions,
+    queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/religions'),
+    enabled,
+    staleTime: LOOKUPS_STALE_TIME,
+  });
+
+  const socialCategoriesQuery = useQuery({
+    queryKey: lookupKeys.socialCategories,
+    queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/social-categories'),
+    enabled,
+    staleTime: LOOKUPS_STALE_TIME,
+  });
+
   const isLoading =
     bloodGroupsQuery.isLoading ||
     admissionCategoriesQuery.isLoading ||
@@ -81,7 +97,9 @@ export function useLookups() {
     academicStandardsQuery.isLoading ||
     sectionsQuery.isLoading ||
     academicYearsQuery.isLoading ||
-    languagesQuery.isLoading;
+    languagesQuery.isLoading ||
+    religionsQuery.isLoading ||
+    socialCategoriesQuery.isLoading;
 
   const isError =
     bloodGroupsQuery.isError ||
@@ -90,7 +108,9 @@ export function useLookups() {
     academicStandardsQuery.isError ||
     sectionsQuery.isError ||
     academicYearsQuery.isError ||
-    languagesQuery.isError;
+    languagesQuery.isError ||
+    religionsQuery.isError ||
+    socialCategoriesQuery.isError;
 
   const currentAcademicYear =
     academicYearsQuery.data?.find((year) => year.isCurrent) ?? academicYearsQuery.data?.[0] ?? null;
@@ -103,6 +123,8 @@ export function useLookups() {
     sections: sectionsQuery.data ?? [],
     academicYears: academicYearsQuery.data ?? [],
     languages: languagesQuery.data ?? [],
+    religions: religionsQuery.data ?? [],
+    socialCategories: socialCategoriesQuery.data ?? [],
     currentAcademicYear,
     isLoading,
     isError,
@@ -113,6 +135,8 @@ export function useLookups() {
       academicStandardsQuery.error ??
       sectionsQuery.error ??
       academicYearsQuery.error ??
-      languagesQuery.error,
+      languagesQuery.error ??
+      religionsQuery.error ??
+      socialCategoriesQuery.error,
   };
 }
