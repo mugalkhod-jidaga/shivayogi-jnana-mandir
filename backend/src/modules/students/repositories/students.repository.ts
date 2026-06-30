@@ -477,6 +477,23 @@ export class StudentsRepository extends BaseRepository {
     return (data ?? []).map((row) => row.standard_id as number);
   }
 
+  async listStudentIdsByStandards(tenantId: number, standardIds: number[]): Promise<string[]> {
+    if (standardIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from('student_enrollments')
+      .select('student_id, students!inner(tenant_id, deleted_at)')
+      .eq('is_current', true)
+      .is('deleted_at', null)
+      .in('standard_id', standardIds)
+      .eq('students.tenant_id', tenantId)
+      .is('students.deleted_at', null);
+
+    if (error) throw new AppError(500, error.message);
+    const ids = new Set((data ?? []).map((row) => row.student_id as string));
+    return [...ids];
+  }
+
   async setAssignedStandardIds(userId: string, standardIds: number[]) {
     const { error: deleteError } = await supabase
       .from('user_standard_assignments')

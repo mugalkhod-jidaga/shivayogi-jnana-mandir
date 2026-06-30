@@ -547,6 +547,53 @@ class LookupRepository {
 
     return serializeTenantLookup(data);
   }
+
+  async listRemarkTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_remark_types')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listRemarkCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_remark_categories')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listHostelAttendanceStatuses(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_hostel_attendance_statuses')
+      .select('id, tenant_id, value, labels, is_active, counts_as_present')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      ...serializeTenantLookup(row as TenantLookupRow, locale),
+      countsAsPresent: (row as { counts_as_present: boolean }).counts_as_present,
+    }));
+  }
+
+  async listMedicalRecordTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_medical_record_types')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
 }
 
 export const lookupRepository = new LookupRepository();

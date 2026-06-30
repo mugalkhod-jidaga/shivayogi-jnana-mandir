@@ -10,6 +10,9 @@ import enImport from '@/locales/en/import.json';
 import enLookups from '@/locales/en/lookups.json';
 import enStaff from '@/locales/en/staff.json';
 import enStudents from '@/locales/en/students.json';
+import enRemarks from '@/locales/en/remarks.json';
+import enHostel from '@/locales/en/hostel.json';
+import enMedical from '@/locales/en/medical.json';
 import knAudit from '@/locales/kn/audit.json';
 import knAuth from '@/locales/kn/auth.json';
 import knCommon from '@/locales/kn/common.json';
@@ -19,6 +22,9 @@ import knImport from '@/locales/kn/import.json';
 import knLookups from '@/locales/kn/lookups.json';
 import knStaff from '@/locales/kn/staff.json';
 import knStudents from '@/locales/kn/students.json';
+import knRemarks from '@/locales/kn/remarks.json';
+import knHostel from '@/locales/kn/hostel.json';
+import knMedical from '@/locales/kn/medical.json';
 
 export const SUPPORTED_LOCALES = ['en', 'kn'] as const;
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -33,6 +39,9 @@ const namespaces = [
   'documents',
   'import',
   'audit',
+  'remarks',
+  'hostel',
+  'medical',
 ] as const;
 
 void i18n
@@ -50,6 +59,9 @@ void i18n
         documents: enDocuments,
         import: enImport,
         audit: enAudit,
+        remarks: enRemarks,
+        hostel: enHostel,
+        medical: enMedical,
       },
       kn: {
         common: knCommon,
@@ -61,6 +73,9 @@ void i18n
         documents: knDocuments,
         import: knImport,
         audit: knAudit,
+        remarks: knRemarks,
+        hostel: knHostel,
+        medical: knMedical,
       },
     },
     fallbackLng: 'en',

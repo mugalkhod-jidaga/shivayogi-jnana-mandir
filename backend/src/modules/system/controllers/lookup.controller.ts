@@ -87,6 +87,34 @@ export const lookupController = {
     res.json({ success: true, data });
   },
 
+  async listRemarkTypes(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listRemarkTypes(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listRemarkCategories(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listRemarkCategories(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listHostelAttendanceStatuses(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listHostelAttendanceStatuses(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listMedicalRecordTypes(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listMedicalRecordTypes(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
   async createAdmissionCategory(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await lookupService.createAdmissionCategory(

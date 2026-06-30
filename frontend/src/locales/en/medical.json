@@ -1,0 +1,26 @@
+{
+  "loading": "Loading medical records…",
+  "empty": "No medical records for this student yet.",
+  "ongoing": "Ongoing",
+  "actions": {
+    "addRecord": "Add record",
+    "cancel": "Cancel",
+    "saveRecord": "Save record"
+  },
+  "form": {
+    "type": "Record type",
+    "title": "Title",
+    "description": "Description",
+    "recordedOn": "Recorded on",
+    "isOngoing": "Ongoing condition",
+    "selectType": "Select type"
+  },
+  "errors": {
+    "createFailed": "Failed to create medical record"
+  },
+  "detail": {
+    "tabs": {
+      "medical": "Medical"
+    }
+  }
+}

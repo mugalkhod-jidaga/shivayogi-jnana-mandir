@@ -163,3 +163,27 @@ lookupRoutes.patch(
   validateZod(updateLookupValueSchema),
   asyncHandler(lookupController.updateLanguage),
 );
+
+lookupRoutes.get(
+  '/remark-types',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listRemarkTypes),
+);
+
+lookupRoutes.get(
+  '/remark-categories',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listRemarkCategories),
+);
+
+lookupRoutes.get(
+  '/hostel-attendance-statuses',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listHostelAttendanceStatuses),
+);
+
+lookupRoutes.get(
+  '/medical-record-types',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listMedicalRecordTypes),
+);

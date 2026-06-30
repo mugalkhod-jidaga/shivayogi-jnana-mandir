@@ -1,4 +1,4 @@
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { Select } from '@/components/ui/select';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { useStudentsList } from '@/hooks/useStudents';
 import { formatDobDisplay } from '@/lib/date';
+import { pdfExports } from '@/lib/pdfDownload';
 import type { StudentStatus } from '@/types/student';
 
 function formatName(firstName: string, lastName: string | null) {
@@ -36,6 +37,7 @@ export function StudentListPage() {
   const [standardFilter, setStandardFilter] = useState(standardIdParam);
   const [academicYearFilter, setAcademicYearFilter] = useState(academicYearIdParam);
   const [categoryFilter, setCategoryFilter] = useState(categoryIdParam);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     setSearchInput(searchParam);
@@ -78,14 +80,38 @@ export function StudentListPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={t('list.title')} description={t('list.description')}>
-        <RequirePermission permission="students:create">
-          <Button asChild>
-            <Link to="/students/new">
-              <Plus className="size-4" />
-              {t('list.addStudent')}
-            </Link>
-          </Button>
-        </RequirePermission>
+        <div className="flex gap-2">
+          <RequirePermission permission="exports:pdf">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pdfLoading}
+              onClick={() => {
+                setPdfLoading(true);
+                void pdfExports
+                  .students({
+                    search: searchParam || undefined,
+                    status: statusParam,
+                    standardId: standardIdParam || undefined,
+                    academicYearId: academicYearIdParam || undefined,
+                    admissionCategoryId: categoryIdParam || undefined,
+                  })
+                  .finally(() => setPdfLoading(false));
+              }}
+            >
+              <Download className="size-4" />
+              PDF
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="students:create">
+            <Button asChild>
+              <Link to="/students/new">
+                <Plus className="size-4" />
+                {t('list.addStudent')}
+              </Link>
+            </Button>
+          </RequirePermission>
+        </div>
       </PageHeader>
 
       <form

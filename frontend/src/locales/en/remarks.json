@@ -1,0 +1,59 @@
+{
+  "title": "Student Remarks",
+  "description": "Track positive, negative, and observation notes for students.",
+  "loading": "Loading remarks…",
+  "empty": "No remarks found for the selected filters.",
+  "emptyStudent": "No remarks recorded for this student yet.",
+  "addFromStudent": "Add remarks from a student's profile page.",
+  "stats": {
+    "total": "Total",
+    "positive": "Positive",
+    "negative": "Negative",
+    "observation": "Observation"
+  },
+  "filters": {
+    "allTypes": "All types",
+    "allCategories": "All categories",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days"
+  },
+  "columns": {
+    "date": "Date",
+    "student": "Student",
+    "type": "Type",
+    "category": "Category",
+    "title": "Title"
+  },
+  "actions": {
+    "downloadPdf": "Download PDF",
+    "addRemark": "Add remark",
+    "cancel": "Cancel",
+    "saveRemark": "Save remark"
+  },
+  "form": {
+    "type": "Remark type",
+    "category": "Category",
+    "severity": "Severity",
+    "title": "Title",
+    "description": "Description",
+    "selectType": "Select type",
+    "selectCategory": "Select category",
+    "selectSeverity": "Select severity"
+  },
+  "severity": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "byAuthor": "By {{name}}",
+  "pagination": "Page {{page}} of {{totalPages}} ({{total}} total)",
+  "errors": {
+    "createFailed": "Failed to create remark"
+  },
+  "detail": {
+    "tabs": {
+      "remarks": "Remarks"
+    }
+  }
+}

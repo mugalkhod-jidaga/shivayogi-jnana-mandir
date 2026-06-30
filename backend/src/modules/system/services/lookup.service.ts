@@ -53,6 +53,22 @@ export const lookupService = {
     return lookupRepository.listLanguages(tenantId, locale);
   },
 
+  listRemarkTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listRemarkTypes(tenantId, locale);
+  },
+
+  listRemarkCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listRemarkCategories(tenantId, locale);
+  },
+
+  listHostelAttendanceStatuses(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listHostelAttendanceStatuses(tenantId, locale);
+  },
+
+  listMedicalRecordTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listMedicalRecordTypes(tenantId, locale);
+  },
+
   createAdmissionCategory(tenantId: number, input: CreateLookupValueInput) {
     return lookupRepository.createAdmissionCategory(tenantId, input.value, input.labelKn);
   },

@@ -1,0 +1,52 @@
+{
+  "title": "Hostel",
+  "description": "Manage hostel blocks, rooms, and student room allocations.",
+  "actions": {
+    "attendance": "Hostel attendance",
+    "backToHostel": "Back to hostel",
+    "backToAttendance": "Back to sessions"
+  },
+  "blocks": {
+    "title": "Blocks",
+    "namePlaceholder": "Block name (e.g. Boys Block A)"
+  },
+  "rooms": {
+    "title": "Rooms",
+    "numberPlaceholder": "Room number",
+    "add": "Add room",
+    "capacity": "Capacity {{count}}",
+    "selectBlock": "Select or create a block to manage rooms."
+  },
+  "allocations": {
+    "title": "Active allocations",
+    "studentId": "Student ID (UUID)",
+    "room": "Room",
+    "selectRoom": "Select room",
+    "from": "From date",
+    "assign": "Assign room",
+    "columns": {
+      "student": "Student",
+      "block": "Block",
+      "room": "Room",
+      "from": "From"
+    }
+  },
+  "attendance": {
+    "title": "Hostel attendance",
+    "description": "Record daily residential attendance (not school attendance).",
+    "date": "Date",
+    "notes": "Session notes",
+    "createSession": "Create session",
+    "loading": "Loading sessions…",
+    "allBlocks": "All blocks",
+    "mark": "Mark attendance",
+    "markTitle": "Mark attendance",
+    "markDescription": "Set status for each allocated hostel student.",
+    "save": "Save attendance",
+    "columns": {
+      "student": "Student",
+      "room": "Room",
+      "status": "Status"
+    }
+  }
+}

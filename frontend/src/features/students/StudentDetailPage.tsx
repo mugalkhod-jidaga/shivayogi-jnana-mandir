@@ -1,4 +1,4 @@
-import { Pencil } from 'lucide-react';
+import { Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
@@ -8,6 +8,8 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { StudentDocumentsTab } from '@/features/documents/StudentDocumentsTab';
+import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
+import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
@@ -17,7 +19,9 @@ import { formatDobDisplay } from '@/lib/date';
 import { genderLabel, parentStatusLabel, satsStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 
-type TabKey = 'profile' | 'documents' | 'avatar';
+import { pdfExports } from '@/lib/pdfDownload';
+
+type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'medical';
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -36,13 +40,30 @@ export function StudentDetailPage() {
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
   const tabParam = searchParams.get('tab');
-  const [tab, setTab] = useState<TabKey>(() =>
-    tabParam === 'documents' || tabParam === 'avatar' ? tabParam : 'profile',
-  );
+  const [tab, setTab] = useState<TabKey>(() => {
+    if (
+      tabParam === 'documents' ||
+      tabParam === 'avatar' ||
+      tabParam === 'remarks' ||
+      tabParam === 'medical'
+    ) {
+      return tabParam;
+    }
+    return 'profile';
+  });
+  const { t: tRemarks } = useTranslation('remarks');
+  const { t: tMedical } = useTranslation('medical');
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
 
   useEffect(() => {
-    if (tabParam === 'documents' || tabParam === 'avatar' || tabParam === 'profile') {
+    if (
+      tabParam === 'documents' ||
+      tabParam === 'avatar' ||
+      tabParam === 'profile' ||
+      tabParam === 'remarks' ||
+      tabParam === 'medical'
+    ) {
       setTab(tabParam);
     }
   }, [tabParam]);
@@ -67,6 +88,12 @@ export function StudentDetailPage() {
     ...(hasPermission('documents:view')
       ? [{ key: 'documents' as const, label: t('detail.tabs.documents') }]
       : []),
+    ...(hasPermission('remarks:read')
+      ? [{ key: 'remarks' as const, label: tRemarks('detail.tabs.remarks') }]
+      : []),
+    ...(hasPermission('medical:read')
+      ? [{ key: 'medical' as const, label: tMedical('detail.tabs.medical') }]
+      : []),
     { key: 'avatar', label: t('detail.tabs.photo') },
   ];
 
@@ -90,6 +117,21 @@ export function StudentDetailPage() {
                   <Pencil className="size-4" />
                   {t('detail.actions.edit')}
                 </Link>
+              </Button>
+            </RequirePermission>
+            <RequirePermission permission="exports:pdf">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pdfLoading}
+                onClick={() => {
+                  setPdfLoading(true);
+                  void pdfExports.studentDetail(student.id).finally(() => setPdfLoading(false));
+                }}
+              >
+                <Download className="size-4" />
+                PDF
               </Button>
             </RequirePermission>
             <RequirePermission permission="students:soft_delete">
@@ -267,6 +309,14 @@ export function StudentDetailPage() {
 
       {tab === 'documents' && hasPermission('documents:view') && (
         <StudentDocumentsTab studentId={student.id} />
+      )}
+
+      {tab === 'remarks' && hasPermission('remarks:read') && (
+        <StudentRemarksTab studentId={student.id} />
+      )}
+
+      {tab === 'medical' && hasPermission('medical:read') && (
+        <StudentMedicalTab studentId={student.id} />
       )}
 
       {tab === 'avatar' && (
