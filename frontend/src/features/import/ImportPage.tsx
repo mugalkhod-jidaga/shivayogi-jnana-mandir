@@ -1,5 +1,6 @@
 import { CheckCircle2, FileSpreadsheet, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/PageHeader';
@@ -15,17 +16,12 @@ type Step = 'upload' | 'preview' | 'done';
 const ACCEPTED_EXTENSIONS = '.csv,.xlsx,.xls';
 const SAMPLE_URL = '/samples/sample-students.csv';
 
-const steps: { key: Step; label: string }[] = [
-  { key: 'upload', label: 'Upload' },
-  { key: 'preview', label: 'Preview' },
-  { key: 'done', label: 'Done' },
-];
-
 function formatName(firstName: string, lastName?: string) {
   return [firstName, lastName].filter(Boolean).join(' ');
 }
 
 export function ImportPage() {
+  const { t } = useTranslation('import');
   const inputRef = useRef<HTMLInputElement>(null);
   const parse = useMigrationParse();
   const commit = useMigrationCommit();
@@ -40,7 +36,7 @@ export function ImportPage() {
 
     const isAllowed = /\.(csv|xlsx|xls)$/i.test(file.name);
     if (!isAllowed) {
-      toast.error('Only .csv, .xlsx, and .xls files are allowed');
+      toast.error(t('upload.invalidType'));
       return;
     }
 
@@ -49,9 +45,9 @@ export function ImportPage() {
       setFileName(file.name);
       setParseResult(result);
       setStep('preview');
-      toast.success(`Parsed ${result.validRows} valid row(s)`);
+      toast.success(t('upload.parseSuccess', { count: result.validRows }));
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Could not parse file';
+      const message = error instanceof ApiError ? error.message : t('upload.parseError');
       toast.error(message);
     }
   };
@@ -63,9 +59,9 @@ export function ImportPage() {
       const { inserted } = await commit.mutateAsync(toCommitRows(parseResult.preview));
       setInsertedCount(inserted);
       setStep('done');
-      toast.success(`Imported ${inserted} student(s)`);
+      toast.success(t('done.imported', { count: inserted }));
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Import failed';
+      const message = error instanceof ApiError ? error.message : t('commitError');
       toast.error(message);
     }
   };
@@ -78,14 +74,17 @@ export function ImportPage() {
     if (inputRef.current) inputRef.current.value = '';
   };
 
+  const steps: { key: Step; label: string }[] = [
+    { key: 'upload', label: t('steps.upload') },
+    { key: 'preview', label: t('steps.preview') },
+    { key: 'done', label: t('steps.done') },
+  ];
+
   const stepIndex = steps.findIndex((item) => item.key === step);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Bulk Import"
-        description="Upload a CSV or spreadsheet, review validation errors, then commit student records."
-      />
+      <PageHeader title={t('title')} description={t('description')} />
 
       <ol className="flex gap-4 border-b pb-4">
         {steps.map((item, index) => (
@@ -129,7 +128,7 @@ export function ImportPage() {
               download="sample-students.csv"
               className="text-sm font-medium text-primary hover:underline"
             >
-              Download sample CSV
+              {t('upload.sampleLink')}
             </a>
             <input
               ref={inputRef}
@@ -230,16 +229,14 @@ export function ImportPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={reset}>
-              Upload different file
+              {t('preview.back')}
             </Button>
             <Button
               type="button"
               disabled={parseResult.preview.length === 0 || commit.isPending}
               onClick={() => void handleCommit()}
             >
-              {commit.isPending
-                ? 'Importing…'
-                : `Import ${parseResult.preview.length} student(s)`}
+              {commit.isPending ? t('preview.committing') : t('preview.commit')}
             </Button>
           </div>
         </div>
@@ -248,16 +245,16 @@ export function ImportPage() {
       {step === 'done' && (
         <div className="rounded-lg border p-8 text-center">
           <CheckCircle2 className="mx-auto size-12 text-emerald-600" />
-          <h2 className="mt-4 text-lg font-medium">Import complete</h2>
+          <h2 className="mt-4 text-lg font-medium">{t('done.title')}</h2>
           <p className="mt-2 text-muted-foreground">
-            Successfully inserted {insertedCount} student record(s).
+            {t('done.imported', { count: insertedCount })}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button type="button" variant="outline" onClick={reset}>
-              Import another file
+              {t('done.importAnother')}
             </Button>
             <Button asChild>
-              <Link to="/students">View students</Link>
+              <Link to="/students">{t('done.viewStudents')}</Link>
             </Button>
           </div>
         </div>

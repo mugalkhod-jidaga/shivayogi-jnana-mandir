@@ -54,11 +54,11 @@ export const lookupService = {
   },
 
   createAdmissionCategory(tenantId: number, input: CreateLookupValueInput) {
-    return lookupRepository.createAdmissionCategory(tenantId, input.value);
+    return lookupRepository.createAdmissionCategory(tenantId, input.value, input.labelKn);
   },
 
   createDocumentType(tenantId: number, input: CreateLookupValueInput) {
-    return lookupRepository.createDocumentType(tenantId, input.value);
+    return lookupRepository.createDocumentType(tenantId, input.value, input.labelKn);
   },
 
   createAcademicStandard(tenantId: number, input: CreateAcademicStandardInput) {

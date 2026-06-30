@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Lookups",
+    "description": "Manage tenant-specific dropdown values for student forms and document uploads.",
+    "errorTitle": "Could not load lookups",
+    "errorDescription": "Check that the backend is running and you are signed in."
+  },
+  "tabs": {
+    "standards": "Standards",
+    "sections": "Sections",
+    "languages": "Languages",
+    "categories": "Admission categories",
+    "documentTypes": "Document types"
+  },
+  "panels": {
+    "standards": {
+      "title": "Academic standards",
+      "singular": "Standard",
+      "description": "Class levels used for enrollment (e.g. 1–10, LKG, UKG)."
+    },
+    "sections": {
+      "title": "Sections",
+      "singular": "Section",
+      "description": "Optional class sections (A, B, …). Activate when the school uses sections."
+    },
+    "languages": {
+      "title": "Languages",
+      "singular": "Language",
+      "description": "Mother tongue options on the student form."
+    },
+    "categories": {
+      "title": "Admission categories",
+      "singular": "Admission category",
+      "description": "Used on the student form. Blood groups are global and managed separately."
+    },
+    "documentTypes": {
+      "title": "Document types",
+      "singular": "Document type",
+      "description": "Used when uploading student verification documents."
+    }
+  },
+  "admin": {
+    "add": "Add",
+    "adding": "Adding…",
+    "noValues": "No active values yet.",
+    "columns": {
+      "name": "Name",
+      "nameKn": "Kannada label",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "active": "Active",
+    "deactivate": "Deactivate"
+  },
+  "addDialog": {
+    "title": "Add {{label}}",
+    "description": "New values appear in student and document forms after the list refreshes.",
+    "nameEn": "Name (English)",
+    "nameKn": "Name (Kannada)",
+    "nameKnHelp": "Optional. Shown when the UI language is Kannada.",
+    "valueRequired": "Value is required",
+    "success": "{{label}} added",
+    "error": "Could not add {{label}}"
+  },
+  "deactivateDialog": {
+    "title": "Deactivate {{label}}",
+    "description": "Deactivate \"{{value}}\"? It will no longer appear in dropdowns.",
+    "success": "{{label}} deactivated",
+    "error": "Could not deactivate {{label}}"
+  }
+}

@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useResetStaffPassword } from '@/hooks/useStaff';
 import { ApiError } from '@/lib/api';
@@ -18,6 +19,8 @@ export function ResetStaffPasswordDialog({
   onOpenChange,
   onReset,
 }: ResetStaffPasswordDialogProps) {
+  const { t } = useTranslation('staff');
+  const { t: tc } = useTranslation();
   const resetPassword = useResetStaffPassword();
 
   if (!open) return null;
@@ -27,10 +30,9 @@ export function ResetStaffPasswordDialog({
       const { meta } = await resetPassword.mutateAsync(staffId);
       onOpenChange(false);
       onReset(staffName, meta.tempPassword);
-      toast.success('Password reset');
+      toast.success(t('resetPassword.success'));
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Could not reset password';
+      const message = error instanceof ApiError ? error.message : t('resetPassword.error');
       toast.error(message);
     }
   };
@@ -38,18 +40,17 @@ export function ResetStaffPasswordDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h2 className="text-lg font-semibold">Reset password</h2>
+        <h2 className="text-lg font-semibold">{t('resetPassword.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Generate a new temporary password for {staffName}? It will be shown once and they must
-          change it on next login.
+          {t('resetPassword.description', { name: staffName })}
         </p>
 
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button type="button" disabled={resetPassword.isPending} onClick={() => void handleConfirm()}>
-            {resetPassword.isPending ? 'Resetting…' : 'Reset password'}
+            {resetPassword.isPending ? t('resetPassword.resetting') : t('resetPassword.confirm')}
           </Button>
         </div>
       </div>

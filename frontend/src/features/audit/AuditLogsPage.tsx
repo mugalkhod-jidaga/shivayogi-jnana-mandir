@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,8 @@ function formatMetadata(metadata: unknown) {
 }
 
 export function AuditLogsPage() {
+  const { t } = useTranslation('audit');
+  const { t: tc } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -61,10 +64,7 @@ export function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Audit Logs"
-        description="Search and review system activity across the tenant."
-      />
+      <PageHeader title={t('title')} description={t('description')} />
 
       <form
         className="flex gap-2"
@@ -78,21 +78,19 @@ export function AuditLogsPage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Search by entity or action type"
+            placeholder={t('searchPlaceholder')}
             className="pl-9"
           />
         </div>
-        <Button type="submit">Search</Button>
+        <Button type="submit">{tc('actions.search')}</Button>
       </form>
 
-      {isLoading && <p className="text-muted-foreground">Loading audit logs…</p>}
+      {isLoading && <p className="text-muted-foreground">{t('loading')}</p>}
 
-      {isError && (
-        <p className="text-destructive">Could not load audit logs. Try again later.</p>
-      )}
+      {isError && <p className="text-destructive">{t('error')}</p>}
 
       {!isLoading && !isError && logs.length === 0 && (
-        <p className="text-muted-foreground">No audit log entries match this search.</p>
+        <p className="text-muted-foreground">{t('noResults')}</p>
       )}
 
       {!isLoading && !isError && logs.length > 0 && (
@@ -100,12 +98,12 @@ export function AuditLogsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-left">
-                <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium">Entity</th>
-                <th className="px-4 py-3 font-medium">Action</th>
-                <th className="px-4 py-3 font-medium">Entity ID</th>
-                <th className="px-4 py-3 font-medium">IP</th>
-                <th className="px-4 py-3 font-medium">Details</th>
+                <th className="px-4 py-3 font-medium">{t('columns.timestamp')}</th>
+                <th className="px-4 py-3 font-medium">{t('columns.entity')}</th>
+                <th className="px-4 py-3 font-medium">{t('columns.action')}</th>
+                <th className="px-4 py-3 font-medium">{t('columns.entityId')}</th>
+                <th className="px-4 py-3 font-medium">{t('columns.ip')}</th>
+                <th className="px-4 py-3 font-medium">{t('columns.metadata')}</th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +127,7 @@ export function AuditLogsPage() {
       {meta && meta.total > meta.limit && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {meta.page} of {totalPages} · {meta.total} total
+            {t('pageOf', { page: meta.page, totalPages, total: meta.total })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -139,7 +137,7 @@ export function AuditLogsPage() {
               disabled={meta.page <= 1}
               onClick={() => goToPage(meta.page - 1)}
             >
-              Previous
+              {tc('actions.previous')}
             </Button>
             <Button
               type="button"
@@ -148,7 +146,7 @@ export function AuditLogsPage() {
               disabled={meta.page >= totalPages}
               onClick={() => goToPage(meta.page + 1)}
             >
-              Next
+              {tc('actions.next')}
             </Button>
           </div>
         </div>

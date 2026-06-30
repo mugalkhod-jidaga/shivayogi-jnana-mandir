@@ -14,15 +14,14 @@ import { SocialDetailsFields } from '@/features/students/components/SocialDetail
 import {
   buildCreateStudentPayload,
   buildUpdateStudentPayload,
-  createStudentFormSchema,
   defaultAcademicPlacement,
   defaultEmergencyContact,
   defaultFamilyDetails,
   defaultSocialDetails,
-  updateStudentFormSchema,
   type CreateStudentFormValues,
   type UpdateStudentFormValues,
 } from '@/features/students/schemas/studentForm.schema';
+import { useStudentFormSchemas } from '@/hooks/useStudentFormSchemas';
 import { useLookups } from '@/hooks/useLookups';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useCreateStudent, useNextAdmissionNumber, useStudent, useUpdateStudent } from '@/hooks/useStudent';
@@ -39,6 +38,7 @@ export function StudentFormPage() {
   const { hasPermission } = usePermissions();
   const canViewFamily = hasPermission('students:view_sensitive_data');
   const { currentAcademicYear } = useLookups();
+  const { createStudentFormSchema, updateStudentFormSchema } = useStudentFormSchemas();
 
   const { data: student, isLoading } = useStudent(isEdit ? id : undefined);
   const { data: nextAdmission, isLoading: isLoadingAdmissionNumber } = useNextAdmissionNumber(

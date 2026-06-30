@@ -1,0 +1,59 @@
+{
+  "queue": {
+    "title": "Documents",
+    "description": "Review uploaded documents across students. Finance users only see Income Certificate and BPL Card.",
+    "searchPlaceholder": "Search by student name or admission number",
+    "loading": "Loading documents…",
+    "error": "Could not load document queue.",
+    "noResults": "No documents match this filter.",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "filters": {
+      "pendingReview": "Pending review",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "renewalNeeded": "Renewal needed",
+      "all": "All"
+    },
+    "columns": {
+      "student": "Student",
+      "type": "Type",
+      "status": "Status",
+      "uploaded": "Uploaded",
+      "file": "File",
+      "actions": "Actions"
+    }
+  },
+  "studentTab": {
+    "title": "Documents",
+    "financeNote": "Finance role users can only view Income Certificate and BPL Card.",
+    "loading": "Loading documents…",
+    "error": "Could not load documents.",
+    "empty": "No documents uploaded yet.",
+    "columns": {
+      "type": "Type",
+      "status": "Status",
+      "uploaded": "Uploaded",
+      "expires": "Expires",
+      "actions": "Actions"
+    }
+  },
+  "upload": {
+    "title": "Upload document",
+    "type": "Document type",
+    "file": "File",
+    "submit": "Upload",
+    "submitting": "Uploading…",
+    "success": "Document uploaded",
+    "error": "Could not upload document"
+  },
+  "actions": {
+    "download": "Download",
+    "verify": "Verify",
+    "reject": "Reject",
+    "renewalNeeded": "Renewal needed",
+    "verifySuccess": "Document verified",
+    "rejectSuccess": "Document rejected",
+    "renewalSuccess": "Marked as renewal needed",
+    "error": "Action failed"
+  }
+}

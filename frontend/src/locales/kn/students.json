@@ -96,5 +96,62 @@
     "pending": "ಬಾಕಿ",
     "transferred": "ವರ್ಗಾಯಿಸಲಾಗಿದೆ",
     "notApplicable": "ಅನ್ವಯಿಸುವುದಿಲ್ಲ"
+  },
+  "detail": {
+    "admissionDescription": "ಪ್ರವೇಶ # {{admissionNumber}}",
+    "loading": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "tabs": {
+      "profile": "ಪ್ರೊಫೈಲ್",
+      "documents": "ದಾಖಲೆಗಳು",
+      "photo": "ಫೋಟೋ"
+    },
+    "actions": {
+      "edit": "ಸಂಪಾದಿಸಿ",
+      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+    },
+    "fields": {
+      "category": "ವರ್ಗ",
+      "statusReason": "ಸ್ಥಿತಿ ಕಾರಣ",
+      "name": "ಹೆಸರು",
+      "phone": "ಫೋನ್",
+      "father": "ತಂದೆ",
+      "mother": "ತಾಯಿ",
+      "guardian": "ರಕ್ಷಕ",
+      "annualIncome": "ವಾರ್ಷಿಕ ಆದಾಯ"
+    },
+    "hiddenFamily": {
+      "title": "ಕುಟುಂಬ ವಿವರ ಮರೆಮಾಡಲಾಗಿದೆ",
+      "description": "ನಿಮ್ಮ ಪಾತ್ರವು ಮೂಲ ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಮಾತ್ರ ನೋಡಬಹುದು. ಕುಟುಂಬ ಮತ್ತು ಆದಾಯ ಮಾಹಿತಿ ತೋರಿಸಲಾಗುವುದಿಲ್ಲ."
+    }
+  },
+  "deactivate": {
+    "title": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ಬದಲಾಯಿಸಿ",
+    "description": "{{name}} ಗಾಗಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಿ. ಈ ಕ್ರಿಯೆಯನ್ನು ಆಡಿಟ್ ಲಾಗ್‌ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗುತ್ತದೆ.",
+    "newStatus": "ಹೊಸ ಸ್ಥಿತಿ",
+    "reason": "ಕಾರಣ",
+    "success": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    "error": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ"
+  },
+  "validation": {
+    "dateRequired": "ದಿನಾಂಕ ಅಗತ್ಯ",
+    "invalidDate": "DD/MM/YYYY ಸ್ವರೂಪದಲ್ಲಿ ಮಾನ್ಯ ದಿನಾಂಕ ನಮೂದಿಸಿ",
+    "invalidYear": "ಮಾನ್ಯ ವರ್ಷ ನಮೂದಿಸಿ",
+    "invalidMonth": "ಮಾನ್ಯ ತಿಂಗಳು ನಮೂದಿಸಿ",
+    "invalidDay": "ಮಾನ್ಯ ದಿನ ನಮೂದಿಸಿ",
+    "invalidDateValue": "ಮಾನ್ಯ ದಿನಾಂಕ ನಮೂದಿಸಿ",
+    "invalidDateFormat": "DD/MM/YYYY ಬಳಸಿ (ಉದಾ. 15/05/2010)",
+    "dobRequired": "ಜನ್ಮ ದಿನಾಂಕ ಅಗತ್ಯ",
+    "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯ",
+    "phone": "10 ಅಂಕೆಗಳ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
+    "contactNameRequired": "ಸಂಪರ್ಕ ಹೆಸರು ಅಗತ್ಯ",
+    "relationshipRequired": "ಸಂಬಂಧ ಅಗತ್ಯ",
+    "rollNumberRequired": "ರೋಲ್ ಸಂಖ್ಯೆ ಅಗತ್ಯ",
+    "villageRequired": "ಗ್ರಾಮ / ಪಟ್ಟಣ ಅಗತ್ಯ",
+    "talukRequired": "ತಾಲೂಕು / ಮಂಡಲ ಅಗತ್ಯ",
+    "districtRequired": "ಜಿಲ್ಲೆ ಅಗತ್ಯ",
+    "pincodeRequired": "ಪಿನ್ ಕೋಡ್ ಅಗತ್ಯ",
+    "aadhaar": "ಆಧಾರ್ ನಿಖರವಾಗಿ 12 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
+    "satsId": "SATS ಐಡಿ ನಿಖರವಾಗಿ 9 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
+    "reasonRequired": "ಕಾರಣ ಅಗತ್ಯ"
   }
 }

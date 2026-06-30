@@ -96,5 +96,62 @@
     "pending": "Pending",
     "transferred": "Transferred",
     "notApplicable": "Not applicable"
+  },
+  "detail": {
+    "admissionDescription": "Admission # {{admissionNumber}}",
+    "loading": "Loading student…",
+    "tabs": {
+      "profile": "Profile",
+      "documents": "Documents",
+      "photo": "Photo"
+    },
+    "actions": {
+      "edit": "Edit",
+      "deactivate": "Deactivate"
+    },
+    "fields": {
+      "category": "Category",
+      "statusReason": "Status reason",
+      "name": "Name",
+      "phone": "Phone",
+      "father": "Father",
+      "mother": "Mother",
+      "guardian": "Guardian",
+      "annualIncome": "Annual income"
+    },
+    "hiddenFamily": {
+      "title": "Family details hidden",
+      "description": "Your role can view basic student profiles only. Family and income information is not shown."
+    }
+  },
+  "deactivate": {
+    "title": "Change student status",
+    "description": "Update status for {{name}}. This action is recorded in the audit log.",
+    "newStatus": "New status",
+    "reason": "Reason",
+    "success": "Student status updated",
+    "error": "Could not update student status"
+  },
+  "validation": {
+    "dateRequired": "Date is required",
+    "invalidDate": "Enter a valid date as DD/MM/YYYY",
+    "invalidYear": "Enter a valid year",
+    "invalidMonth": "Enter a valid month",
+    "invalidDay": "Enter a valid day",
+    "invalidDateValue": "Enter a valid date",
+    "invalidDateFormat": "Use DD/MM/YYYY (e.g. 15/05/2010)",
+    "dobRequired": "Date of birth is required",
+    "firstNameRequired": "First name is required",
+    "phone": "Enter a 10-digit mobile number",
+    "contactNameRequired": "Contact name is required",
+    "relationshipRequired": "Relationship is required",
+    "rollNumberRequired": "Roll number is required",
+    "villageRequired": "Village / town is required",
+    "talukRequired": "Taluk / mandal is required",
+    "districtRequired": "District is required",
+    "pincodeRequired": "Pincode is required",
+    "aadhaar": "Aadhaar must be exactly 12 digits",
+    "satsId": "SATS ID must be exactly 9 digits",
+    "reasonRequired": "Reason is required"
   }
 }

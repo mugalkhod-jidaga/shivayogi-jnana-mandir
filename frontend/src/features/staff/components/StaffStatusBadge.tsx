@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import type { StaffStatus } from '@/types/user';
+import { staffStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 
 const statusStyles: Record<StaffStatus, string> = {
@@ -7,6 +9,8 @@ const statusStyles: Record<StaffStatus, string> = {
 };
 
 export function StaffStatusBadge({ status }: { status: StaffStatus }) {
+  const { t } = useTranslation();
+
   return (
     <span
       className={cn(
@@ -14,7 +18,7 @@ export function StaffStatusBadge({ status }: { status: StaffStatus }) {
         statusStyles[status],
       )}
     >
-      {status}
+      {staffStatusLabel(t, status)}
     </span>
   );
 }

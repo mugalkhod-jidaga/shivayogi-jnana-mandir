@@ -1,0 +1,37 @@
+{
+  "title": "Bulk Import",
+  "description": "Import students from a CSV or Excel file.",
+  "steps": {
+    "upload": "Upload",
+    "preview": "Preview",
+    "done": "Done"
+  },
+  "upload": {
+    "dropHint": "Drag and drop a file here, or click to browse",
+    "accepted": "Accepted: .csv, .xlsx, .xls",
+    "sampleLink": "Download sample CSV",
+    "invalidType": "Only .csv, .xlsx, and .xls files are allowed",
+    "parseSuccess": "Parsed {{count}} valid row(s)",
+    "parseError": "Could not parse file"
+  },
+  "preview": {
+    "file": "File: {{name}}",
+    "validRows": "{{valid}} valid · {{invalid}} invalid · {{total}} total",
+    "commit": "Import students",
+    "committing": "Importing…",
+    "back": "Choose another file",
+    "columns": {
+      "admissionNumber": "Admission #",
+      "name": "Name",
+      "dob": "DOB",
+      "standard": "Standard"
+    }
+  },
+  "done": {
+    "title": "Import complete",
+    "imported": "Imported {{count}} student(s)",
+    "viewStudents": "View students",
+    "importAnother": "Import another file"
+  },
+  "commitError": "Import failed"
+}

@@ -48,5 +48,20 @@
   "errors": {
     "loadStudents": "Could not load students. Is the backend running?",
     "generic": "Something went wrong"
-  }
+  },
+  "confirm": "Confirm",
+  "adding": "Adding…",
+  "selectPlaceholder": "Select…",
+  "staffStatus": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "documentStatus": {
+    "pendingReview": "Pending review",
+    "verified": "Verified",
+    "rejected": "Rejected",
+    "renewalNeeded": "Renewal needed"
+  },
+  "loadingProfile": "Loading profile…",
+  "staffFallback": "Staff"
 }

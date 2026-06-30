@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useDeactivateStaff } from '@/hooks/useStaff';
 import { ApiError } from '@/lib/api';
@@ -16,6 +17,8 @@ export function DeactivateStaffDialog({
   open,
   onOpenChange,
 }: DeactivateStaffDialogProps) {
+  const { t } = useTranslation('staff');
+  const { t: tc } = useTranslation();
   const deactivate = useDeactivateStaff();
 
   if (!open) return null;
@@ -23,11 +26,10 @@ export function DeactivateStaffDialog({
   const handleConfirm = async () => {
     try {
       await deactivate.mutateAsync(staffId);
-      toast.success('Staff account deactivated');
+      toast.success(t('deactivate.success'));
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Could not deactivate staff account';
+      const message = error instanceof ApiError ? error.message : t('deactivate.error');
       toast.error(message);
     }
   };
@@ -35,14 +37,14 @@ export function DeactivateStaffDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h2 className="text-lg font-semibold">Deactivate staff account</h2>
+        <h2 className="text-lg font-semibold">{t('deactivate.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Deactivate {staffName}? They will no longer be able to sign in.
+          {t('deactivate.description', { name: staffName })}
         </p>
 
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button
             type="button"
@@ -50,7 +52,7 @@ export function DeactivateStaffDialog({
             disabled={deactivate.isPending}
             onClick={() => void handleConfirm()}
           >
-            {deactivate.isPending ? 'Deactivating…' : 'Deactivate'}
+            {deactivate.isPending ? t('deactivate.deactivating') : t('deactivate.confirm')}
           </Button>
         </div>
       </div>

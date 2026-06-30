@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import type { DocumentStatus } from '@/types/document';
+import { documentStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 
 const statusStyles: Record<DocumentStatus, string> = {
@@ -10,6 +12,8 @@ const statusStyles: Record<DocumentStatus, string> = {
 };
 
 export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
+  const { t } = useTranslation();
+
   return (
     <span
       className={cn(
@@ -17,7 +21,7 @@ export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
         statusStyles[status],
       )}
     >
-      {status}
+      {documentStatusLabel(t, status)}
     </span>
   );
 }

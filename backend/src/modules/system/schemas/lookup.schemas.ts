@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const createLookupValueSchema = z.object({
   value: z.string().trim().min(1).max(100),
+  labelKn: z.string().trim().max(100).optional(),
 });
 
 export const updateLookupValueSchema = z

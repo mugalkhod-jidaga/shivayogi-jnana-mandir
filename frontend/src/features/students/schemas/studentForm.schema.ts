@@ -1,117 +1,155 @@
 import { z } from 'zod';
-import { parseDobToIso } from '@/lib/date';
+import { parseDobToIso, type DateParseMessages } from '@/lib/date';
 import { normalizeIndianPhone } from '@/lib/phone';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
 
-const dateFieldSchema = z
-  .string()
-  .trim()
-  .min(1, 'Date is required')
-  .transform((value, ctx) => {
-    try {
-      return parseDobToIso(value);
-    } catch (error) {
-      ctx.addIssue({
-        code: 'custom',
-        message: error instanceof Error ? error.message : 'Enter a valid date as DD/MM/YYYY',
-      });
-      return z.NEVER;
-    }
+export type StudentFormValidationMessages = {
+  dateRequired: string;
+  invalidDate: string;
+  dobRequired: string;
+  firstNameRequired: string;
+  phone: string;
+  contactNameRequired: string;
+  relationshipRequired: string;
+  rollNumberRequired: string;
+  villageRequired: string;
+  talukRequired: string;
+  districtRequired: string;
+  pincodeRequired: string;
+  aadhaar: string;
+  satsId: string;
+  reasonRequired: string;
+  dateParse: DateParseMessages;
+};
+
+const DEFAULT_VALIDATION: StudentFormValidationMessages = {
+  dateRequired: 'Date is required',
+  invalidDate: 'Enter a valid date as DD/MM/YYYY',
+  dobRequired: 'Date of birth is required',
+  firstNameRequired: 'First name is required',
+  phone: 'Enter a 10-digit mobile number',
+  contactNameRequired: 'Contact name is required',
+  relationshipRequired: 'Relationship is required',
+  rollNumberRequired: 'Roll number is required',
+  villageRequired: 'Village / town is required',
+  talukRequired: 'Taluk / mandal is required',
+  districtRequired: 'District is required',
+  pincodeRequired: 'Pincode is required',
+  aadhaar: 'Aadhaar must be exactly 12 digits',
+  satsId: 'SATS ID must be exactly 9 digits',
+  reasonRequired: 'Reason is required',
+  dateParse: {
+    required: 'Date of birth is required',
+    invalidFormat: 'Use DD/MM/YYYY (e.g. 15/05/2010)',
+    invalidYear: 'Enter a valid year',
+    invalidMonth: 'Enter a valid month',
+    invalidDay: 'Enter a valid day',
+    invalidDate: 'Enter a valid date',
+  },
+};
+
+function buildDateFieldSchema(msg: StudentFormValidationMessages) {
+  return z
+    .string()
+    .trim()
+    .min(1, msg.dateRequired)
+    .transform((value, ctx) => {
+      try {
+        return parseDobToIso(value, {
+          ...msg.dateParse,
+          required: msg.dateRequired,
+        });
+      } catch (error) {
+        ctx.addIssue({
+          code: 'custom',
+          message: error instanceof Error ? error.message : msg.invalidDate,
+        });
+        return z.NEVER;
+      }
+    });
+}
+
+export function buildStudentFormSchemas(msg: StudentFormValidationMessages = DEFAULT_VALIDATION) {
+  const dateFieldSchema = buildDateFieldSchema(msg);
+
+  const familyDetailsFormSchema = z.object({
+    fatherName: z.string().trim().max(100).optional(),
+    motherName: z.string().trim().max(100).optional(),
+    guardianName: z.string().trim().max(100).optional(),
+    parentStatus: parentStatusEnum,
+    annualIncome: z.string().optional(),
+    primaryContact: z.string().trim().regex(/^\d{10}$/, msg.phone),
+    houseDetails: z.string().trim().max(255).optional(),
+    villageTown: z.string().trim().min(1, msg.villageRequired).max(150),
+    talukMandal: z.string().trim().min(1, msg.talukRequired).max(150),
+    district: z.string().trim().min(1, msg.districtRequired).max(150),
+    state: z.string().trim().min(1).max(150),
+    pincode: z.string().trim().min(6, msg.pincodeRequired).max(10),
   });
 
-const dobFieldSchema = dateFieldSchema;
+  const emergencyContactFormSchema = z.object({
+    contactName: z.string().trim().min(1, msg.contactNameRequired).max(100),
+    relationship: z.string().trim().min(1, msg.relationshipRequired).max(100),
+    phone: z.string().trim().regex(/^\d{10}$/, msg.phone),
+  });
 
-const familyDetailsFormSchema = z.object({
-  fatherName: z.string().trim().max(100).optional(),
-  motherName: z.string().trim().max(100).optional(),
-  guardianName: z.string().trim().max(100).optional(),
-  parentStatus: parentStatusEnum,
-  annualIncome: z.string().optional(),
-  primaryContact: z
-    .string()
-    .trim()
-    .regex(/^\d{10}$/, 'Enter a 10-digit mobile number'),
-  houseDetails: z.string().trim().max(255).optional(),
-  villageTown: z.string().trim().min(1, 'Village / town is required').max(150),
-  talukMandal: z.string().trim().min(1, 'Taluk / mandal is required').max(150),
-  district: z.string().trim().min(1, 'District is required').max(150),
-  state: z.string().trim().min(1).max(150),
-  pincode: z.string().trim().min(6, 'Pincode is required').max(10),
-});
+  const academicPlacementFormSchema = z.object({
+    rollNumber: z.string().trim().min(1, msg.rollNumberRequired).max(20),
+    previousSchool: z.string().trim().max(255).optional(),
+    previousSchoolAddress: z.string().trim().max(2000).optional(),
+    lastClassStudied: z.string().trim().max(100).optional(),
+  });
 
-const emergencyContactFormSchema = z.object({
-  contactName: z.string().trim().min(1, 'Contact name is required').max(100),
-  relationship: z.string().trim().min(1, 'Relationship is required').max(100),
-  phone: z.string().trim().regex(/^\d{10}$/, 'Enter a 10-digit mobile number'),
-});
+  const socialDetailsFormSchema = z.object({
+    caste: z.string().trim().max(100).optional(),
+    subCaste: z.string().trim().max(100).optional(),
+    rdNumber: z.string().trim().max(50).optional(),
+    rdNumberSecondary: z.string().trim().max(50).optional(),
+  });
 
-const academicPlacementFormSchema = z.object({
-  rollNumber: z.string().trim().min(1, 'Roll number is required').max(20),
-  previousSchool: z.string().trim().max(255).optional(),
-  previousSchoolAddress: z.string().trim().max(2000).optional(),
-  lastClassStudied: z.string().trim().max(100).optional(),
-});
+  const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
 
-const socialDetailsFormSchema = z.object({
-  caste: z.string().trim().max(100).optional(),
-  subCaste: z.string().trim().max(100).optional(),
-  rdNumber: z.string().trim().max(50).optional(),
-  rdNumberSecondary: z.string().trim().max(50).optional(),
-});
+  const createStudentFormSchema = z.object({
+    firstName: z.string().trim().min(1, msg.firstNameRequired).max(100),
+    lastName: z.string().trim().max(100).optional(),
+    dob: dateFieldSchema,
+    gender: genderEnum,
+    admissionDate: dateFieldSchema,
+    aadhaarNumber: z
+      .string()
+      .trim()
+      .regex(/^\d{12}$/, msg.aadhaar)
+      .optional()
+      .or(z.literal('')),
+    satsId: z
+      .string()
+      .trim()
+      .regex(/^\d{9}$/, msg.satsId)
+      .optional()
+      .or(z.literal('')),
+    satsTransferStatus: satsTransferStatusEnum.optional(),
+    academicPlacement: academicPlacementFormSchema,
+    emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+    socialDetails: socialDetailsFormSchema.optional(),
+    familyDetails: familyDetailsFormSchema,
+  });
 
-const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+  const updateStudentFormSchema = createStudentFormSchema;
 
-export const createStudentFormSchema = z.object({
-  firstName: z.string().trim().min(1, 'First name is required').max(100),
-  lastName: z.string().trim().max(100).optional(),
-  dob: dobFieldSchema,
-  gender: genderEnum,
-  admissionDate: dateFieldSchema,
-  aadhaarNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
-    .optional()
-    .or(z.literal('')),
-  satsId: z
-    .string()
-    .trim()
-    .regex(/^\d{9}$/, 'SATS ID must be exactly 9 digits')
-    .optional()
-    .or(z.literal('')),
-  satsTransferStatus: satsTransferStatusEnum.optional(),
-  academicPlacement: academicPlacementFormSchema,
-  emergencyContacts: z.array(emergencyContactFormSchema).min(1),
-  socialDetails: socialDetailsFormSchema.optional(),
-  familyDetails: familyDetailsFormSchema,
-});
+  const deactivateStudentFormSchema = z.object({
+    status: z.enum(['Alumni', 'Discontinued']),
+    statusReason: z.string().trim().min(1, msg.reasonRequired).max(500),
+  });
 
-export const updateStudentFormSchema = z.object({
-  firstName: z.string().trim().min(1, 'First name is required').max(100),
-  lastName: z.string().trim().max(100).optional(),
-  dob: dobFieldSchema,
-  gender: genderEnum,
-  admissionDate: dateFieldSchema,
-  aadhaarNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
-    .optional()
-    .or(z.literal('')),
-  satsId: z
-    .string()
-    .trim()
-    .regex(/^\d{9}$/, 'SATS ID must be exactly 9 digits')
-    .optional()
-    .or(z.literal('')),
-  satsTransferStatus: satsTransferStatusEnum.optional(),
-  academicPlacement: academicPlacementFormSchema,
-  emergencyContacts: z.array(emergencyContactFormSchema).min(1),
-  socialDetails: socialDetailsFormSchema.optional(),
-  familyDetails: familyDetailsFormSchema,
-});
+  return { createStudentFormSchema, updateStudentFormSchema, deactivateStudentFormSchema };
+}
+
+const defaultSchemas = buildStudentFormSchemas();
+export const createStudentFormSchema = defaultSchemas.createStudentFormSchema;
+export const updateStudentFormSchema = defaultSchemas.updateStudentFormSchema;
+export const deactivateStudentFormSchema = defaultSchemas.deactivateStudentFormSchema;
 
 export type CreateStudentFormValues = z.infer<typeof createStudentFormSchema>;
 export type UpdateStudentFormValues = z.infer<typeof updateStudentFormSchema>;
@@ -241,11 +279,6 @@ export function buildUpdateStudentPayload(
 
   return payload;
 }
-
-export const deactivateStudentFormSchema = z.object({
-  status: z.enum(['Alumni', 'Discontinued']),
-  statusReason: z.string().trim().min(1, 'Reason is required').max(500),
-});
 
 export type DeactivateStudentFormValues = z.infer<typeof deactivateStudentFormSchema>;
 

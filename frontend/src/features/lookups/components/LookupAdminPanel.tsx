@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { AddLookupDialog } from '@/features/lookups/components/AddLookupDialog';
 import { DeactivateLookupDialog } from '@/features/lookups/components/DeactivateLookupDialog';
@@ -13,6 +14,7 @@ type LookupAdminPanelProps = {
   description: string;
   items: TenantLookupOption[];
   isLoading: boolean;
+  supportsKannadaLabel?: boolean;
 };
 
 export function LookupAdminPanel({
@@ -22,7 +24,10 @@ export function LookupAdminPanel({
   description,
   items,
   isLoading,
+  supportsKannadaLabel = false,
 }: LookupAdminPanelProps) {
+  const { t } = useTranslation('lookups');
+  const { t: tc } = useTranslation();
   const [addOpen, setAddOpen] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState<TenantLookupOption | null>(null);
 
@@ -35,14 +40,14 @@ export function LookupAdminPanel({
         </div>
         <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
           <Plus className="size-4" />
-          Add
+          {t('admin.add')}
         </Button>
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <p className="text-sm text-muted-foreground">{tc('loading')}</p>}
 
       {!isLoading && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">No active values yet.</p>
+        <p className="text-sm text-muted-foreground">{t('admin.noValues')}</p>
       )}
 
       {!isLoading && items.length > 0 && (
@@ -50,9 +55,9 @@ export function LookupAdminPanel({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-left">
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">{t('admin.columns.name')}</th>
+                <th className="px-4 py-3 font-medium">{t('admin.columns.status')}</th>
+                <th className="px-4 py-3 font-medium">{t('admin.columns.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -61,7 +66,7 @@ export function LookupAdminPanel({
                   <td className="px-4 py-3">{item.value}</td>
                   <td className="px-4 py-3">
                     <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                      Active
+                      {t('admin.active')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -71,7 +76,7 @@ export function LookupAdminPanel({
                       variant="outline"
                       onClick={() => setDeactivateTarget(item)}
                     >
-                      Deactivate
+                      {t('admin.deactivate')}
                     </Button>
                   </td>
                 </tr>
@@ -86,6 +91,7 @@ export function LookupAdminPanel({
         label={singularLabel}
         open={addOpen}
         onOpenChange={setAddOpen}
+        supportsKannadaLabel={supportsKannadaLabel}
       />
 
       {deactivateTarget && (

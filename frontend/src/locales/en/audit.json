@@ -1,0 +1,17 @@
+{
+  "title": "Audit Logs",
+  "description": "Search and review system activity across the tenant.",
+    "searchPlaceholder": "Search by entity or action type",
+  "loading": "Loading audit logs…",
+  "error": "Could not load audit logs.",
+  "noResults": "No audit entries match this search.",
+  "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+  "columns": {
+    "timestamp": "Time",
+    "entity": "Entity",
+    "action": "Action",
+    "entityId": "Entity ID",
+    "ip": "IP",
+    "metadata": "Details"
+  }
+}

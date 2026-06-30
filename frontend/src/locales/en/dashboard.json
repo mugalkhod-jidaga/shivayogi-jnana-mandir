@@ -1,0 +1,33 @@
+{
+  "title": "Dashboard",
+  "description": "School operations overview — students, staff, and enrollment breakdown.",
+  "errorTitle": "Could not load dashboard",
+  "errorDescription": "Check that the backend is running and you have dashboard access.",
+  "kpis": {
+    "activeStudents": "Active students",
+    "totalEnrolled": "{{count}} total enrolled",
+    "activeStaff": "Active staff",
+    "staffAccounts": "{{count}} staff accounts",
+    "admissionsMonth": "Admissions this month",
+    "admissionsYear": "Admissions this year"
+  },
+  "byStandard": {
+    "title": "Students by standard",
+    "description": "Active students in current enrollment.",
+    "empty": "No enrollment data yet.",
+    "columnStandard": "Standard",
+    "columnStudents": "Students"
+  },
+  "byCategory": {
+    "title": "Students by category",
+    "description": "Active students by admission category.",
+    "empty": "No category data yet.",
+    "columnCategory": "Category",
+    "columnStudents": "Students"
+  },
+  "documents": {
+    "title": "Document compliance",
+    "description": "Review pending uploads and missing verified documents from the documents queue.",
+    "cta": "Open document queue →"
+  }
+}

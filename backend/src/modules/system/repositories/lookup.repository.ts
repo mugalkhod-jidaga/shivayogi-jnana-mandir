@@ -127,11 +127,12 @@ class LookupRepository {
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
-  async createAdmissionCategory(tenantId: number, value: string) {
+  async createAdmissionCategory(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_admission_categories')
-      .insert({ tenant_id: tenantId, value })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -144,11 +145,12 @@ class LookupRepository {
     return serializeTenantLookup(data);
   }
 
-  async createDocumentType(tenantId: number, value: string) {
+  async createDocumentType(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_document_types')
-      .insert({ tenant_id: tenantId, value })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
