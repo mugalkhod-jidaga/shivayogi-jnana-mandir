@@ -13,6 +13,7 @@ import { TempPasswordDialog } from '@/features/staff/components/TempPasswordDial
 import { useMe } from '@/hooks/useMe';
 import { useStaffList } from '@/hooks/useStaff';
 import { phoneToDisplay } from '@/lib/phone';
+import { roleLabel } from '@/lib/enumLabels';
 
 function formatStaffName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
@@ -128,7 +129,7 @@ export function StaffPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">+91 {phoneToDisplay(member.phoneNumber)}</td>
-                    <td className="px-4 py-3">{member.roles[0]?.name ?? '—'}</td>
+                    <td className="px-4 py-3">{roleLabel(t, member.roles[0]?.name)}</td>
                     <td className="px-4 py-3">
                       <StaffStatusBadge status={member.status} />
                     </td>

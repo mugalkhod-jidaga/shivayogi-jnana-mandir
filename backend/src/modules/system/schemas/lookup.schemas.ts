@@ -26,6 +26,7 @@ export type UpdateAcademicYearInput = z.infer<typeof updateAcademicYearSchema>;
 export const createAcademicStandardSchema = z.object({
   value: z.string().trim().min(1).max(100),
   sortOrder: z.number().int().min(0).optional(),
+  labelKn: z.string().trim().max(100).optional(),
 });
 
 export const createAcademicYearSchema = z.object({

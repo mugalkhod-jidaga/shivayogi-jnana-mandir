@@ -61,9 +61,15 @@
     "copyError": "ಪಾಸ್‌ವರ್ಡ್ ನಕಲಿಸಲಾಗಲಿಲ್ಲ",
     "done": "ಮುಗಿದಿದೆ"
   },
+  "roles": {
+    "superAdmin": "ಸೂಪರ್ ಅಡ್ಮಿನ್",
+    "admissionsClerk": "ಪ್ರವೇಶ ಕ್ಲರ್ಕ್",
+    "finance": "ಹಣಕಾಸು",
+    "teacherWarden": "ಶಿಕ್ಷಕ/ವಾರ್ಡನ್"
+  },
   "validation": {
     "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯ",
     "phone": "10 ಅಂಕೆಗಳ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
-    "roleRequired": "ಪಾತ್ರ ಅಗತ್ಯ"
+    "roleRequired": "ಪಾತ್ರ ಆಯ್ಕೆಮಾಡಿ"
   }
 }

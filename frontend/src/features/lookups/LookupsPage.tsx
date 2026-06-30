@@ -70,6 +70,7 @@ export function LookupsPage() {
               description={t('panels.standards.description')}
               items={academicStandards}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
@@ -81,6 +82,7 @@ export function LookupsPage() {
               description={t('panels.sections.description')}
               items={sections}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
@@ -92,6 +94,7 @@ export function LookupsPage() {
               description={t('panels.languages.description')}
               items={languages}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 

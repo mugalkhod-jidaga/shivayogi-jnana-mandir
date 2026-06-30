@@ -61,9 +61,15 @@
     "copyError": "Could not copy password",
     "done": "Done"
   },
+  "roles": {
+    "superAdmin": "Super Admin",
+    "admissionsClerk": "Admissions Clerk",
+    "finance": "Finance",
+    "teacherWarden": "Teacher/Warden"
+  },
   "validation": {
     "firstNameRequired": "First name is required",
     "phone": "Enter a 10-digit mobile number",
-    "roleRequired": "Role is required"
+    "roleRequired": "Choose a role"
   }
 }

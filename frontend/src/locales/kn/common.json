@@ -47,11 +47,21 @@
   "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
   "errors": {
     "loadStudents": "ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ಬ್ಯಾಕೆಂಡ್ ಚಾಲನೆಯಲ್ಲಿದೆಯೇ?",
-    "generic": "ಏನೋ ತಪ್ಪಾಗಿದೆ"
+    "generic": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
+    "sessionExpired": "ಸೆಷನ್ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "fileTooLarge": "ಫೈಲ್ 25 MB ಅಥವಾ ಅದಕ್ಕಿಂತ ಚಿಕ್ಕದಾಗಿರಬೇಕು",
+    "uploadStorageFailed": "ಸಂಗ್ರಹಣೆಗೆ ಫೈಲ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ ({{status}})",
+    "avatarUploadFailed": "ಫೋಟೋ ಸಂಗ್ರಹಣೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ ({{status}})"
   },
   "confirm": "ದೃಢೀಕರಿಸಿ",
   "adding": "ಸೇರಿಸಲಾಗುತ್ತಿದೆ…",
   "selectPlaceholder": "ಆಯ್ಕೆಮಾಡಿ…",
+  "lookups": {
+    "language": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+    "standard": "ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ",
+    "section": "ವಿಭಾಗ ಇಲ್ಲ",
+    "academicYear": "ಶೈಕ್ಷಣಿಕ ವರ್ಷ ಆಯ್ಕೆಮಾಡಿ"
+  },
   "staffStatus": {
     "active": "ಸಕ್ರಿಯ",
     "inactive": "ನಿಷ್ಕ್ರಿಯ"

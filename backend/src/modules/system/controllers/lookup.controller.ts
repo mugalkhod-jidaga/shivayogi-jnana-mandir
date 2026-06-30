@@ -62,13 +62,15 @@ export const lookupController = {
 
   async listAcademicStandards(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listAcademicStandards(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listAcademicStandards(tenantId, locale);
     res.json({ success: true, data });
   },
 
   async listSections(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listSections(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listSections(tenantId, locale);
     res.json({ success: true, data });
   },
 
@@ -80,7 +82,8 @@ export const lookupController = {
 
   async listLanguages(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listLanguages(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listLanguages(tenantId, locale);
     res.json({ success: true, data });
   },
 

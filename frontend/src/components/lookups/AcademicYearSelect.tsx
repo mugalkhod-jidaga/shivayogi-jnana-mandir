@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { LookupSelect } from '@/components/lookups/LookupSelect';
 import { useLookups } from '@/hooks/useLookups';
 
@@ -12,8 +13,9 @@ export function AcademicYearSelect({
   id,
   value,
   onChange,
-  placeholder = 'Select academic year',
+  placeholder,
 }: AcademicYearSelectProps) {
+  const { t } = useTranslation();
   const { academicYears, isLoading } = useLookups();
   const options = academicYears.map((year) => ({
     id: year.id,
@@ -26,7 +28,7 @@ export function AcademicYearSelect({
       id={id}
       value={value}
       onChange={onChange}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t('lookups.academicYear')}
       options={options}
       isLoading={isLoading}
     />

@@ -50,3 +50,28 @@ export function documentStatusLabel(t: TFunction, status: string): string {
   const key = map[status];
   return key ? t(`documentStatus.${key}`) : status;
 }
+
+const ROLE_KEY_MAP: Record<string, string> = {
+  'Super Admin': 'superAdmin',
+  'Admissions Clerk': 'admissionsClerk',
+  Finance: 'finance',
+  'Teacher/Warden': 'teacherWarden',
+};
+
+export function roleLabel(t: TFunction, name: string | null | undefined): string {
+  if (!name) return '—';
+  const key = ROLE_KEY_MAP[name];
+  return key ? t(`roles.${key}`, { ns: 'staff' }) : name;
+}
+
+export function auditEntityLabel(t: TFunction, entityType: string): string {
+  const key = entityType.replace(/-/g, '_');
+  const translated = t(`entities.${key}`, { ns: 'audit', defaultValue: '' });
+  return translated || entityType;
+}
+
+export function auditActionLabel(t: TFunction, actionType: string): string {
+  const key = actionType.replace(/-/g, '_');
+  const translated = t(`actions.${key}`, { ns: 'audit', defaultValue: '' });
+  return translated || actionType;
+}

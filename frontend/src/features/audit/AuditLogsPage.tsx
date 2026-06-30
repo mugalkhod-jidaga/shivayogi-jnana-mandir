@@ -6,9 +6,11 @@ import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuditLogs } from '@/hooks/useAuditLogs';
+import { auditActionLabel, auditEntityLabel } from '@/lib/enumLabels';
+import i18n from '@/lib/i18n';
 
 function formatTimestamp(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
+  return new Date(iso).toLocaleString(i18n.language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -110,8 +112,8 @@ export function AuditLogsPage() {
               {logs.map((log) => (
                 <tr key={log.id} className="border-b last:border-b-0">
                   <td className="px-4 py-3 whitespace-nowrap">{formatTimestamp(log.createdAt)}</td>
-                  <td className="px-4 py-3">{log.entityType}</td>
-                  <td className="px-4 py-3">{log.actionType}</td>
+                  <td className="px-4 py-3">{auditEntityLabel(t, log.entityType)}</td>
+                  <td className="px-4 py-3">{auditActionLabel(t, log.actionType)}</td>
                   <td className="px-4 py-3 font-mono text-xs">{log.entityId ?? '—'}</td>
                   <td className="px-4 py-3">{log.ipAddress ?? '—'}</td>
                   <td className="max-w-xs truncate px-4 py-3 text-muted-foreground">

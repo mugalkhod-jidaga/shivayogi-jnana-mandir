@@ -47,11 +47,21 @@
   "saving": "Saving…",
   "errors": {
     "loadStudents": "Could not load students. Is the backend running?",
-    "generic": "Something went wrong"
+    "generic": "Something went wrong",
+    "sessionExpired": "Session expired",
+    "fileTooLarge": "File must be 25 MB or smaller",
+    "uploadStorageFailed": "Failed to upload file to storage ({{status}})",
+    "avatarUploadFailed": "Failed to upload photo to storage ({{status}})"
   },
   "confirm": "Confirm",
   "adding": "Adding…",
   "selectPlaceholder": "Select…",
+  "lookups": {
+    "language": "Select language",
+    "standard": "Select standard",
+    "section": "No section",
+    "academicYear": "Select academic year"
+  },
   "staffStatus": {
     "active": "Active",
     "inactive": "Inactive"

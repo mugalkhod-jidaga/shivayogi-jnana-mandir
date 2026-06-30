@@ -1,7 +1,7 @@
 {
   "title": "Audit Logs",
   "description": "Search and review system activity across the tenant.",
-    "searchPlaceholder": "Search by entity or action type",
+  "searchPlaceholder": "Search by entity or action type",
   "loading": "Loading audit logs…",
   "error": "Could not load audit logs.",
   "noResults": "No audit entries match this search.",
@@ -13,5 +13,15 @@
     "entityId": "Entity ID",
     "ip": "IP",
     "metadata": "Details"
+  },
+  "entities": {
+    "students": "Student",
+    "student_documents": "Document",
+    "user_profiles": "Staff user"
+  },
+  "actions": {
+    "update": "Updated",
+    "soft_delete": "Deleted",
+    "download": "Downloaded"
   }
 }

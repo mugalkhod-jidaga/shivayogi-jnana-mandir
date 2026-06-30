@@ -9,12 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import {
   buildCreateStaffPayload,
-  createStaffFormSchema,
   type CreateStaffFormValues,
 } from '@/features/staff/schemas/staffForm.schema';
 import { useLookups } from '@/hooks/useLookups';
 import { useCreateStaff, useRoles } from '@/hooks/useStaff';
+import { useStaffFormSchemas } from '@/hooks/useStaffFormSchemas';
 import { ApiError } from '@/lib/api';
+import { roleLabel } from '@/lib/enumLabels';
 import { formatPhoneInput } from '@/lib/phone';
 
 type CreateStaffDialogProps = {
@@ -26,6 +27,7 @@ type CreateStaffDialogProps = {
 export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaffDialogProps) {
   const { t } = useTranslation('staff');
   const { t: tc } = useTranslation();
+  const { createStaffFormSchema } = useStaffFormSchemas();
   const createStaff = useCreateStaff();
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
   const { academicStandards } = useLookups();
@@ -124,7 +126,7 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
               <option value="">{t('create.rolePlaceholder')}</option>
               {roles.map((role) => (
                 <option key={role.id} value={String(role.id)}>
-                  {role.name}
+                  {roleLabel(t, role.name)}
                 </option>
               ))}
             </Select>

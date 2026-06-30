@@ -37,20 +37,20 @@ export const lookupService = {
     return lookupRepository.listSocialCategories(tenantId, locale);
   },
 
-  listAcademicStandards(tenantId: number) {
-    return lookupRepository.listAcademicStandards(tenantId);
+  listAcademicStandards(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listAcademicStandards(tenantId, locale);
   },
 
-  listSections(tenantId: number) {
-    return lookupRepository.listSections(tenantId);
+  listSections(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listSections(tenantId, locale);
   },
 
   listAcademicYears(tenantId: number) {
     return lookupRepository.listAcademicYears(tenantId);
   },
 
-  listLanguages(tenantId: number) {
-    return lookupRepository.listLanguages(tenantId);
+  listLanguages(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listLanguages(tenantId, locale);
   },
 
   createAdmissionCategory(tenantId: number, input: CreateLookupValueInput) {
@@ -62,11 +62,16 @@ export const lookupService = {
   },
 
   createAcademicStandard(tenantId: number, input: CreateAcademicStandardInput) {
-    return lookupRepository.createAcademicStandard(tenantId, input.value, input.sortOrder ?? 0);
+    return lookupRepository.createAcademicStandard(
+      tenantId,
+      input.value,
+      input.sortOrder ?? 0,
+      input.labelKn,
+    );
   },
 
   createSection(tenantId: number, input: CreateLookupValueInput) {
-    return lookupRepository.createSection(tenantId, input.value);
+    return lookupRepository.createSection(tenantId, input.value, input.labelKn);
   },
 
   createAcademicYear(tenantId: number, input: CreateAcademicYearInput) {
@@ -79,7 +84,7 @@ export const lookupService = {
   },
 
   createLanguage(tenantId: number, input: CreateLookupValueInput) {
-    return lookupRepository.createLanguage(tenantId, input.value);
+    return lookupRepository.createLanguage(tenantId, input.value, input.labelKn);
   },
 
   updateAdmissionCategory(id: number, tenantId: number, input: UpdateLookupValueInput) {
@@ -103,18 +108,20 @@ export const lookupService = {
     tenantId: number,
     input: UpdateLookupValueInput & { sortOrder?: number },
   ) {
-    const changes: { value?: string; sort_order?: number; is_active?: boolean } = {};
-    if (input.value !== undefined) changes.value = input.value;
-    if (input.sortOrder !== undefined) changes.sort_order = input.sortOrder;
-    if (input.isActive !== undefined) changes.is_active = input.isActive;
-    return lookupRepository.updateAcademicStandard(id, tenantId, changes);
+    return lookupRepository.updateAcademicStandard(id, tenantId, {
+      value: input.value,
+      sort_order: input.sortOrder,
+      is_active: input.isActive,
+      labelKn: input.labelKn,
+    });
   },
 
   updateSection(id: number, tenantId: number, input: UpdateLookupValueInput) {
-    const changes: { value?: string; is_active?: boolean } = {};
-    if (input.value !== undefined) changes.value = input.value;
-    if (input.isActive !== undefined) changes.is_active = input.isActive;
-    return lookupRepository.updateSection(id, tenantId, changes);
+    return lookupRepository.updateSection(id, tenantId, {
+      value: input.value,
+      is_active: input.isActive,
+      labelKn: input.labelKn,
+    });
   },
 
   updateAcademicYear(id: number, tenantId: number, input: UpdateAcademicYearInput) {
@@ -134,9 +141,10 @@ export const lookupService = {
   },
 
   updateLanguage(id: number, tenantId: number, input: UpdateLookupValueInput) {
-    const changes: { value?: string; is_active?: boolean } = {};
-    if (input.value !== undefined) changes.value = input.value;
-    if (input.isActive !== undefined) changes.is_active = input.isActive;
-    return lookupRepository.updateLanguage(id, tenantId, changes);
+    return lookupRepository.updateLanguage(id, tenantId, {
+      value: input.value,
+      is_active: input.isActive,
+      labelKn: input.labelKn,
+    });
   },
 };

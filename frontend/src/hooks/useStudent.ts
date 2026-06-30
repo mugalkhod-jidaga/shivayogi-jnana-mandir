@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { studentKeys } from '@/hooks/useStudents';
+import i18n from '@/lib/i18n';
 import type {
   AvatarDownloadResponse,
   AvatarPresignResponse,
@@ -94,7 +95,9 @@ export function useAvatarUpload(id: string) {
       });
 
       if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload avatar to storage (${uploadResponse.status})`);
+        throw new Error(
+          i18n.t('errors.avatarUploadFailed', { status: uploadResponse.status }),
+        );
       }
 
       return apiFetch<StudentDetail>(`/students/${id}/avatar/confirm`, {

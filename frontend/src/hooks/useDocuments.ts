@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
+import i18n from '@/lib/i18n';
 import type {
   DocumentDownloadResponse,
   DocumentPresignResponse,
@@ -50,7 +51,7 @@ export function useDocumentUpload(studentId: string) {
   return useMutation({
     mutationFn: async ({ file, documentTypeId, expiryDate }: DocumentUploadInput) => {
       if (file.size > MAX_FILE_SIZE) {
-        throw new Error('File must be 25 MB or smaller');
+        throw new Error(i18n.t('errors.fileTooLarge'));
       }
 
       const contentType = file.type || 'application/octet-stream';
@@ -73,7 +74,9 @@ export function useDocumentUpload(studentId: string) {
       });
 
       if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload file to storage (${uploadResponse.status})`);
+        throw new Error(
+          i18n.t('errors.uploadStorageFailed', { status: uploadResponse.status }),
+        );
       }
 
       return apiFetch<StudentDocument>(`/students/${studentId}/documents/confirm`, {

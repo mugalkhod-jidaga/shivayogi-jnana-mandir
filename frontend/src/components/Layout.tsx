@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMe } from '@/hooks/useMe';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useNavItems } from '@/lib/navigation';
+import { roleLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -23,7 +24,7 @@ export function Layout() {
   const displayName = me
     ? [me.firstName, me.lastName].filter(Boolean).join(' ')
     : t('staffFallback');
-  const roleName = me?.roles[0]?.name ?? t('staffFallback');
+  const roleName = me?.roles[0]?.name ? roleLabel(t, me.roles[0].name) : t('staffFallback');
 
   const handleSignOut = () => {
     void (async () => {
