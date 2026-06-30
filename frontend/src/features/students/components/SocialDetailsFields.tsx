@@ -1,4 +1,5 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ReligionSelect } from '@/components/lookups/ReligionSelect';
 import { SocialCategorySelect } from '@/components/lookups/SocialCategorySelect';
 import { Input } from '@/components/ui/input';
@@ -25,17 +26,18 @@ export function SocialDetailsFields({
   onReligionChange,
   onSocialCategoryChange,
 }: SocialDetailsFieldsProps) {
+  const { t } = useTranslation('students');
   const socialErrors = errors.socialDetails;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2">
-        <Label htmlFor="religionId">Religion</Label>
+        <Label htmlFor="religionId">{t('form.fields.religion')}</Label>
         <ReligionSelect id="religionId" value={religionId} onChange={onReligionChange} />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="socialCategoryId">Social category</Label>
+        <Label htmlFor="socialCategoryId">{t('form.fields.socialCategory')}</Label>
         <SocialCategorySelect
           id="socialCategoryId"
           value={socialCategoryId}
@@ -44,7 +46,7 @@ export function SocialDetailsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="caste">Caste</Label>
+        <Label htmlFor="caste">{t('form.fields.caste')}</Label>
         <Input id="caste" {...register('socialDetails.caste')} />
         {socialErrors?.caste && (
           <p className="text-sm text-destructive">{socialErrors.caste.message}</p>
@@ -52,7 +54,7 @@ export function SocialDetailsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="subCaste">Sub-caste</Label>
+        <Label htmlFor="subCaste">{t('form.fields.subCaste')}</Label>
         <Input id="subCaste" {...register('socialDetails.subCaste')} />
         {socialErrors?.subCaste && (
           <p className="text-sm text-destructive">{socialErrors.subCaste.message}</p>
@@ -60,7 +62,7 @@ export function SocialDetailsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="rdNumber">RD number</Label>
+        <Label htmlFor="rdNumber">{t('form.fields.rdNumber')}</Label>
         <Input id="rdNumber" {...register('socialDetails.rdNumber')} />
         {socialErrors?.rdNumber && (
           <p className="text-sm text-destructive">{socialErrors.rdNumber.message}</p>
@@ -68,7 +70,7 @@ export function SocialDetailsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="rdNumberSecondary">RD number (secondary)</Label>
+        <Label htmlFor="rdNumberSecondary">{t('form.fields.rdNumberSecondary')}</Label>
         <Input id="rdNumberSecondary" {...register('socialDetails.rdNumberSecondary')} />
         {socialErrors?.rdNumberSecondary && (
           <p className="text-sm text-destructive">{socialErrors.rdNumberSecondary.message}</p>

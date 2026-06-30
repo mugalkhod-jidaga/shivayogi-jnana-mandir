@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { StudentStatus } from '@/types/student';
 import { cn } from '@/lib/utils';
 
@@ -7,7 +8,15 @@ const statusStyles: Record<StudentStatus, string> = {
   Discontinued: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
 };
 
+const statusKeys: Record<StudentStatus, 'active' | 'alumni' | 'discontinued'> = {
+  Active: 'active',
+  Alumni: 'alumni',
+  Discontinued: 'discontinued',
+};
+
 export function StatusBadge({ status }: { status: StudentStatus }) {
+  const { t } = useTranslation();
+
   return (
     <span
       className={cn(
@@ -15,7 +24,7 @@ export function StatusBadge({ status }: { status: StudentStatus }) {
         statusStyles[status],
       )}
     >
-      {status}
+      {t(`status.${statusKeys[status]}`)}
     </span>
   );
 }

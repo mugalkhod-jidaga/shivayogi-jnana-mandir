@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/PageHeader';
@@ -30,6 +31,8 @@ import { phoneToDisplay } from '@/lib/phone';
 import { ApiError } from '@/lib/api';
 
 export function StudentFormPage() {
+  const { t } = useTranslation('students');
+  const { t: tc } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
@@ -173,7 +176,7 @@ export function StudentFormPage() {
   }
 
   if (isEdit && isLoading) {
-    return <p className="text-muted-foreground">Loading student…</p>;
+    return <p className="text-muted-foreground">{t('form.loadingStudent')}</p>;
   }
 
   if (isEdit && !student) {
@@ -193,38 +196,38 @@ export function StudentFormPage() {
 
   const onCreate = createForm.handleSubmit(async (values) => {
     if (!canViewFamily) {
-      toast.error('You do not have permission to create students with family details');
+      toast.error(t('form.errors.noFamilyPermission'));
       return;
     }
 
     if (!academicYearId || !standardId) {
-      toast.error('Academic year and standard are required');
+      toast.error(t('form.errors.academicRequired'));
       return;
     }
 
     try {
       const payload = buildCreateStudentPayload(values, lookupIds);
       const created = await createStudent.mutateAsync(payload);
-      toast.success('Student created. Add documents and photo from the student profile.');
+      toast.success(t('form.createSuccess'));
       navigate(`/students/${created.id}`);
     } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : 'Could not create student');
+      toast.error(error instanceof ApiError ? error.message : t('form.errors.createFailed'));
     }
   });
 
   const onUpdate = editForm.handleSubmit(async (values) => {
     if (!academicYearId || !standardId) {
-      toast.error('Academic year and standard are required');
+      toast.error(t('form.errors.academicRequired'));
       return;
     }
 
     try {
       const payload = buildUpdateStudentPayload(values, lookupIds, canViewFamily);
       const updated = await updateStudent.mutateAsync(payload);
-      toast.success('Student updated');
+      toast.success(t('form.updateSuccess'));
       navigate(`/students/${updated.id}`);
     } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : 'Could not update student');
+      toast.error(error instanceof ApiError ? error.message : t('form.errors.updateFailed'));
     }
   });
 
@@ -258,21 +261,21 @@ export function StudentFormPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={isEdit ? 'Edit student' : 'Add student'}
+        title={isEdit ? t('form.editTitle') : t('form.addTitle')}
         description={
           isEdit
-            ? `Update record for ${student?.admissionNumber}`
-            : 'Create a student record. Documents and photo can be added after saving.'
+            ? t('form.editDescription', { admissionNumber: student?.admissionNumber })
+            : t('form.addDescription')
         }
       >
         <Button asChild variant="outline">
-          <Link to={isEdit ? `/students/${id}` : '/students'}>Cancel</Link>
+          <Link to={isEdit ? `/students/${id}` : '/students'}>{tc('actions.cancel')}</Link>
         </Button>
       </PageHeader>
 
       <form className="space-y-8" onSubmit={isEdit ? onUpdate : onCreate}>
         <section className="rounded-lg border p-6">
-          <h2 className="text-lg font-medium">Basic information</h2>
+          <h2 className="text-lg font-medium">{t('form.sections.basic')}</h2>
           <div className="mt-4">
             {isEdit ? (
               <DemographicsFields
@@ -294,7 +297,7 @@ export function StudentFormPage() {
         </section>
 
         <section className="rounded-lg border p-6">
-          <h2 className="text-lg font-medium">Academic placement</h2>
+          <h2 className="text-lg font-medium">{t('form.sections.academic')}</h2>
           <div className="mt-4">
             {isEdit ? (
               <AcademicPlacementFields
@@ -313,10 +316,8 @@ export function StudentFormPage() {
         </section>
 
         <section className="rounded-lg border p-6">
-          <h2 className="text-lg font-medium">Emergency contact</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            A separate emergency contact in addition to the family primary contact.
-          </p>
+          <h2 className="text-lg font-medium">{t('form.sections.emergency')}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t('form.hints.emergency')}</p>
           <div className="mt-4">
             {isEdit ? (
               <EmergencyContactFields
@@ -334,10 +335,8 @@ export function StudentFormPage() {
 
         {canViewFamily && (
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Social & caste details</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sensitive information — visible only to authorized staff.
-            </p>
+            <h2 className="text-lg font-medium">{t('form.sections.social')}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t('form.hints.social')}</p>
             <div className="mt-4">
               {isEdit ? (
                 <SocialDetailsFields
@@ -358,10 +357,8 @@ export function StudentFormPage() {
 
         {canViewFamily && (
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Family & address</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sensitive family and income details — visible only to authorized staff.
-            </p>
+            <h2 className="text-lg font-medium">{t('form.sections.family')}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t('form.hints.family')}</p>
             <div className="mt-4">
               {isEdit ? (
                 <FamilyDetailsFields
@@ -380,7 +377,11 @@ export function StudentFormPage() {
 
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving…' : isEdit ? 'Save changes' : 'Create student'}
+            {isSubmitting
+              ? tc('saving')
+              : isEdit
+                ? tc('actions.saveChanges')
+                : t('form.createSubmit')}
           </Button>
         </div>
       </form>

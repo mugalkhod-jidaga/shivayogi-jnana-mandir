@@ -14,6 +14,7 @@
     "signOut": "Sign out",
     "cancel": "Cancel",
     "save": "Save",
+    "saveChanges": "Save changes",
     "apply": "Apply",
     "search": "Search",
     "add": "Add",
@@ -29,5 +30,23 @@
     "active": "Active",
     "alumni": "Alumni",
     "discontinued": "Discontinued"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "parentStatus": {
+    "bothAlive": "Both Alive",
+    "singleMother": "Single Mother",
+    "orphan": "Orphan"
+  },
+  "optional": "Optional",
+  "notSet": "Not set",
+  "loading": "Loading…",
+  "saving": "Saving…",
+  "errors": {
+    "loadStudents": "Could not load students. Is the backend running?",
+    "generic": "Something went wrong"
   }
 }

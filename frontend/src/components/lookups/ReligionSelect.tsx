@@ -1,5 +1,6 @@
 import { LookupSelect } from '@/components/lookups/LookupSelect';
 import { useLookups } from '@/hooks/useLookups';
+import { useTranslation } from 'react-i18next';
 
 export function ReligionSelect({
   value,
@@ -11,6 +12,7 @@ export function ReligionSelect({
   id?: string;
 }) {
   const { religions, isLoading } = useLookups();
+  const { t } = useTranslation();
   return (
     <LookupSelect
       id={id}
@@ -18,7 +20,7 @@ export function ReligionSelect({
       onChange={onChange}
       options={religions}
       isLoading={isLoading}
-      placeholder="Optional"
+      placeholder={t('optional')}
     />
   );
 }

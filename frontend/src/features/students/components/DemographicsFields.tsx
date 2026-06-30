@@ -1,4 +1,5 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { BloodGroupSelect } from '@/components/lookups/BloodGroupSelect';
 import { LanguageSelect } from '@/components/lookups/LanguageSelect';
@@ -37,46 +38,56 @@ export function DemographicsFields({
   nextAdmissionNumber,
   isLoadingAdmissionNumber,
 }: DemographicsFieldsProps) {
+  const { t } = useTranslation('students');
+  const { t: tc } = useTranslation();
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {isCreate && (
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="admissionNumberPreview">Admission number</Label>
+          <Label htmlFor="admissionNumberPreview">{t('form.nextAdmissionNumber')}</Label>
           <Input
             id="admissionNumberPreview"
             readOnly
-            value={isLoadingAdmissionNumber ? 'Loading…' : (nextAdmissionNumber ?? '—')}
+            value={
+              isLoadingAdmissionNumber
+                ? t('form.admissionNumberLoading')
+                : (nextAdmissionNumber ?? '—')
+            }
             className="bg-muted"
           />
-          <p className="text-xs text-muted-foreground">
-            Assigned automatically when you save (SJM format).
-          </p>
+          <p className="text-xs text-muted-foreground">{t('form.nextAdmissionHelp')}</p>
         </div>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="firstName">First name</Label>
+        <Label htmlFor="firstName">{t('form.fields.firstName')}</Label>
         <Input id="firstName" {...register('firstName')} />
         {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="lastName">Last name</Label>
+        <Label htmlFor="lastName">{t('form.fields.lastName')}</Label>
         <Input id="lastName" {...register('lastName')} />
         {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="dob">Date of birth</Label>
-        <Input id="dob" placeholder="DD/MM/YYYY" inputMode="numeric" {...register('dob')} />
+        <Label htmlFor="dob">{t('form.fields.dob')}</Label>
+        <Input
+          id="dob"
+          placeholder={t('form.fields.dobPlaceholder')}
+          inputMode="numeric"
+          {...register('dob')}
+        />
         {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="admissionDate">Admission date</Label>
+        <Label htmlFor="admissionDate">{t('form.fields.admissionDate')}</Label>
         <Input
           id="admissionDate"
-          placeholder="DD/MM/YYYY"
+          placeholder={t('form.fields.dobPlaceholder')}
           inputMode="numeric"
           {...register('admissionDate')}
         />
@@ -86,51 +97,51 @@ export function DemographicsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="gender">Gender</Label>
+        <Label htmlFor="gender">{t('form.fields.gender')}</Label>
         <Select id="gender" {...register('gender')}>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
+          <option value="Male">{tc('gender.male')}</option>
+          <option value="Female">{tc('gender.female')}</option>
+          <option value="Other">{tc('gender.other')}</option>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="motherTongueId">Mother tongue</Label>
+        <Label htmlFor="motherTongueId">{t('form.fields.motherTongue')}</Label>
         <LanguageSelect
           id="motherTongueId"
           value={motherTongueId}
           onChange={onMotherTongueChange}
-          placeholder="Optional"
+          placeholder={tc('optional')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bloodGroupId">Blood group</Label>
+        <Label htmlFor="bloodGroupId">{t('form.fields.bloodGroup')}</Label>
         <BloodGroupSelect
           id="bloodGroupId"
           value={bloodGroupId}
           onChange={onBloodGroupChange}
-          placeholder="Optional"
+          placeholder={tc('optional')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="admissionCategoryId">Admission category</Label>
+        <Label htmlFor="admissionCategoryId">{t('form.fields.admissionCategory')}</Label>
         <AdmissionCategorySelect
           id="admissionCategoryId"
           value={admissionCategoryId}
           onChange={onAdmissionCategoryChange}
-          placeholder="Optional"
+          placeholder={tc('optional')}
         />
       </div>
 
       <div className="space-y-2 sm:col-span-2">
-        <Label htmlFor="aadhaarNumber">Aadhaar number</Label>
+        <Label htmlFor="aadhaarNumber">{t('form.fields.aadhaarNumber')}</Label>
         <Input
           id="aadhaarNumber"
           inputMode="numeric"
           maxLength={12}
-          placeholder="12-digit Aadhaar (optional)"
+          placeholder={t('form.fields.aadhaarPlaceholder')}
           {...register('aadhaarNumber')}
         />
         {errors.aadhaarNumber && (
@@ -139,24 +150,24 @@ export function DemographicsFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="satsId">SATS ID</Label>
+        <Label htmlFor="satsId">{t('form.fields.satsId')}</Label>
         <Input
           id="satsId"
           inputMode="numeric"
           maxLength={9}
-          placeholder="9-digit Karnataka SATS ID (optional)"
+          placeholder={t('form.fields.satsIdPlaceholder')}
           {...register('satsId')}
         />
         {errors.satsId && <p className="text-sm text-destructive">{errors.satsId.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="satsTransferStatus">SATS transfer status</Label>
+        <Label htmlFor="satsTransferStatus">{t('form.fields.satsTransferStatus')}</Label>
         <Select id="satsTransferStatus" {...register('satsTransferStatus')}>
-          <option value="">Not set</option>
-          <option value="Pending">Pending</option>
-          <option value="Transferred">Transferred</option>
-          <option value="NotApplicable">Not applicable</option>
+          <option value="">{tc('notSet')}</option>
+          <option value="Pending">{t('satsStatus.pending')}</option>
+          <option value="Transferred">{t('satsStatus.transferred')}</option>
+          <option value="NotApplicable">{t('satsStatus.notApplicable')}</option>
         </Select>
         {errors.satsTransferStatus && (
           <p className="text-sm text-destructive">{errors.satsTransferStatus.message}</p>

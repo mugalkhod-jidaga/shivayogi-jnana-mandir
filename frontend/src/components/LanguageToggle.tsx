@@ -1,11 +1,19 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { lookupKeys } from '@/hooks/useLookups';
 import { SUPPORTED_LOCALES, type AppLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import { useTranslation } from 'react-i18next';
 
 export function LanguageToggle() {
   const { i18n, t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const current = (i18n.language?.split('-')[0] ?? 'en') as AppLocale;
+
+  const changeLanguage = async (locale: AppLocale) => {
+    await i18n.changeLanguage(locale);
+    void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+  };
 
   return (
     <div className="flex rounded-md border p-0.5 text-xs">
@@ -19,7 +27,7 @@ export function LanguageToggle() {
               ? 'bg-primary text-primary-foreground'
               : 'text-muted-foreground hover:text-foreground',
           )}
-          onClick={() => void i18n.changeLanguage(locale)}
+          onClick={() => void changeLanguage(locale)}
         >
           {t(`language.${locale}`)}
         </button>
