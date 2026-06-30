@@ -34,25 +34,43 @@ export const lookupController = {
 
   async listAdmissionCategories(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listAdmissionCategories(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listAdmissionCategories(tenantId, locale);
     res.json({ success: true, data });
   },
 
   async listDocumentTypes(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listDocumentTypes(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listDocumentTypes(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listReligions(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listReligions(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listSocialCategories(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listSocialCategories(tenantId, locale);
     res.json({ success: true, data });
   },
 
   async listAcademicStandards(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listAcademicStandards(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listAcademicStandards(tenantId, locale);
     res.json({ success: true, data });
   },
 
   async listSections(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listSections(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listSections(tenantId, locale);
     res.json({ success: true, data });
   },
 
@@ -64,7 +82,36 @@ export const lookupController = {
 
   async listLanguages(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
-    const data = await lookupService.listLanguages(tenantId);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listLanguages(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listRemarkTypes(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listRemarkTypes(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listRemarkCategories(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listRemarkCategories(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listHostelAttendanceStatuses(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listHostelAttendanceStatuses(tenantId, locale);
+    res.json({ success: true, data });
+  },
+
+  async listMedicalRecordTypes(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listMedicalRecordTypes(tenantId, locale);
     res.json({ success: true, data });
   },
 

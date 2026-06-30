@@ -24,6 +24,11 @@ export const aadhaarSchema = z
   .trim()
   .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits');
 
+export const satsIdSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{9}$/, 'SATS ID must be exactly 9 digits');
+
 export const dateInputSchema = z
   .string()
   .trim()

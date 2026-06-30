@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Select } from '@/components/ui/select';
 import type { LookupOption } from '@/types/lookup';
 
@@ -15,13 +16,16 @@ type LookupSelectProps = {
 export function LookupSelect({
   value,
   onChange,
-  placeholder = 'Select…',
+  placeholder,
   disabled,
   isLoading,
   options,
   id,
   name,
 }: LookupSelectProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('selectPlaceholder');
+
   return (
     <Select
       id={id}
@@ -30,7 +34,7 @@ export function LookupSelect({
       disabled={disabled || isLoading}
       onChange={(event) => onChange?.(event.target.value)}
     >
-      <option value="">{isLoading ? 'Loading…' : placeholder}</option>
+      <option value="">{isLoading ? t('loading') : resolvedPlaceholder}</option>
       {options.map((option) => (
         <option key={option.id} value={String(option.id)}>
           {option.value}

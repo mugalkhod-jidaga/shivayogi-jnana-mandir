@@ -1,0 +1,172 @@
+{
+  "list": {
+    "title": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "description": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ, ಫಿಲ್ಟರ್ ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ.",
+    "addStudent": "ವಿದ್ಯಾರ್ಥಿ ಸೇರಿಸಿ",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಪ್ರವೇಶ ಸಂಖ್ಯೆಯಿಂದ ಹುಡುಕಿ",
+    "allStatuses": "ಎಲ್ಲಾ ಸ್ಥಿತಿಗಳು",
+    "noResults": "ವಿದ್ಯಾರ್ಥಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "loading": "ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "pageOf": "ಪುಟ {{page}} / {{totalPages}} · ಒಟ್ಟು {{total}}",
+    "columns": {
+      "admissionNumber": "ಪ್ರವೇಶ #",
+      "name": "ಹೆಸರು",
+      "standard": "ತರಗತಿ",
+      "rollNumber": "ರೋಲ್ #",
+      "admissionDate": "ಪ್ರವೇಶ ದಿನಾಂಕ",
+      "status": "ಸ್ಥಿತಿ"
+    }
+  },
+  "form": {
+    "addTitle": "ವಿದ್ಯಾರ್ಥಿ ಸೇರಿಸಿ",
+    "editTitle": "ವಿದ್ಯಾರ್ಥಿ ಸಂಪಾದಿಸಿ",
+    "addDescription": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆ ರಚಿಸಿ. ಉಳಿಸಿದ ನಂತರ ದಾಖಲೆಗಳು ಮತ್ತು ಫೋಟೋ ಸೇರಿಸಬಹುದು.",
+    "editDescription": "{{admissionNumber}} ಗಾಗಿ ದಾಖಲೆ ನವೀಕರಿಸಿ",
+    "loadingStudent": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "nextAdmissionNumber": "ಪ್ರವೇಶ ಸಂಖ್ಯೆ",
+    "nextAdmissionHelp": "ಉಳಿಸಿದಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಗದಿಯಾಗುತ್ತದೆ (SJM ಸ್ವರೂಪ).",
+    "admissionNumberLoading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+    "sections": {
+      "basic": "ಮೂಲ ಮಾಹಿತಿ",
+      "academic": "ಶೈಕ್ಷಣಿಕ ವಿವರ",
+      "emergency": "ತುರ್ತು ಸಂಪರ್ಕ",
+      "social": "ಸಾಮಾಜಿಕ ಮತ್ತು ಜಾತಿ ವಿವರ",
+      "family": "ಕುಟುಂಬ ಮತ್ತು ವಿಳಾಸ"
+    },
+    "hints": {
+      "emergency": "ಕುಟುಂಬದ ಪ್ರಾಥಮಿಕ ಸಂಪರ್ಕದ ಹೊರತು ಪ್ರತ್ಯೇಕ ತುರ್ತು ಸಂಪರ್ಕ.",
+      "social": "ಸಂವೇದನಾಶೀಲ ಮಾಹಿತಿ — ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ.",
+      "family": "ಸಂವೇದನಾಶೀಲ ಕುಟುಂಬ ಮತ್ತು ಆದಾಯ ವಿವರ — ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ."
+    },
+    "fields": {
+      "firstName": "ಮೊದಲ ಹೆಸರು",
+      "lastName": "ಕೊನೆಯ ಹೆಸರು",
+      "dob": "ಜನ್ಮ ದಿನಾಂಕ",
+      "dobPlaceholder": "ದಿನ/ತಿಂಗಳು/ವರ್ಷ",
+      "admissionDate": "ಪ್ರವೇಶ ದಿನಾಂಕ",
+      "gender": "ಲಿಂಗ",
+      "motherTongue": "ಮಾತೃಭಾಷೆ",
+      "bloodGroup": "ರಕ್ತ ಗುಂಪು",
+      "admissionCategory": "ಪ್ರವೇಶ ವರ್ಗ",
+      "aadhaarNumber": "ಆಧಾರ್ ಸಂಖ್ಯೆ",
+      "aadhaarPlaceholder": "12 ಅಂಕೆಗಳ ಆಧಾರ್ (ಐಚ್ಛಿಕ)",
+      "satsId": "SATS ಐಡಿ",
+      "satsIdPlaceholder": "9 ಅಂಕೆಗಳ ಕರ್ನಾಟಕ SATS ಐಡಿ (ಐಚ್ಛಿಕ)",
+      "satsTransferStatus": "SATS ವರ್ಗಾವಣೆ ಸ್ಥಿತಿ",
+      "academicYear": "ಶೈಕ್ಷಣಿಕ ವರ್ಷ",
+      "standard": "ತರಗತಿ",
+      "section": "ವಿಭಾಗ (ಐಚ್ಛಿಕ)",
+      "rollNumber": "ರೋಲ್ ಸಂಖ್ಯೆ",
+      "previousSchool": "ಹಿಂದಿನ ಶಾಲೆ",
+      "previousSchoolAddress": "ಹಿಂದಿನ ಶಾಲೆಯ ವಿಳಾಸ",
+      "lastClassStudied": "ಕೊನೆಯದಾಗಿ ಓದಿದ ತರಗತಿ",
+      "contactName": "ಸಂಪರ್ಕ ಹೆಸರು",
+      "relationship": "ಸಂಬಂಧ",
+      "emergencyPhone": "ತುರ್ತು ಫೋನ್",
+      "religion": "ಧರ್ಮ",
+      "socialCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ",
+      "caste": "ಜಾತಿ",
+      "subCaste": "ಉಪಜಾತಿ",
+      "rdNumber": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ",
+      "rdNumberSecondary": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ (ದ್ವಿತೀಯ)",
+      "fatherName": "ತಂದೆಯ ಹೆಸರು",
+      "motherName": "ತಾಯಿಯ ಹೆಸರು",
+      "guardianName": "ರಕ್ಷಕರ ಹೆಸರು",
+      "parentStatus": "ಪೋಷಕ ಸ್ಥಿತಿ",
+      "annualIncome": "ವಾರ್ಷಿಕ ಆದಾಯ (₹)",
+      "primaryContact": "ಪ್ರಾಥಮಿಕ ಸಂಪರ್ಕ",
+      "houseDetails": "ಮನೆ ವಿವರ",
+      "villageTown": "ಗ್ರಾಮ / ಪಟ್ಟಣ",
+      "talukMandal": "ತಾಲೂಕು / ಮಂಡಲ",
+      "district": "ಜಿಲ್ಲೆ",
+      "state": "ರಾಜ್ಯ",
+      "pincode": "ಪಿನ್ ಕೋಡ್"
+    },
+    "createSuccess": "ವಿದ್ಯಾರ್ಥಿ ರಚಿಸಲಾಗಿದೆ. ಪ್ರೊಫೈಲ್‌ನಿಂದ ದಾಖಲೆಗಳು ಮತ್ತು ಫೋಟೋ ಸೇರಿಸಿ.",
+    "updateSuccess": "ವಿದ್ಯಾರ್ಥಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    "createSubmit": "ವಿದ್ಯಾರ್ಥಿ ರಚಿಸಿ",
+    "errors": {
+      "academicRequired": "ಶೈಕ್ಷಣಿಕ ವರ್ಷ ಮತ್ತು ತರಗತಿ ಅಗತ್ಯ",
+      "noFamilyPermission": "ಕುಟುಂಬ ವಿವರಗಳೊಂದಿಗೆ ವಿದ್ಯಾರ್ಥಿ ರಚಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ",
+      "createFailed": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ರಚಿಸಲಾಗಲಿಲ್ಲ",
+      "updateFailed": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ"
+    }
+  },
+  "satsStatus": {
+    "pending": "ಬಾಕಿ",
+    "transferred": "ವರ್ಗಾಯಿಸಲಾಗಿದೆ",
+    "notApplicable": "ಅನ್ವಯಿಸುವುದಿಲ್ಲ"
+  },
+  "detail": {
+    "admissionDescription": "ಪ್ರವೇಶ # {{admissionNumber}}",
+    "loading": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "tabs": {
+      "profile": "ಪ್ರೊಫೈಲ್",
+      "documents": "ದಾಖಲೆಗಳು",
+      "photo": "ಫೋಟೋ"
+    },
+    "actions": {
+      "edit": "ಸಂಪಾದಿಸಿ",
+      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+    },
+    "fields": {
+      "category": "ವರ್ಗ",
+      "statusReason": "ಸ್ಥಿತಿ ಕಾರಣ",
+      "name": "ಹೆಸರು",
+      "phone": "ಫೋನ್",
+      "father": "ತಂದೆ",
+      "mother": "ತಾಯಿ",
+      "guardian": "ರಕ್ಷಕ",
+      "annualIncome": "ವಾರ್ಷಿಕ ಆದಾಯ"
+    },
+    "hiddenFamily": {
+      "title": "ಕುಟುಂಬ ವಿವರ ಮರೆಮಾಡಲಾಗಿದೆ",
+      "description": "ನಿಮ್ಮ ಪಾತ್ರವು ಮೂಲ ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಮಾತ್ರ ನೋಡಬಹುದು. ಕುಟುಂಬ ಮತ್ತು ಆದಾಯ ಮಾಹಿತಿ ತೋರಿಸಲಾಗುವುದಿಲ್ಲ."
+    },
+    "avatar": {
+      "title": "ವಿದ್ಯಾರ್ಥಿ ಫೋಟೋ",
+      "description": "ಪಟ್ಟಿಯು ಉಚಿತ ಆದ್ಯಾಕ್ಷರ ಅವತಾರ್‌ಗಳನ್ನು ಬಳಸುತ್ತದೆ. ಅಪ್‌ಲೋಡ್ ಫೋಟೋಗಳು R2 ನಲ್ಲಿ ಸಂಗ್ರಹವಾಗುತ್ತವೆ ಮತ್ತು \"ಫೋಟೋ ನೋಡಿ\" ಕ್ಲಿಕ್ ಮಾಡಿದಾಗ ಮಾತ್ರ ಲೋಡ್ ಆಗುತ್ತವೆ.",
+      "viewPhoto": "ಅಪ್‌ಲೋಡ್ ಫೋಟೋ ನೋಡಿ",
+      "loadError": "ಫೋಟೋ ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.",
+      "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+      "uploading": "ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+      "replacePhoto": "ಫೋಟೋ ಬದಲಾಯಿಸಿ",
+      "uploadPhoto": "ಫೋಟೋ ಅಪ್‌ಲೋಡ್",
+      "noPhoto": "ಈ ವಿದ್ಯಾರ್ಥಿಗೆ ಅಪ್‌ಲೋಡ್ ಫೋಟೋ ಇಲ್ಲ.",
+      "invalidFile": "ಚಿತ್ರ ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
+      "success": "ಫೋಟೋ ನವೀಕರಿಸಲಾಗಿದೆ",
+      "error": "ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+      "alt": "ವಿದ್ಯಾರ್ಥಿ ಫೋಟೋ"
+    }
+  },
+  "deactivate": {
+    "title": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ಬದಲಾಯಿಸಿ",
+    "description": "{{name}} ಗಾಗಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಿ. ಈ ಕ್ರಿಯೆಯನ್ನು ಆಡಿಟ್ ಲಾಗ್‌ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗುತ್ತದೆ.",
+    "newStatus": "ಹೊಸ ಸ್ಥಿತಿ",
+    "reason": "ಕಾರಣ",
+    "success": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    "error": "ವಿದ್ಯಾರ್ಥಿ ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ"
+  },
+  "validation": {
+    "dateRequired": "ದಿನಾಂಕ ಅಗತ್ಯ",
+    "invalidDate": "DD/MM/YYYY ಸ್ವರೂಪದಲ್ಲಿ ಮಾನ್ಯ ದಿನಾಂಕ ನಮೂದಿಸಿ",
+    "invalidYear": "ಮಾನ್ಯ ವರ್ಷ ನಮೂದಿಸಿ",
+    "invalidMonth": "ಮಾನ್ಯ ತಿಂಗಳು ನಮೂದಿಸಿ",
+    "invalidDay": "ಮಾನ್ಯ ದಿನ ನಮೂದಿಸಿ",
+    "invalidDateValue": "ಮಾನ್ಯ ದಿನಾಂಕ ನಮೂದಿಸಿ",
+    "invalidDateFormat": "DD/MM/YYYY ಬಳಸಿ (ಉದಾ. 15/05/2010)",
+    "dobRequired": "ಜನ್ಮ ದಿನಾಂಕ ಅಗತ್ಯ",
+    "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯ",
+    "phone": "10 ಅಂಕೆಗಳ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
+    "contactNameRequired": "ಸಂಪರ್ಕ ಹೆಸರು ಅಗತ್ಯ",
+    "relationshipRequired": "ಸಂಬಂಧ ಅಗತ್ಯ",
+    "rollNumberRequired": "ರೋಲ್ ಸಂಖ್ಯೆ ಅಗತ್ಯ",
+    "villageRequired": "ಗ್ರಾಮ / ಪಟ್ಟಣ ಅಗತ್ಯ",
+    "talukRequired": "ತಾಲೂಕು / ಮಂಡಲ ಅಗತ್ಯ",
+    "districtRequired": "ಜಿಲ್ಲೆ ಅಗತ್ಯ",
+    "pincodeRequired": "ಪಿನ್ ಕೋಡ್ ಅಗತ್ಯ",
+    "aadhaar": "ಆಧಾರ್ ನಿಖರವಾಗಿ 12 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
+    "satsId": "SATS ಐಡಿ ನಿಖರವಾಗಿ 9 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
+    "reasonRequired": "ಕಾರಣ ಅಗತ್ಯ"
+  }
+}

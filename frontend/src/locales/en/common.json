@@ -1,0 +1,80 @@
+{
+  "appName": "Shivayogi Jnana Mandir",
+  "appSubtitle": "Trust ERP",
+  "nav": {
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "remarks": "Remarks",
+    "hostel": "Hostel",
+    "medical": "Medical",
+    "documents": "Documents",
+    "import": "Bulk Import",
+    "staff": "Staff",
+    "lookups": "Lookups",
+    "auditLogs": "Audit Logs"
+  },
+  "actions": {
+    "signOut": "Sign out",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "apply": "Apply",
+    "search": "Search",
+    "add": "Add",
+    "view": "View",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "language": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ"
+  },
+  "status": {
+    "active": "Active",
+    "alumni": "Alumni",
+    "discontinued": "Discontinued"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "parentStatus": {
+    "bothAlive": "Both Alive",
+    "singleMother": "Single Mother",
+    "orphan": "Orphan"
+  },
+  "optional": "Optional",
+  "notSet": "Not set",
+  "loading": "Loading…",
+  "saving": "Saving…",
+  "errors": {
+    "loadStudents": "Could not load students. Is the backend running?",
+    "generic": "Something went wrong",
+    "sessionExpired": "Session expired",
+    "fileTooLarge": "File must be 25 MB or smaller",
+    "uploadStorageFailed": "Failed to upload file to storage ({{status}})",
+    "avatarUploadFailed": "Failed to upload photo to storage ({{status}})"
+  },
+  "confirm": "Confirm",
+  "adding": "Adding…",
+  "selectPlaceholder": "Select…",
+  "lookups": {
+    "language": "Select language",
+    "standard": "Select standard",
+    "section": "No section",
+    "academicYear": "Select academic year"
+  },
+  "staffStatus": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "documentStatus": {
+    "pendingReview": "Pending review",
+    "verified": "Verified",
+    "rejected": "Rejected",
+    "renewalNeeded": "Renewal needed"
+  },
+  "loadingProfile": "Loading profile…",
+  "staffFallback": "Staff"
+}

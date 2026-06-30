@@ -27,6 +27,12 @@ async function getPermissions(profileId: string): Promise<string[]> {
 }
 
 export const studentController = {
+  async getNextAdmissionNumber(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await studentService.getNextAdmissionNumber(tenantId);
+    res.json({ success: true, data });
+  },
+
   async list(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const query = studentListQuerySchema.parse(req.query);

@@ -6,7 +6,12 @@ import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { DocumentQueuePage } from '@/features/documents/DocumentQueuePage';
 import { ImportPage } from '@/features/import/ImportPage';
+import { HostelAttendanceMarkPage } from '@/features/hostel/HostelAttendanceMarkPage';
+import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
+import { HostelPage } from '@/features/hostel/HostelPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
+import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
+import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
 import { StudentFormPage } from '@/features/students/StudentFormPage';
@@ -62,6 +67,46 @@ export function AppRoutes() {
             element={
               <PermissionRoute permission="students:read">
                 <StudentListPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/remarks"
+            element={
+              <PermissionRoute permission="remarks:read">
+                <RemarksPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/medical-records"
+            element={
+              <PermissionRoute permission="medical:read">
+                <MedicalRecordsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hostel/attendance/:sessionId"
+            element={
+              <PermissionRoute permission="hostel_attendance:record">
+                <HostelAttendanceMarkPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hostel/attendance"
+            element={
+              <PermissionRoute permission="hostel_attendance:read">
+                <HostelAttendancePage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hostel"
+            element={
+              <PermissionRoute permission="hostel:read">
+                <HostelPage />
               </PermissionRoute>
             }
           />

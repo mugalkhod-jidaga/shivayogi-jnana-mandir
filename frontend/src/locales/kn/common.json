@@ -1,0 +1,80 @@
+{
+  "appName": "ಶಿವಯೋಗಿ ಜ್ಞಾನ ಮಂದಿರ",
+  "appSubtitle": "ಟ್ರಸ್ಟ್ ಇಆರ್‌ಪಿ",
+  "nav": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "remarks": "ಟಿಪ್ಪಣಿಗಳು",
+    "hostel": "ವಸತಿ ನಿಲಯ",
+    "medical": "ವೈದ್ಯಕೀಯ",
+    "documents": "ದಾಖಲೆಗಳು",
+    "import": "ಬಲ್ಕ್ ಆಮದು",
+    "staff": "ಸಿಬ್ಬಂದಿ",
+    "lookups": "ಲುಕಪ್‌ಗಳು",
+    "auditLogs": "ಆಡಿಟ್ ಲಾಗ್‌ಗಳು"
+  },
+  "actions": {
+    "signOut": "ಸೈನ್ ಔಟ್",
+    "cancel": "ರದ್ದು",
+    "save": "ಉಳಿಸಿ",
+    "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "apply": "ಅನ್ವಯಿಸಿ",
+    "search": "ಹುಡುಕಿ",
+    "add": "ಸೇರಿಸಿ",
+    "view": "ನೋಡಿ",
+    "previous": "ಹಿಂದಿನ",
+    "next": "ಮುಂದಿನ"
+  },
+  "language": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ"
+  },
+  "status": {
+    "active": "ಸಕ್ರಿಯ",
+    "alumni": "ಪೂರ್ವ ವಿದ್ಯಾರ್ಥಿ",
+    "discontinued": "ನಿಲ್ಲಿಸಲಾಗಿದೆ"
+  },
+  "gender": {
+    "male": "ಪುರುಷ",
+    "female": "ಮಹಿಳೆ",
+    "other": "ಇತರೆ"
+  },
+  "parentStatus": {
+    "bothAlive": "ಇಬ್ಬರೂ ಜೀವಂತ",
+    "singleMother": "ಏಕಾಂಗಿ ತಾಯಿ",
+    "orphan": "ಅನಾಥ"
+  },
+  "optional": "ಐಚ್ಛಿಕ",
+  "notSet": "ಹೊಂದಿಸಲಾಗಿಲ್ಲ",
+  "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+  "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
+  "errors": {
+    "loadStudents": "ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ಬ್ಯಾಕೆಂಡ್ ಚಾಲನೆಯಲ್ಲಿದೆಯೇ?",
+    "generic": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
+    "sessionExpired": "ಸೆಷನ್ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "fileTooLarge": "ಫೈಲ್ 25 MB ಅಥವಾ ಅದಕ್ಕಿಂತ ಚಿಕ್ಕದಾಗಿರಬೇಕು",
+    "uploadStorageFailed": "ಸಂಗ್ರಹಣೆಗೆ ಫೈಲ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ ({{status}})",
+    "avatarUploadFailed": "ಫೋಟೋ ಸಂಗ್ರಹಣೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ ({{status}})"
+  },
+  "confirm": "ದೃಢೀಕರಿಸಿ",
+  "adding": "ಸೇರಿಸಲಾಗುತ್ತಿದೆ…",
+  "selectPlaceholder": "ಆಯ್ಕೆಮಾಡಿ…",
+  "lookups": {
+    "language": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+    "standard": "ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ",
+    "section": "ವಿಭಾಗ ಇಲ್ಲ",
+    "academicYear": "ಶೈಕ್ಷಣಿಕ ವರ್ಷ ಆಯ್ಕೆಮಾಡಿ"
+  },
+  "staffStatus": {
+    "active": "ಸಕ್ರಿಯ",
+    "inactive": "ನಿಷ್ಕ್ರಿಯ"
+  },
+  "documentStatus": {
+    "pendingReview": "ಪರಿಶೀಲನೆ ಬಾಕಿ",
+    "verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+    "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+    "renewalNeeded": "ನವೀಕರಣ ಅಗತ್ಯ"
+  },
+  "loadingProfile": "ಪ್ರೊಫೈಲ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+  "staffFallback": "ಸಿಬ್ಬಂದಿ"
+}

@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,20 +19,29 @@ import { Label } from '@/components/ui/label';
 import { normalizeIndianPhone } from '@/lib/phone';
 import { supabase } from '@/lib/supabase';
 
-const loginSchema = z.object({
-  phone: z
-    .string()
-    .min(10, 'Enter a 10-digit mobile number')
-    .max(10, 'Enter a 10-digit mobile number')
-    .regex(/^\d{10}$/, 'Enter a 10-digit mobile number'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = {
+  phone: string;
+  password: string;
+};
 
 export function LoginPage() {
+  const { t } = useTranslation('auth');
+  const { t: tc } = useTranslation();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        phone: z
+          .string()
+          .min(10, t('validation.phone'))
+          .max(10, t('validation.phone'))
+          .regex(/^\d{10}$/, t('validation.phone')),
+        password: z.string().min(1, t('validation.passwordRequired')),
+      }),
+    [t],
+  );
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -47,33 +58,35 @@ export function LoginPage() {
       });
 
       if (error) {
-        toast.error('Invalid phone number or password');
+        toast.error(t('invalidCredentials'));
         return;
       }
 
       const redirectTo = (location.state as { from?: string } | null)?.from;
       if (redirectTo && redirectTo !== '/login') {
-        // ProtectedRoute will handle must-reset redirect after /users/me loads
         return;
       }
     } catch {
-      toast.error('Invalid phone number or password');
+      toast.error(t('invalidCredentials'));
     } finally {
       setIsSubmitting(false);
     }
   });
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <main className="relative flex min-h-screen items-center justify-center p-4">
+      <div className="absolute right-4 top-4">
+        <LanguageToggle />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle>Shivayogi Jnana Mandir</CardTitle>
-          <CardDescription>Sign in with your staff credentials</CardDescription>
+          <CardTitle>{tc('appName')}</CardTitle>
+          <CardDescription>{t('subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="phone">Mobile number</Label>
+              <Label htmlFor="phone">{t('mobileNumber')}</Label>
               <div className="flex">
                 <span className="inline-flex h-9 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
                   +91
@@ -82,7 +95,7 @@ export function LoginPage() {
                   id="phone"
                   inputMode="numeric"
                   autoComplete="tel"
-                  placeholder="Enter Mobile Number"
+                  placeholder={t('mobilePlaceholder')}
                   className="rounded-l-none"
                   {...form.register('phone')}
                 />
@@ -93,7 +106,7 @@ export function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -106,7 +119,7 @@ export function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? t('signingIn') : t('signIn')}
             </Button>
           </form>
         </CardContent>

@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,12 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import {
   buildCreateStaffPayload,
-  createStaffFormSchema,
   type CreateStaffFormValues,
 } from '@/features/staff/schemas/staffForm.schema';
 import { useLookups } from '@/hooks/useLookups';
 import { useCreateStaff, useRoles } from '@/hooks/useStaff';
+import { useStaffFormSchemas } from '@/hooks/useStaffFormSchemas';
 import { ApiError } from '@/lib/api';
+import { roleLabel } from '@/lib/enumLabels';
 import { formatPhoneInput } from '@/lib/phone';
 
 type CreateStaffDialogProps = {
@@ -23,6 +25,9 @@ type CreateStaffDialogProps = {
 };
 
 export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaffDialogProps) {
+  const { t } = useTranslation('staff');
+  const { t: tc } = useTranslation();
+  const { createStaffFormSchema } = useStaffFormSchemas();
   const createStaff = useCreateStaff();
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
   const { academicStandards } = useLookups();
@@ -65,10 +70,9 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
       setAssignedStandardIds([]);
       onOpenChange(false);
       onCreated(staffName, meta.tempPassword);
-      toast.success('Staff account created');
+      toast.success(t('create.success'));
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Could not create staff account';
+      const message = error instanceof ApiError ? error.message : t('create.error');
       toast.error(message);
     }
   });
@@ -76,14 +80,12 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h2 className="text-lg font-semibold">Create staff account</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          A temporary password will be generated and shown once after creation.
-        </p>
+        <h2 className="text-lg font-semibold">{t('create.title')}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t('create.description')}</p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
+            <Label htmlFor="firstName">{t('create.firstName')}</Label>
             <Input id="firstName" {...form.register('firstName')} />
             {form.formState.errors.firstName && (
               <p className="text-sm text-destructive">{form.formState.errors.firstName.message}</p>
@@ -91,12 +93,12 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last name (optional)</Label>
+            <Label htmlFor="lastName">{t('create.lastName')}</Label>
             <Input id="lastName" {...form.register('lastName')} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Mobile number</Label>
+            <Label htmlFor="phone">{t('create.mobile')}</Label>
             <div className="flex">
               <span className="inline-flex items-center rounded-l-md border border-r-0 bg-muted px-3 text-sm text-muted-foreground">
                 +91
@@ -119,12 +121,12 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="roleId">Role</Label>
+            <Label htmlFor="roleId">{t('create.role')}</Label>
             <Select id="roleId" disabled={rolesLoading} {...form.register('roleId')}>
-              <option value="">Select role</option>
+              <option value="">{t('create.rolePlaceholder')}</option>
               {roles.map((role) => (
                 <option key={role.id} value={String(role.id)}>
-                  {role.name}
+                  {roleLabel(t, role.name)}
                 </option>
               ))}
             </Select>
@@ -135,10 +137,8 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
 
           {showStandardAssignments && (
             <div className="space-y-2">
-              <Label>Assigned standards</Label>
-              <p className="text-xs text-muted-foreground">
-                Teacher/Warden accounts only see students in the selected standards.
-              </p>
+              <Label>{t('create.standardAssignments')}</Label>
+              <p className="text-xs text-muted-foreground">{t('create.standardHint')}</p>
               <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
                 {academicStandards.map((standard) => (
                   <label key={standard.id} className="flex items-center gap-2 text-sm">
@@ -156,10 +156,10 @@ export function CreateStaffDialog({ open, onOpenChange, onCreated }: CreateStaff
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tc('actions.cancel')}
             </Button>
             <Button type="submit" disabled={createStaff.isPending}>
-              {createStaff.isPending ? 'Creating…' : 'Create account'}
+              {createStaff.isPending ? t('create.submitting') : t('create.submit')}
             </Button>
           </div>
         </form>

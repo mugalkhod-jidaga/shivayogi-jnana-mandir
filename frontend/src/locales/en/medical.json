@@ -1,0 +1,39 @@
+{
+  "loading": "Loading medical records…",
+  "empty": "No medical records for this student yet.",
+  "ongoing": "Ongoing",
+  "list": {
+    "title": "Medical Records",
+    "description": "View and filter student medical records across the school.",
+    "allTypes": "All record types",
+    "empty": "No medical records found.",
+    "pagination": "Page {{page}} of {{totalPages}} ({{total}} total)",
+    "columns": {
+      "date": "Recorded on",
+      "student": "Student",
+      "type": "Type",
+      "title": "Title"
+    }
+  },
+  "actions": {
+    "addRecord": "Add record",
+    "cancel": "Cancel",
+    "saveRecord": "Save record"
+  },
+  "form": {
+    "type": "Record type",
+    "title": "Title",
+    "description": "Description",
+    "recordedOn": "Recorded on",
+    "isOngoing": "Ongoing condition",
+    "selectType": "Select type"
+  },
+  "errors": {
+    "createFailed": "Failed to create medical record"
+  },
+  "detail": {
+    "tabs": {
+      "medical": "Medical"
+    }
+  }
+}

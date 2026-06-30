@@ -1,0 +1,45 @@
+{
+  "title": "Bulk Import",
+  "description": "Upload a CSV or spreadsheet, review validation errors, then commit student records.",
+  "steps": {
+    "upload": "Upload",
+    "preview": "Preview",
+    "done": "Done"
+  },
+  "upload": {
+    "title": "Upload spreadsheet",
+    "description": "CSV or Excel (.xlsx / .xls), up to 5 MB. Date of birth uses DD/MM/YYYY (e.g. 15/05/2010). Other columns match the sample file.",
+    "sampleLink": "Download sample CSV",
+    "chooseFile": "Choose file",
+    "parsing": "Parsing…",
+    "invalidType": "Only .csv, .xlsx, and .xls files are allowed",
+    "parseSuccess": "Parsed {{count}} valid row(s)",
+    "parseError": "Could not parse file"
+  },
+  "preview": {
+    "summary": "{{name}} — {{valid}} valid row(s)",
+    "errorsSuffix": ", {{count}} error(s)",
+    "validRowsTitle": "Valid rows ({{count}})",
+    "errorsTitle": "Errors ({{count}})",
+    "errorsHint": "These rows will not be imported. Fix the file and upload again, or commit the valid rows only.",
+    "commit": "Import {{count}} student(s)",
+    "committing": "Importing…",
+    "back": "Choose another file",
+    "columns": {
+      "row": "Row",
+      "admissionNumber": "Admission #",
+      "name": "Name",
+      "dob": "DOB",
+      "district": "District",
+      "contact": "Contact",
+      "error": "Error"
+    }
+  },
+  "done": {
+    "title": "Import complete",
+    "imported": "Successfully inserted {{count}} student record(s).",
+    "viewStudents": "View students",
+    "importAnother": "Import another file"
+  },
+  "commitError": "Import failed"
+}

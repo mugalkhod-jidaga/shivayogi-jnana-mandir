@@ -16,6 +16,13 @@ import {
 export const studentRoutes = Router();
 
 studentRoutes.get(
+  '/admission-number/next',
+  extractTenantMiddleware,
+  requirePermission('students:create'),
+  asyncHandler(studentController.getNextAdmissionNumber),
+);
+
+studentRoutes.get(
   '/',
   extractTenantMiddleware,
   requirePermission('students:read'),

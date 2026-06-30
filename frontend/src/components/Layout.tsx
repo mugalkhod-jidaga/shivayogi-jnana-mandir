@@ -1,14 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { LogOut } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useMe } from '@/hooks/useMe';
 import { usePermissions } from '@/hooks/usePermissions';
-import { NAV_ITEMS } from '@/lib/navigation';
+import { useNavItems } from '@/lib/navigation';
+import { roleLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
-
-const APP_NAME = 'Shivayogi Jnana Mandir';
+import { useTranslation } from 'react-i18next';
 
 export function Layout() {
   const navigate = useNavigate();
@@ -16,10 +17,14 @@ export function Layout() {
   const { signOut } = useAuth();
   const { data: me } = useMe();
   const { hasPermission } = usePermissions();
+  const { t } = useTranslation();
+  const navItems = useNavItems();
 
-  const visibleNavItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
-  const displayName = me ? [me.firstName, me.lastName].filter(Boolean).join(' ') : 'Staff';
-  const roleName = me?.roles[0]?.name ?? 'Staff';
+  const visibleNavItems = navItems.filter((item) => hasPermission(item.permission));
+  const displayName = me
+    ? [me.firstName, me.lastName].filter(Boolean).join(' ')
+    : t('staffFallback');
+  const roleName = me?.roles[0]?.name ? roleLabel(t, me.roles[0].name) : t('staffFallback');
 
   const handleSignOut = () => {
     void (async () => {
@@ -33,8 +38,8 @@ export function Layout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
         <div className="border-b px-6 py-5">
-          <p className="text-sm font-semibold leading-tight">{APP_NAME}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Trust ERP</p>
+          <p className="text-sm font-semibold leading-tight">{t('appName')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t('appSubtitle')}</p>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
@@ -62,10 +67,11 @@ export function Layout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b bg-card px-4 py-3 md:px-6">
           <div className="min-w-0 md:hidden">
-            <p className="truncate text-sm font-semibold">{APP_NAME}</p>
+            <p className="truncate text-sm font-semibold">{t('appName')}</p>
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <LanguageToggle />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">{displayName}</p>
               <p className="text-xs text-muted-foreground">{roleName}</p>
@@ -75,7 +81,7 @@ export function Layout() {
             </span>
             <Button type="button" variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="size-4" />
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden sm:inline">{t('actions.signOut')}</span>
             </Button>
           </div>
         </header>

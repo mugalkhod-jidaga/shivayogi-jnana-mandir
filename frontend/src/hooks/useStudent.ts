@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { studentKeys } from '@/hooks/useStudents';
+import i18n from '@/lib/i18n';
 import type {
   AvatarDownloadResponse,
   AvatarPresignResponse,
@@ -15,6 +16,15 @@ export function useStudent(id: string | undefined) {
     queryKey: studentKeys.detail(id ?? ''),
     queryFn: () => apiFetch<StudentDetail>(`/students/${id}`),
     enabled: Boolean(id),
+  });
+}
+
+export function useNextAdmissionNumber(enabled = true) {
+  return useQuery({
+    queryKey: ['students', 'next-admission-number'],
+    queryFn: () => apiFetch<{ admissionNumber: string }>('/students/admission-number/next'),
+    enabled,
+    staleTime: 30_000,
   });
 }
 
@@ -85,7 +95,9 @@ export function useAvatarUpload(id: string) {
       });
 
       if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload avatar to storage (${uploadResponse.status})`);
+        throw new Error(
+          i18n.t('errors.avatarUploadFailed', { status: uploadResponse.status }),
+        );
       }
 
       return apiFetch<StudentDetail>(`/students/${id}/avatar/confirm`, {

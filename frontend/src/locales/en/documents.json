@@ -1,0 +1,68 @@
+{
+  "queue": {
+    "title": "Documents",
+    "description": "Review uploaded documents across students. Finance users only see Income Certificate and BPL Card.",
+    "searchPlaceholder": "Search by student name or admission number",
+    "loading": "Loading documents…",
+    "error": "Could not load document queue.",
+    "noResults": "No documents match this filter.",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "filters": {
+      "pendingReview": "Pending review",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "renewalNeeded": "Renewal needed",
+      "all": "All"
+    },
+    "columns": {
+      "student": "Student",
+      "type": "Type",
+      "status": "Status",
+      "uploaded": "Uploaded",
+      "file": "File",
+      "actions": "Actions"
+    }
+  },
+  "upload": {
+    "title": "Upload document",
+    "description": "PDF or image files up to 25 MB. Uploads go to secure storage and start as Pending Review.",
+    "type": "Document type",
+    "typePlaceholder": "Select type",
+    "expiryDate": "Expiry date (optional)",
+    "chooseFile": "Choose file",
+    "file": "File",
+    "submit": "Upload",
+    "submitting": "Uploading…",
+    "success": "Document uploaded",
+    "error": "Could not upload document",
+    "typeRequired": "Choose a document type first",
+    "invalidFile": "Only PDF and image files are allowed"
+  },
+  "studentTab": {
+    "uploadedTitle": "Uploaded documents",
+    "financeNote": "Finance users only see Income Certificate and BPL Card here.",
+    "loading": "Loading documents…",
+    "error": "Could not load documents for this student.",
+    "empty": "No documents uploaded yet.",
+    "columns": {
+      "type": "Type",
+      "file": "File",
+      "status": "Status",
+      "uploaded": "Uploaded",
+      "expires": "Expiry",
+      "actions": "Actions"
+    }
+  },
+  "actions": {
+    "download": "Download",
+    "verify": "Verify",
+    "reject": "Reject",
+    "renewalNeeded": "Renewal needed",
+    "verifySuccess": "Document verified",
+    "rejectSuccess": "Document rejected",
+    "renewalSuccess": "Marked as renewal needed",
+    "downloadError": "Could not download document",
+    "updateError": "Could not update document status",
+    "markedAs": "Document marked as {{status}}"
+  }
+}

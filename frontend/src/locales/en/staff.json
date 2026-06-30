@@ -1,0 +1,75 @@
+{
+  "list": {
+    "title": "Staff",
+    "description": "Create staff accounts, assign roles, and manage access.",
+    "addStaff": "Add staff",
+    "searchPlaceholder": "Search by name or phone",
+    "loading": "Loading staff…",
+    "error": "Could not load staff list. Try again later.",
+    "noResults": "No staff accounts match this search.",
+    "mustResetPassword": "Must reset password",
+    "cannotDeactivateSelf": "You cannot deactivate your own account",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "columns": {
+      "name": "Name",
+      "phone": "Phone",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "resetPassword": "Reset password",
+      "deactivate": "Deactivate"
+    }
+  },
+  "create": {
+    "title": "Create staff account",
+    "description": "A temporary password will be generated and shown once after creation.",
+    "firstName": "First name",
+    "lastName": "Last name (optional)",
+    "mobile": "Mobile number",
+    "role": "Role",
+    "rolePlaceholder": "Select role",
+    "standardAssignments": "Standard assignments",
+    "standardHint": "Teacher/Warden roles can only view students in assigned standards.",
+    "submit": "Create account",
+    "submitting": "Creating…",
+    "success": "Staff account created",
+    "error": "Could not create staff account"
+  },
+  "deactivate": {
+    "title": "Deactivate staff account",
+    "description": "Deactivate {{name}}? They will no longer be able to sign in.",
+    "confirm": "Deactivate",
+    "deactivating": "Deactivating…",
+    "success": "Staff account deactivated",
+    "error": "Could not deactivate staff account"
+  },
+  "resetPassword": {
+    "title": "Reset password",
+    "description": "Generate a new temporary password for {{name}}? It will be shown once and they must change it on next login.",
+    "confirm": "Reset password",
+    "resetting": "Resetting…",
+    "success": "Password reset",
+    "error": "Could not reset password"
+  },
+  "tempPassword": {
+    "title": "Temporary password",
+    "description": "Share this password with {{name}} once. It will not be shown again. They must change it on first login.",
+    "copy": "Copy",
+    "copied": "Password copied",
+    "copyError": "Could not copy password",
+    "done": "Done"
+  },
+  "roles": {
+    "superAdmin": "Super Admin",
+    "admissionsClerk": "Admissions Clerk",
+    "finance": "Finance",
+    "teacherWarden": "Teacher/Warden"
+  },
+  "validation": {
+    "firstNameRequired": "First name is required",
+    "phone": "Enter a 10-digit mobile number",
+    "roleRequired": "Choose a role"
+  }
+}

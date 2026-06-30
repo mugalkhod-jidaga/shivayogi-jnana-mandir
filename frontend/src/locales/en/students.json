@@ -1,0 +1,172 @@
+{
+  "list": {
+    "title": "Students",
+    "description": "Search, filter, and manage student records.",
+    "addStudent": "Add student",
+    "searchPlaceholder": "Search by name or admission number",
+    "allStatuses": "All statuses",
+    "noResults": "No students found.",
+    "loading": "Loading students…",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "columns": {
+      "admissionNumber": "Admission #",
+      "name": "Name",
+      "standard": "Standard",
+      "rollNumber": "Roll #",
+      "admissionDate": "Admission date",
+      "status": "Status"
+    }
+  },
+  "form": {
+    "addTitle": "Add student",
+    "editTitle": "Edit student",
+    "addDescription": "Create a student record. Documents and photo can be added after saving.",
+    "editDescription": "Update record for {{admissionNumber}}",
+    "loadingStudent": "Loading student…",
+    "nextAdmissionNumber": "Admission number",
+    "nextAdmissionHelp": "Assigned automatically when you save (SJM format).",
+    "admissionNumberLoading": "Loading…",
+    "sections": {
+      "basic": "Basic information",
+      "academic": "Academic placement",
+      "emergency": "Emergency contact",
+      "social": "Social & caste details",
+      "family": "Family & address"
+    },
+    "hints": {
+      "emergency": "A separate emergency contact in addition to the family primary contact.",
+      "social": "Sensitive information — visible only to authorized staff.",
+      "family": "Sensitive family and income details — visible only to authorized staff."
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "dob": "Date of birth",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "admissionDate": "Admission date",
+      "gender": "Gender",
+      "motherTongue": "Mother tongue",
+      "bloodGroup": "Blood group",
+      "admissionCategory": "Admission category",
+      "aadhaarNumber": "Aadhaar number",
+      "aadhaarPlaceholder": "12-digit Aadhaar (optional)",
+      "satsId": "SATS ID",
+      "satsIdPlaceholder": "9-digit Karnataka SATS ID (optional)",
+      "satsTransferStatus": "SATS transfer status",
+      "academicYear": "Academic year",
+      "standard": "Standard / class",
+      "section": "Section (optional)",
+      "rollNumber": "Roll number",
+      "previousSchool": "Previous school",
+      "previousSchoolAddress": "Previous school address",
+      "lastClassStudied": "Last class studied",
+      "contactName": "Contact name",
+      "relationship": "Relationship",
+      "emergencyPhone": "Emergency phone",
+      "religion": "Religion",
+      "socialCategory": "Social category",
+      "caste": "Caste",
+      "subCaste": "Sub-caste",
+      "rdNumber": "RD number",
+      "rdNumberSecondary": "RD number (secondary)",
+      "fatherName": "Father's name",
+      "motherName": "Mother's name",
+      "guardianName": "Guardian's name",
+      "parentStatus": "Parent status",
+      "annualIncome": "Annual income (₹)",
+      "primaryContact": "Primary contact",
+      "houseDetails": "House details",
+      "villageTown": "Village / town",
+      "talukMandal": "Taluk / mandal",
+      "district": "District",
+      "state": "State",
+      "pincode": "Pincode"
+    },
+    "createSuccess": "Student created. Add documents and photo from the student profile.",
+    "updateSuccess": "Student updated",
+    "createSubmit": "Create student",
+    "errors": {
+      "academicRequired": "Academic year and standard are required",
+      "noFamilyPermission": "You do not have permission to create students with family details",
+      "createFailed": "Could not create student",
+      "updateFailed": "Could not update student"
+    }
+  },
+  "satsStatus": {
+    "pending": "Pending",
+    "transferred": "Transferred",
+    "notApplicable": "Not applicable"
+  },
+  "detail": {
+    "admissionDescription": "Admission # {{admissionNumber}}",
+    "loading": "Loading student…",
+    "tabs": {
+      "profile": "Profile",
+      "documents": "Documents",
+      "photo": "Photo"
+    },
+    "actions": {
+      "edit": "Edit",
+      "deactivate": "Deactivate"
+    },
+    "fields": {
+      "category": "Category",
+      "statusReason": "Status reason",
+      "name": "Name",
+      "phone": "Phone",
+      "father": "Father",
+      "mother": "Mother",
+      "guardian": "Guardian",
+      "annualIncome": "Annual income"
+    },
+    "hiddenFamily": {
+      "title": "Family details hidden",
+      "description": "Your role can view basic student profiles only. Family and income information is not shown."
+    },
+    "avatar": {
+      "title": "Student photo",
+      "description": "The list uses free initials avatars. Uploaded photos are stored in R2 and load only when you click \"View photo\" here.",
+      "viewPhoto": "View uploaded photo",
+      "loadError": "Could not load photo.",
+      "retry": "Retry",
+      "uploading": "Uploading…",
+      "replacePhoto": "Replace photo",
+      "uploadPhoto": "Upload photo",
+      "noPhoto": "No uploaded photo for this student.",
+      "invalidFile": "Please choose an image file",
+      "success": "Photo updated",
+      "error": "Could not upload photo",
+      "alt": "Student photo"
+    }
+  },
+  "deactivate": {
+    "title": "Change student status",
+    "description": "Update status for {{name}}. This action is recorded in the audit log.",
+    "newStatus": "New status",
+    "reason": "Reason",
+    "success": "Student status updated",
+    "error": "Could not update student status"
+  },
+  "validation": {
+    "dateRequired": "Date is required",
+    "invalidDate": "Enter a valid date as DD/MM/YYYY",
+    "invalidYear": "Enter a valid year",
+    "invalidMonth": "Enter a valid month",
+    "invalidDay": "Enter a valid day",
+    "invalidDateValue": "Enter a valid date",
+    "invalidDateFormat": "Use DD/MM/YYYY (e.g. 15/05/2010)",
+    "dobRequired": "Date of birth is required",
+    "firstNameRequired": "First name is required",
+    "phone": "Enter a 10-digit mobile number",
+    "contactNameRequired": "Contact name is required",
+    "relationshipRequired": "Relationship is required",
+    "rollNumberRequired": "Roll number is required",
+    "villageRequired": "Village / town is required",
+    "talukRequired": "Taluk / mandal is required",
+    "districtRequired": "District is required",
+    "pincodeRequired": "Pincode is required",
+    "aadhaar": "Aadhaar must be exactly 12 digits",
+    "satsId": "SATS ID must be exactly 9 digits",
+    "reasonRequired": "Reason is required"
+  }
+}

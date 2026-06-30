@@ -2,16 +2,20 @@ import { z } from 'zod';
 
 export const createLookupValueSchema = z.object({
   value: z.string().trim().min(1).max(100),
+  labelKn: z.string().trim().max(100).optional(),
 });
 
 export const updateLookupValueSchema = z
   .object({
     value: z.string().trim().min(1).max(100).optional(),
     isActive: z.boolean().optional(),
+    labelKn: z.string().trim().max(100).optional().nullable(),
   })
-  .refine((data) => data.value !== undefined || data.isActive !== undefined, {
-    message: 'At least one field must be provided',
-  });
+  .refine(
+    (data) =>
+      data.value !== undefined || data.isActive !== undefined || data.labelKn !== undefined,
+    { message: 'At least one field must be provided' },
+  );
 
 export type CreateLookupValueInput = z.infer<typeof createLookupValueSchema>;
 export type UpdateLookupValueInput = z.infer<typeof updateLookupValueSchema>;
@@ -22,6 +26,7 @@ export type UpdateAcademicYearInput = z.infer<typeof updateAcademicYearSchema>;
 export const createAcademicStandardSchema = z.object({
   value: z.string().trim().min(1).max(100),
   sortOrder: z.number().int().min(0).optional(),
+  labelKn: z.string().trim().max(100).optional(),
 });
 
 export const createAcademicYearSchema = z.object({

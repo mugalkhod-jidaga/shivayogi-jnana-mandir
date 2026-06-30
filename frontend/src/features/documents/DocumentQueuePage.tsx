@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,8 @@ function formatStudentName(firstName: string, lastName: string | null) {
 }
 
 export function DocumentQueuePage() {
+  const { t } = useTranslation('documents');
+  const { t: tc } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -56,20 +59,20 @@ export function DocumentQueuePage() {
     setSearchParams(next);
   };
 
-  const statusFilters = [
-    { value: 'Pending Review', label: 'Pending review' },
-    { value: 'Verified', label: 'Verified' },
-    { value: 'Rejected', label: 'Rejected' },
-    { value: 'Renewal Needed', label: 'Renewal needed' },
-    { value: '', label: 'All' },
-  ];
+  const statusFilters = useMemo(
+    () => [
+      { value: 'Pending Review', label: t('queue.filters.pendingReview') },
+      { value: 'Verified', label: t('queue.filters.verified') },
+      { value: 'Rejected', label: t('queue.filters.rejected') },
+      { value: 'Renewal Needed', label: t('queue.filters.renewalNeeded') },
+      { value: '', label: t('queue.filters.all') },
+    ],
+    [t],
+  );
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Documents"
-        description="Review uploaded documents across students. Finance users only see Income Certificate and BPL Card."
-      />
+      <PageHeader title={t('queue.title')} description={t('queue.description')} />
 
       <div className="flex flex-wrap gap-2">
         {statusFilters.map((filter) => (
@@ -97,21 +100,19 @@ export function DocumentQueuePage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Search by student name or admission number"
+            placeholder={t('queue.searchPlaceholder')}
             className="pl-9"
           />
         </div>
-        <Button type="submit">Search</Button>
+        <Button type="submit">{tc('actions.search')}</Button>
       </form>
 
-      {isLoading && <p className="text-muted-foreground">Loading documents…</p>}
+      {isLoading && <p className="text-muted-foreground">{t('queue.loading')}</p>}
 
-      {isError && (
-        <p className="text-destructive">Could not load the document queue. Try again later.</p>
-      )}
+      {isError && <p className="text-destructive">{t('queue.error')}</p>}
 
       {!isLoading && !isError && documents.length === 0 && (
-        <p className="text-muted-foreground">No documents match this filter.</p>
+        <p className="text-muted-foreground">{t('queue.noResults')}</p>
       )}
 
       {!isLoading && !isError && documents.length > 0 && (
@@ -119,12 +120,12 @@ export function DocumentQueuePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-left">
-                <th className="px-4 py-3 font-medium">Student</th>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">File</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Uploaded</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.student')}</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.type')}</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.file')}</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.status')}</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.uploaded')}</th>
+                <th className="px-4 py-3 font-medium">{t('queue.columns.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -165,7 +166,7 @@ export function DocumentQueuePage() {
       {meta && meta.total > meta.limit && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {meta.page} of {totalPages} · {meta.total} total
+            {t('queue.pageOf', { page: meta.page, totalPages, total: meta.total })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -175,7 +176,7 @@ export function DocumentQueuePage() {
               disabled={meta.page <= 1}
               onClick={() => goToPage(meta.page - 1)}
             >
-              Previous
+              {tc('actions.previous')}
             </Button>
             <Button
               type="button"
@@ -184,7 +185,7 @@ export function DocumentQueuePage() {
               disabled={meta.page >= totalPages}
               onClick={() => goToPage(meta.page + 1)}
             >
-              Next
+              {tc('actions.next')}
             </Button>
           </div>
         </div>

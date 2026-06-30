@@ -6,11 +6,12 @@ import type {
   AcademicPlacementInput,
   EmergencyContactInput,
   FamilyDetailsInput,
+  SocialDetailsInput,
   StudentListQuery,
 } from '../schemas/student.schemas';
 
 const ENROLLMENT_SELECT = `
-  id, roll_number, previous_school, last_class_studied, enrolled_at, is_current,
+  id, roll_number, previous_school, previous_school_address, last_class_studied, enrolled_at, is_current,
   academic_year_id, standard_id, section_id,
   academic_year:lookup_academic_years(id, label, is_current),
   standard:lookup_academic_standards(id, value, sort_order),
@@ -23,6 +24,11 @@ const STUDENT_SELECT = `
   admission_category:lookup_admission_categories(id, value),
   mother_tongue:lookup_languages(id, value),
   family_details:student_family_details(*),
+  social_details:student_social_details(
+    id, religion_id, social_category_id, caste, sub_caste, rd_number, rd_number_secondary,
+    religion:lookup_religions(id, value),
+    social_category:lookup_social_categories(id, value)
+  ),
   current_enrollment:student_enrollments!left(
     ${ENROLLMENT_SELECT}
   ),
@@ -44,6 +50,8 @@ export interface StudentRow {
   admission_date: string;
   mother_tongue_id: number | null;
   aadhaar_number: string | null;
+  sats_id: string | null;
+  sats_transfer_status: string | null;
   status: string;
   status_reason: string | null;
   status_changed_at: string | null;
@@ -53,12 +61,26 @@ export interface StudentRow {
   family_details?: FamilyDetailsRow | FamilyDetailsRow[] | null;
   current_enrollment?: EnrollmentRow | EnrollmentRow[] | null;
   emergency_contacts?: EmergencyContactRow[] | null;
+  social_details?: SocialDetailsRow | SocialDetailsRow[] | null;
+}
+
+export interface SocialDetailsRow {
+  id: string;
+  religion_id: number | null;
+  social_category_id: number | null;
+  caste: string | null;
+  sub_caste: string | null;
+  rd_number: string | null;
+  rd_number_secondary: string | null;
+  religion?: { id: number; value: string } | null;
+  social_category?: { id: number; value: string } | null;
 }
 
 export interface EnrollmentRow {
   id: string;
   roll_number: string | null;
   previous_school: string | null;
+  previous_school_address: string | null;
   last_class_studied: string | null;
   enrolled_at: string;
   is_current: boolean;
@@ -118,10 +140,28 @@ function mapEnrollmentToDb(input: AcademicPlacementInput, admissionDate: string)
     section_id: input.sectionId ?? null,
     roll_number: input.rollNumber,
     previous_school: input.previousSchool ?? null,
+    previous_school_address: input.previousSchoolAddress ?? null,
     last_class_studied: input.lastClassStudied ?? null,
     is_current: true,
     enrolled_at: input.enrolledAt ?? admissionDate,
   };
+}
+
+function mapSocialToDb(input: SocialDetailsInput) {
+  return {
+    religion_id: input.religionId ?? null,
+    social_category_id: input.socialCategoryId ?? null,
+    caste: input.caste ?? null,
+    sub_caste: input.subCaste ?? null,
+    rd_number: input.rdNumber ?? null,
+    rd_number_secondary: input.rdNumberSecondary ?? null,
+  };
+}
+
+function unwrapSocial(row: StudentRow): SocialDetailsRow | null {
+  if (!row.social_details) return null;
+  if (Array.isArray(row.social_details)) return row.social_details[0] ?? null;
+  return row.social_details;
 }
 
 function unwrapFamily(row: StudentRow): FamilyDetailsRow | null {
@@ -228,6 +268,32 @@ export class StudentsRepository extends BaseRepository {
     return row;
   }
 
+  async peekNextAdmissionNumber(tenantId: number): Promise<string> {
+    const { data, error } = await supabase
+      .from('tenant_admission_sequences')
+      .select('prefix, next_number')
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+
+    if (error) throw new AppError(500, error.message);
+
+    const prefix = data?.prefix ?? 'SJM';
+    const nextNumber = data?.next_number ?? 1;
+    return `${prefix}${String(nextNumber).padStart(5, '0')}`;
+  }
+
+  async allocateAdmissionNumber(tenantId: number): Promise<string> {
+    const { data, error } = await supabase.rpc('allocate_admission_number', {
+      p_tenant_id: tenantId,
+    });
+
+    if (error) throw new AppError(500, error.message);
+    if (!data || typeof data !== 'string') {
+      throw new AppError(500, 'Failed to allocate admission number');
+    }
+    return data;
+  }
+
   async create(
     tenantId: number,
     student: Record<string, unknown>,
@@ -236,6 +302,7 @@ export class StudentsRepository extends BaseRepository {
     emergencyContacts: EmergencyContactInput[],
     admissionDate: string,
     userId: string,
+    socialDetails?: SocialDetailsInput,
   ): Promise<StudentRow> {
     const { data: created, error } = await supabase
       .from('students')
@@ -289,6 +356,17 @@ export class StudentsRepository extends BaseRepository {
       throw new AppError(500, `Failed to create emergency contacts: ${contactsError.message}`);
     }
 
+    if (socialDetails) {
+      const { error: socialError } = await supabase
+        .from('student_social_details')
+        .insert({ student_id: studentId, ...mapSocialToDb(socialDetails) });
+
+      if (socialError) {
+        await supabase.from('students').update({ deleted_at: new Date().toISOString() }).eq('id', studentId);
+        throw new AppError(500, `Failed to create social details: ${socialError.message}`);
+      }
+    }
+
     const full = await this.findByIdWithRelations(studentId, tenantId);
     if (!full) throw new AppError(500, 'Failed to load created student');
     return full;
@@ -313,6 +391,9 @@ export class StudentsRepository extends BaseRepository {
     if (changes.sectionId !== undefined) dbChanges.section_id = changes.sectionId;
     if (changes.rollNumber !== undefined) dbChanges.roll_number = changes.rollNumber;
     if (changes.previousSchool !== undefined) dbChanges.previous_school = changes.previousSchool;
+    if (changes.previousSchoolAddress !== undefined) {
+      dbChanges.previous_school_address = changes.previousSchoolAddress;
+    }
     if (changes.lastClassStudied !== undefined) dbChanges.last_class_studied = changes.lastClassStudied;
     if (changes.enrolledAt !== undefined) dbChanges.enrolled_at = changes.enrolledAt;
     else if (admissionDate !== undefined) dbChanges.enrolled_at = admissionDate;
@@ -321,6 +402,23 @@ export class StudentsRepository extends BaseRepository {
       .from('student_enrollments')
       .update(dbChanges)
       .eq('id', enrollment.data.id);
+
+    if (error) throw new AppError(500, error.message);
+  }
+
+  async updateSocialDetails(studentId: string, social: Partial<SocialDetailsInput>) {
+    const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (social.religionId !== undefined) dbChanges.religion_id = social.religionId;
+    if (social.socialCategoryId !== undefined) dbChanges.social_category_id = social.socialCategoryId;
+    if (social.caste !== undefined) dbChanges.caste = social.caste;
+    if (social.subCaste !== undefined) dbChanges.sub_caste = social.subCaste;
+    if (social.rdNumber !== undefined) dbChanges.rd_number = social.rdNumber;
+    if (social.rdNumberSecondary !== undefined) dbChanges.rd_number_secondary = social.rdNumberSecondary;
+
+    const { error } = await supabase
+      .from('student_social_details')
+      .update(dbChanges)
+      .eq('student_id', studentId);
 
     if (error) throw new AppError(500, error.message);
   }
@@ -379,6 +477,23 @@ export class StudentsRepository extends BaseRepository {
     return (data ?? []).map((row) => row.standard_id as number);
   }
 
+  async listStudentIdsByStandards(tenantId: number, standardIds: number[]): Promise<string[]> {
+    if (standardIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from('student_enrollments')
+      .select('student_id, students!inner(tenant_id, deleted_at)')
+      .eq('is_current', true)
+      .is('deleted_at', null)
+      .in('standard_id', standardIds)
+      .eq('students.tenant_id', tenantId)
+      .is('students.deleted_at', null);
+
+    if (error) throw new AppError(500, error.message);
+    const ids = new Set((data ?? []).map((row) => row.student_id as string));
+    return [...ids];
+  }
+
   async setAssignedStandardIds(userId: string, standardIds: number[]) {
     const { error: deleteError } = await supabase
       .from('user_standard_assignments')
@@ -418,20 +533,21 @@ export class StudentsRepository extends BaseRepository {
         status,
         status_reason: statusReason,
         status_changed_at: now,
-        deleted_at: now,
         updated_at: now,
         updated_by: userId,
       })
       .eq('id', id)
       .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
       .select(STUDENT_SELECT)
       .single();
 
     if (error) throw new AppError(500, error.message);
 
-    await auditLogService.record(userId, tenantId, 'students', id, 'soft_delete', {
+    await auditLogService.record(userId, tenantId, 'students', id, 'update', {
       before,
       after: data,
+      metadata: { action: 'deactivate', status, statusReason },
     });
 
     return data as StudentRow;
@@ -439,4 +555,4 @@ export class StudentsRepository extends BaseRepository {
 }
 
 export const studentsRepository = new StudentsRepository();
-export { unwrapFamily, unwrapEnrollment };
+export { unwrapFamily, unwrapEnrollment, unwrapSocial };

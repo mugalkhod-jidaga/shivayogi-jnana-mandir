@@ -1,5 +1,6 @@
-import { Pencil } from 'lucide-react';
+import { Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
@@ -7,15 +8,20 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { StudentDocumentsTab } from '@/features/documents/StudentDocumentsTab';
+import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
+import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
+import { genderLabel, parentStatusLabel, satsStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 
-type TabKey = 'profile' | 'documents' | 'avatar';
+import { pdfExports } from '@/lib/pdfDownload';
+
+type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'medical';
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -27,18 +33,37 @@ function DetailField({ label, value }: { label: string; value: string | null | u
 }
 
 export function StudentDetailPage() {
+  const { t } = useTranslation('students');
+  const { t: tc } = useTranslation();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
   const tabParam = searchParams.get('tab');
-  const [tab, setTab] = useState<TabKey>(() =>
-    tabParam === 'documents' || tabParam === 'avatar' ? tabParam : 'profile',
-  );
+  const [tab, setTab] = useState<TabKey>(() => {
+    if (
+      tabParam === 'documents' ||
+      tabParam === 'avatar' ||
+      tabParam === 'remarks' ||
+      tabParam === 'medical'
+    ) {
+      return tabParam;
+    }
+    return 'profile';
+  });
+  const { t: tRemarks } = useTranslation('remarks');
+  const { t: tMedical } = useTranslation('medical');
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
 
   useEffect(() => {
-    if (tabParam === 'documents' || tabParam === 'avatar' || tabParam === 'profile') {
+    if (
+      tabParam === 'documents' ||
+      tabParam === 'avatar' ||
+      tabParam === 'profile' ||
+      tabParam === 'remarks' ||
+      tabParam === 'medical'
+    ) {
       setTab(tabParam);
     }
   }, [tabParam]);
@@ -46,7 +71,7 @@ export function StudentDetailPage() {
   if (!id) return <Navigate to="/students" replace />;
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading student…</p>;
+    return <p className="text-muted-foreground">{t('detail.loading')}</p>;
   }
 
   if (isError || !student) {
@@ -59,16 +84,25 @@ export function StudentDetailPage() {
   const emergencyContact = student.emergencyContacts[0];
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: 'profile', label: 'Profile' },
+    { key: 'profile', label: t('detail.tabs.profile') },
     ...(hasPermission('documents:view')
-      ? [{ key: 'documents' as const, label: 'Documents' }]
+      ? [{ key: 'documents' as const, label: t('detail.tabs.documents') }]
       : []),
-    { key: 'avatar', label: 'Photo' },
+    ...(hasPermission('remarks:read')
+      ? [{ key: 'remarks' as const, label: tRemarks('detail.tabs.remarks') }]
+      : []),
+    ...(hasPermission('medical:read')
+      ? [{ key: 'medical' as const, label: tMedical('detail.tabs.medical') }]
+      : []),
+    { key: 'avatar', label: t('detail.tabs.photo') },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader title={displayName} description={`Admission # ${student.admissionNumber}`}>
+      <PageHeader
+        title={displayName}
+        description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
+      >
         <div className="flex flex-wrap items-center gap-3">
           <StudentInitialsAvatar
             firstName={student.firstName}
@@ -81,8 +115,23 @@ export function StudentDetailPage() {
               <Button asChild variant="outline" size="sm">
                 <Link to={`/students/${student.id}/edit`}>
                   <Pencil className="size-4" />
-                  Edit
+                  {t('detail.actions.edit')}
                 </Link>
+              </Button>
+            </RequirePermission>
+            <RequirePermission permission="exports:pdf">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pdfLoading}
+                onClick={() => {
+                  setPdfLoading(true);
+                  void pdfExports.studentDetail(student.id).finally(() => setPdfLoading(false));
+                }}
+              >
+                <Download className="size-4" />
+                PDF
               </Button>
             </RequirePermission>
             <RequirePermission permission="students:soft_delete">
@@ -93,7 +142,7 @@ export function StudentDetailPage() {
                   size="sm"
                   onClick={() => setDeactivateOpen(true)}
                 >
-                  Deactivate
+                  {t('detail.actions.deactivate')}
                 </Button>
               )}
             </RequirePermission>
@@ -122,72 +171,137 @@ export function StudentDetailPage() {
       {tab === 'profile' && (
         <div className="space-y-6">
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Basic information</h2>
+            <h2 className="text-lg font-medium">{t('form.sections.basic')}</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailField label="Admission number" value={student.admissionNumber} />
-              <DetailField label="Date of birth" value={formatDobDisplay(student.dob)} />
-              <DetailField label="Admission date" value={formatDobDisplay(student.admissionDate)} />
-              <DetailField label="Gender" value={student.gender} />
-              <DetailField label="Mother tongue" value={student.motherTongue?.value} />
-              <DetailField label="Blood group" value={student.bloodGroup?.value} />
-              <DetailField label="Category" value={student.admissionCategory?.value} />
-              <DetailField label="Aadhaar" value={student.aadhaarNumber} />
-              <DetailField label="Status reason" value={student.statusReason} />
+              <DetailField
+                label={t('list.columns.admissionNumber')}
+                value={student.admissionNumber}
+              />
+              <DetailField label={t('form.fields.dob')} value={formatDobDisplay(student.dob)} />
+              <DetailField
+                label={t('form.fields.admissionDate')}
+                value={formatDobDisplay(student.admissionDate)}
+              />
+              <DetailField label={t('form.fields.gender')} value={genderLabel(tc, student.gender)} />
+              <DetailField label={t('form.fields.motherTongue')} value={student.motherTongue?.value} />
+              <DetailField label={t('form.fields.bloodGroup')} value={student.bloodGroup?.value} />
+              <DetailField
+                label={t('detail.fields.category')}
+                value={student.admissionCategory?.value}
+              />
+              <DetailField label={t('form.fields.aadhaarNumber')} value={student.aadhaarNumber} />
+              <DetailField label={t('form.fields.satsId')} value={student.satsId} />
+              <DetailField
+                label={t('form.fields.satsTransferStatus')}
+                value={satsStatusLabel(t, student.satsTransferStatus)}
+              />
+              <DetailField label={t('detail.fields.statusReason')} value={student.statusReason} />
             </dl>
           </section>
 
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Academic placement</h2>
+            <h2 className="text-lg font-medium">{t('form.sections.academic')}</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailField label="Academic year" value={enrollment?.academicYear?.value ?? null} />
-              <DetailField label="Standard" value={enrollment?.standard?.value ?? null} />
-              <DetailField label="Section" value={enrollment?.section?.value ?? null} />
-              <DetailField label="Roll number" value={enrollment?.rollNumber} />
-              <DetailField label="Previous school" value={enrollment?.previousSchool} />
-              <DetailField label="Last class studied" value={enrollment?.lastClassStudied} />
+              <DetailField
+                label={t('form.fields.academicYear')}
+                value={enrollment?.academicYear?.value ?? null}
+              />
+              <DetailField label={t('form.fields.standard')} value={enrollment?.standard?.value ?? null} />
+              <DetailField label={t('form.fields.section')} value={enrollment?.section?.value ?? null} />
+              <DetailField label={t('form.fields.rollNumber')} value={enrollment?.rollNumber} />
+              <DetailField
+                label={t('form.fields.previousSchool')}
+                value={enrollment?.previousSchool}
+              />
+              <DetailField
+                label={t('form.fields.previousSchoolAddress')}
+                value={enrollment?.previousSchoolAddress}
+              />
+              <DetailField
+                label={t('form.fields.lastClassStudied')}
+                value={enrollment?.lastClassStudied}
+              />
             </dl>
           </section>
 
           <section className="rounded-lg border p-6">
-            <h2 className="text-lg font-medium">Emergency contact</h2>
+            <h2 className="text-lg font-medium">{t('form.sections.emergency')}</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailField label="Name" value={emergencyContact?.contactName} />
-              <DetailField label="Relationship" value={emergencyContact?.relationship} />
-              <DetailField label="Phone" value={emergencyContact?.phone} />
+              <DetailField label={t('detail.fields.name')} value={emergencyContact?.contactName} />
+              <DetailField
+                label={t('form.fields.relationship')}
+                value={emergencyContact?.relationship}
+              />
+              <DetailField label={t('detail.fields.phone')} value={emergencyContact?.phone} />
             </dl>
           </section>
+
+          {canViewFamily && student.socialDetails && (
+            <section className="rounded-lg border p-6">
+              <h2 className="text-lg font-medium">{t('form.sections.social')}</h2>
+              <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <DetailField label={t('form.fields.religion')} value={student.socialDetails.religion?.value} />
+                <DetailField
+                  label={t('form.fields.socialCategory')}
+                  value={student.socialDetails.socialCategory?.value}
+                />
+                <DetailField label={t('form.fields.caste')} value={student.socialDetails.caste} />
+                <DetailField label={t('form.fields.subCaste')} value={student.socialDetails.subCaste} />
+                <DetailField label={t('form.fields.rdNumber')} value={student.socialDetails.rdNumber} />
+                <DetailField
+                  label={t('form.fields.rdNumberSecondary')}
+                  value={student.socialDetails.rdNumberSecondary}
+                />
+              </dl>
+            </section>
+          )}
 
           {canViewFamily && student.familyDetails && (
             <section className="rounded-lg border p-6">
-              <h2 className="text-lg font-medium">Family & address</h2>
+              <h2 className="text-lg font-medium">{t('form.sections.family')}</h2>
               <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <DetailField label="Father" value={student.familyDetails.fatherName} />
-                <DetailField label="Mother" value={student.familyDetails.motherName} />
-                <DetailField label="Guardian" value={student.familyDetails.guardianName} />
-                <DetailField label="Parent status" value={student.familyDetails.parentStatus} />
+                <DetailField label={t('detail.fields.father')} value={student.familyDetails.fatherName} />
+                <DetailField label={t('detail.fields.mother')} value={student.familyDetails.motherName} />
+                <DetailField label={t('detail.fields.guardian')} value={student.familyDetails.guardianName} />
                 <DetailField
-                  label="Annual income"
+                  label={t('form.fields.parentStatus')}
+                  value={parentStatusLabel(tc, student.familyDetails.parentStatus)}
+                />
+                <DetailField
+                  label={t('detail.fields.annualIncome')}
                   value={
                     student.familyDetails.annualIncome != null
                       ? `₹${student.familyDetails.annualIncome}`
                       : null
                   }
                 />
-                <DetailField label="Primary contact" value={student.familyDetails.primaryContact} />
-                <DetailField label="House details" value={student.familyDetails.houseDetails} />
-                <DetailField label="Village / town" value={student.familyDetails.villageTown} />
-                <DetailField label="Taluk / mandal" value={student.familyDetails.talukMandal} />
-                <DetailField label="District" value={student.familyDetails.district} />
-                <DetailField label="State" value={student.familyDetails.state} />
-                <DetailField label="Pincode" value={student.familyDetails.pincode} />
+                <DetailField
+                  label={t('form.fields.primaryContact')}
+                  value={student.familyDetails.primaryContact}
+                />
+                <DetailField
+                  label={t('form.fields.houseDetails')}
+                  value={student.familyDetails.houseDetails}
+                />
+                <DetailField
+                  label={t('form.fields.villageTown')}
+                  value={student.familyDetails.villageTown}
+                />
+                <DetailField
+                  label={t('form.fields.talukMandal')}
+                  value={student.familyDetails.talukMandal}
+                />
+                <DetailField label={t('form.fields.district')} value={student.familyDetails.district} />
+                <DetailField label={t('form.fields.state')} value={student.familyDetails.state} />
+                <DetailField label={t('form.fields.pincode')} value={student.familyDetails.pincode} />
               </dl>
             </section>
           )}
 
           {!canViewFamily && (
             <PlaceholderPanel
-              title="Family details hidden"
-              description="Your role can view basic student profiles only. Family and income information is not shown."
+              title={t('detail.hiddenFamily.title')}
+              description={t('detail.hiddenFamily.description')}
             />
           )}
         </div>
@@ -195,6 +309,14 @@ export function StudentDetailPage() {
 
       {tab === 'documents' && hasPermission('documents:view') && (
         <StudentDocumentsTab studentId={student.id} />
+      )}
+
+      {tab === 'remarks' && hasPermission('remarks:read') && (
+        <StudentRemarksTab studentId={student.id} />
+      )}
+
+      {tab === 'medical' && hasPermission('medical:read') && (
+        <StudentMedicalTab studentId={student.id} />
       )}
 
       {tab === 'avatar' && (

@@ -1,5 +1,6 @@
 import { supabase } from '../../../config/supabase';
 import { AppError } from '../../../utils/AppError';
+import { parseLocale, resolveLocalizedLabel, type SupportedLocale } from '../../../utils/locale';
 
 export interface BloodGroupRow {
   id: number;
@@ -32,20 +33,65 @@ function serializeBloodGroup(row: BloodGroupRow) {
   return { id: row.id, value: row.value, isActive: row.is_active };
 }
 
-function serializeTenantLookup(row: TenantLookupRow) {
+function serializeTenantLookup(row: TenantLookupRow, locale: SupportedLocale = 'en') {
+  const labels = (row as TenantLookupRow & { labels?: Record<string, string> }).labels;
+  const value = resolveLocalizedLabel(labels, row.value, locale);
   return {
     id: row.id,
     tenantId: row.tenant_id,
-    value: row.value,
+    value,
+    labels: labels ?? { en: row.value },
     isActive: row.is_active,
   };
 }
 
-function serializeAcademicStandard(row: AcademicStandardRow) {
+type LookupLabelsTable =
+  | 'lookup_admission_categories'
+  | 'lookup_document_types'
+  | 'lookup_academic_standards'
+  | 'lookup_sections'
+  | 'lookup_languages';
+
+async function buildLabelsUpdate(
+  table: LookupLabelsTable,
+  id: number,
+  tenantId: number,
+  patch: { value?: string; labelKn?: string | null },
+): Promise<Record<string, string> | undefined> {
+  if (patch.labelKn === undefined && patch.value === undefined) return undefined;
+
+  const { data: existing, error } = await supabase
+    .from(table)
+    .select('value, labels')
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (error || !existing) return undefined;
+
+  const baseValue = patch.value ?? existing.value;
+  const labels: Record<string, string> = {
+    ...((existing.labels as Record<string, string> | null) ?? { en: existing.value }),
+    en: baseValue,
+  };
+
+  if (patch.labelKn !== undefined) {
+    const kn = patch.labelKn?.trim();
+    if (kn) labels.kn = kn;
+    else delete labels.kn;
+  }
+
+  return labels;
+}
+
+function serializeAcademicStandard(row: AcademicStandardRow, locale: SupportedLocale = 'en') {
+  const labels = (row as AcademicStandardRow & { labels?: Record<string, string> }).labels;
+  const value = resolveLocalizedLabel(labels, row.value, locale);
   return {
     id: row.id,
     tenantId: row.tenant_id,
-    value: row.value,
+    value,
+    labels: labels ?? { en: row.value },
     sortOrder: row.sort_order,
     isActive: row.is_active,
   };
@@ -75,35 +121,60 @@ class LookupRepository {
     return (data ?? []).map(serializeBloodGroup);
   }
 
-  async listAdmissionCategories(tenantId: number) {
+  async listAdmissionCategories(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_admission_categories')
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
       .order('value');
 
     if (error) throw new AppError(500, error.message);
-    return (data ?? []).map(serializeTenantLookup);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
-  async listDocumentTypes(tenantId: number) {
+  async listDocumentTypes(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_document_types')
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
       .order('value');
 
     if (error) throw new AppError(500, error.message);
-    return (data ?? []).map(serializeTenantLookup);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
-  async createAdmissionCategory(tenantId: number, value: string) {
+  async listReligions(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_religions')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listSocialCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_social_categories')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async createAdmissionCategory(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_admission_categories')
-      .insert({ tenant_id: tenantId, value })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -116,11 +187,12 @@ class LookupRepository {
     return serializeTenantLookup(data);
   }
 
-  async createDocumentType(tenantId: number, value: string) {
+  async createDocumentType(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_document_types')
-      .insert({ tenant_id: tenantId, value })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -136,14 +208,24 @@ class LookupRepository {
   async updateAdmissionCategory(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_admission_categories', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_admission_categories')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -160,14 +242,24 @@ class LookupRepository {
   async updateDocumentType(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_document_types', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_document_types')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -181,29 +273,29 @@ class LookupRepository {
     return serializeTenantLookup(data);
   }
 
-  async listAcademicStandards(tenantId: number) {
+  async listAcademicStandards(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_academic_standards')
-      .select('id, tenant_id, value, sort_order, is_active')
+      .select('id, tenant_id, value, labels, sort_order, is_active')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
       .order('sort_order')
       .order('value');
 
     if (error) throw new AppError(500, error.message);
-    return (data ?? []).map((row) => serializeAcademicStandard(row as AcademicStandardRow));
+    return (data ?? []).map((row) => serializeAcademicStandard(row as AcademicStandardRow, locale));
   }
 
-  async listSections(tenantId: number) {
+  async listSections(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_sections')
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
       .order('value');
 
     if (error) throw new AppError(500, error.message);
-    return (data ?? []).map(serializeTenantLookup);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
   async listAcademicYears(tenantId: number) {
@@ -218,23 +310,24 @@ class LookupRepository {
     return (data ?? []).map((row) => serializeAcademicYear(row as AcademicYearRow));
   }
 
-  async listLanguages(tenantId: number) {
+  async listLanguages(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_languages')
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
       .order('value');
 
     if (error) throw new AppError(500, error.message);
-    return (data ?? []).map(serializeTenantLookup);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
-  async createAcademicStandard(tenantId: number, value: string, sortOrder = 0) {
+  async createAcademicStandard(tenantId: number, value: string, sortOrder = 0, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_academic_standards')
-      .insert({ tenant_id: tenantId, value, sort_order: sortOrder })
-      .select('id, tenant_id, value, sort_order, is_active')
+      .insert({ tenant_id: tenantId, value, sort_order: sortOrder, labels })
+      .select('id, tenant_id, value, labels, sort_order, is_active')
       .single();
 
     if (error) {
@@ -247,11 +340,12 @@ class LookupRepository {
     return serializeAcademicStandard(data as AcademicStandardRow);
   }
 
-  async createSection(tenantId: number, value: string) {
+  async createSection(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_sections')
-      .insert({ tenant_id: tenantId, value, is_active: true })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, is_active: true, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -297,11 +391,12 @@ class LookupRepository {
     return serializeAcademicYear(data as AcademicYearRow);
   }
 
-  async createLanguage(tenantId: number, value: string) {
+  async createLanguage(tenantId: number, value: string, labelKn?: string) {
+    const labels = labelKn ? { en: value, kn: labelKn } : { en: value };
     const { data, error } = await supabase
       .from('lookup_languages')
-      .insert({ tenant_id: tenantId, value })
-      .select('id, tenant_id, value, is_active')
+      .insert({ tenant_id: tenantId, value, labels })
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -317,14 +412,30 @@ class LookupRepository {
   async updateAcademicStandard(
     id: number,
     tenantId: number,
-    changes: { value?: string; sort_order?: number; is_active?: boolean },
+    patch: { value?: string; sort_order?: number; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: {
+      value?: string;
+      sort_order?: number;
+      is_active?: boolean;
+      labels?: Record<string, string>;
+    } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.sort_order !== undefined) changes.sort_order = patch.sort_order;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_academic_standards', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_academic_standards')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, sort_order, is_active')
+      .select('id, tenant_id, value, labels, sort_order, is_active')
       .single();
 
     if (error) {
@@ -341,14 +452,24 @@ class LookupRepository {
   async updateSection(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_sections', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_sections')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -398,14 +519,24 @@ class LookupRepository {
   async updateLanguage(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_languages', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_languages')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -415,6 +546,53 @@ class LookupRepository {
     }
 
     return serializeTenantLookup(data);
+  }
+
+  async listRemarkTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_remark_types')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listRemarkCategories(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_remark_categories')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listHostelAttendanceStatuses(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_hostel_attendance_statuses')
+      .select('id, tenant_id, value, labels, is_active, counts_as_present')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      ...serializeTenantLookup(row as TenantLookupRow, locale),
+      countsAsPresent: (row as { counts_as_present: boolean }).counts_as_present,
+    }));
+  }
+
+  async listMedicalRecordTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_medical_record_types')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 }
 

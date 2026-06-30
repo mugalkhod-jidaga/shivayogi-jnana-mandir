@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
@@ -13,6 +14,7 @@ type TabKey =
   | 'languages';
 
 export function LookupsPage() {
+  const { t } = useTranslation('lookups');
   const {
     admissionCategories,
     documentTypes,
@@ -25,25 +27,19 @@ export function LookupsPage() {
   const [tab, setTab] = useState<TabKey>('standards');
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: 'standards', label: 'Standards' },
-    { key: 'sections', label: 'Sections' },
-    { key: 'languages', label: 'Languages' },
-    { key: 'categories', label: 'Admission categories' },
-    { key: 'document-types', label: 'Document types' },
+    { key: 'standards', label: t('tabs.standards') },
+    { key: 'sections', label: t('tabs.sections') },
+    { key: 'languages', label: t('tabs.languages') },
+    { key: 'categories', label: t('tabs.categories') },
+    { key: 'document-types', label: t('tabs.documentTypes') },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Lookups"
-        description="Manage tenant-specific dropdown values for student forms and document uploads."
-      />
+      <PageHeader title={t('page.title')} description={t('page.description')} />
 
       {isError && (
-        <PlaceholderPanel
-          title="Could not load lookups"
-          description="Check that the backend is running and you are signed in."
-        />
+        <PlaceholderPanel title={t('page.errorTitle')} description={t('page.errorDescription')} />
       )}
 
       {!isError && (
@@ -69,55 +65,60 @@ export function LookupsPage() {
           {tab === 'standards' && (
             <LookupAdminPanel
               resource="academic-standards"
-              title="Academic standards"
-              singularLabel="Standard"
-              description="Class levels used for enrollment (e.g. 1–10, LKG, UKG)."
+              title={t('panels.standards.title')}
+              singularLabel={t('panels.standards.singular')}
+              description={t('panels.standards.description')}
               items={academicStandards}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
           {tab === 'sections' && (
             <LookupAdminPanel
               resource="sections"
-              title="Sections"
-              singularLabel="Section"
-              description="Optional class sections (A, B, …). Activate when the school uses sections."
+              title={t('panels.sections.title')}
+              singularLabel={t('panels.sections.singular')}
+              description={t('panels.sections.description')}
               items={sections}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
           {tab === 'languages' && (
             <LookupAdminPanel
               resource="languages"
-              title="Languages"
-              singularLabel="Language"
-              description="Mother tongue options on the student form."
+              title={t('panels.languages.title')}
+              singularLabel={t('panels.languages.singular')}
+              description={t('panels.languages.description')}
               items={languages}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
           {tab === 'categories' && (
             <LookupAdminPanel
               resource="admission-categories"
-              title="Admission categories"
-              singularLabel="Admission category"
-              description="Used on the student form. Blood groups are global and managed separately."
+              title={t('panels.categories.title')}
+              singularLabel={t('panels.categories.singular')}
+              description={t('panels.categories.description')}
               items={admissionCategories}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
 
           {tab === 'document-types' && (
             <LookupAdminPanel
               resource="document-types"
-              title="Document types"
-              singularLabel="Document type"
-              description="Used when uploading student verification documents."
+              title={t('panels.documentTypes.title')}
+              singularLabel={t('panels.documentTypes.singular')}
+              description={t('panels.documentTypes.description')}
               items={documentTypes}
               isLoading={isLoading}
+              supportsKannadaLabel
             />
           )}
         </>

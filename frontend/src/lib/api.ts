@@ -1,4 +1,5 @@
 import { env } from '@/lib/env';
+import i18n, { getApiLocale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import type { ApiResponse, PaginatedList, PaginationMeta } from '@/types/api';
 
@@ -41,6 +42,7 @@ async function apiRequest<T>(
     ...rest,
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': getApiLocale(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
@@ -60,7 +62,7 @@ async function apiRequest<T>(
       const { data, error } = await supabase.auth.refreshSession();
       if (error || !data.session) {
         handleUnauthorized();
-        throw new ApiError('Session expired', 401, errorCode);
+        throw new ApiError(i18n.t('errors.sessionExpired'), 401, errorCode);
       }
 
       return apiRequest<T>(path, {

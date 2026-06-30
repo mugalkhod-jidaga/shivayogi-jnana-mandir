@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { LookupSelect } from '@/components/lookups/LookupSelect';
 import { useLookups } from '@/hooks/useLookups';
 
@@ -12,15 +13,16 @@ export function AcademicStandardSelect({
   id,
   value,
   onChange,
-  placeholder = 'Select standard',
+  placeholder,
 }: AcademicStandardSelectProps) {
+  const { t } = useTranslation();
   const { academicStandards, isLoading } = useLookups();
   return (
     <LookupSelect
       id={id}
       value={value}
       onChange={onChange}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t('lookups.standard')}
       options={academicStandards}
       isLoading={isLoading}
     />

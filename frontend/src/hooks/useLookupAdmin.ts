@@ -18,17 +18,26 @@ const resourceKeys: Record<LookupResource, readonly ['lookups', string]> = {
   languages: lookupKeys.languages,
 };
 
+export type CreateLookupPayload = {
+  value: string;
+  labelKn?: string;
+};
+
 export function useCreateLookupValue(resource: LookupResource) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (value: string) =>
-      apiFetch<TenantLookupOption>(`/lookups/${resource}`, {
+    mutationFn: (payload: CreateLookupPayload | string) => {
+      const body =
+        typeof payload === 'string' ? { value: payload } : { value: payload.value, labelKn: payload.labelKn };
+      return apiFetch<TenantLookupOption>(`/lookups/${resource}`, {
         method: 'POST',
-        body: JSON.stringify({ value }),
-      }),
+        body: JSON.stringify(body),
+      });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
+      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
     },
   });
 }
@@ -44,6 +53,23 @@ export function useDeactivateLookupValue(resource: LookupResource) {
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
+      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+    },
+  });
+}
+
+export function useUpdateLookupLabels(resource: LookupResource) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, labelKn }: { id: number; labelKn: string }) =>
+      apiFetch<TenantLookupOption>(`/lookups/${resource}/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ labelKn: labelKn.trim() || null }),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
+      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
     },
   });
 }

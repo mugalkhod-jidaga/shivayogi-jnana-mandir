@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFetch } from '@/lib/api';
+import { getApiLocale } from '@/lib/i18n';
 import type {
   AcademicStandardOption,
   AcademicYearOption,
@@ -19,57 +21,76 @@ export const lookupKeys = {
   sections: ['lookups', 'sections'] as const,
   academicYears: ['lookups', 'academic-years'] as const,
   languages: ['lookups', 'languages'] as const,
+  religions: ['lookups', 'religions'] as const,
+  socialCategories: ['lookups', 'social-categories'] as const,
 };
 
 export function useLookups() {
   const { session } = useAuth();
+  const { i18n } = useTranslation();
+  const locale = getApiLocale();
   const enabled = Boolean(session);
+  const localeKey = i18n.language?.split('-')[0] ?? locale;
 
   const bloodGroupsQuery = useQuery({
-    queryKey: lookupKeys.bloodGroups,
+    queryKey: [...lookupKeys.bloodGroups, localeKey],
     queryFn: () => apiFetch<LookupOption[]>('/lookups/blood-groups'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const admissionCategoriesQuery = useQuery({
-    queryKey: lookupKeys.admissionCategories,
+    queryKey: [...lookupKeys.admissionCategories, localeKey],
     queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/admission-categories'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const documentTypesQuery = useQuery({
-    queryKey: lookupKeys.documentTypes,
+    queryKey: [...lookupKeys.documentTypes, localeKey],
     queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/document-types'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const academicStandardsQuery = useQuery({
-    queryKey: lookupKeys.academicStandards,
+    queryKey: [...lookupKeys.academicStandards, localeKey],
     queryFn: () => apiFetch<AcademicStandardOption[]>('/lookups/academic-standards'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const sectionsQuery = useQuery({
-    queryKey: lookupKeys.sections,
+    queryKey: [...lookupKeys.sections, localeKey],
     queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/sections'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const academicYearsQuery = useQuery({
-    queryKey: lookupKeys.academicYears,
+    queryKey: [...lookupKeys.academicYears, localeKey],
     queryFn: () => apiFetch<AcademicYearOption[]>('/lookups/academic-years'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
 
   const languagesQuery = useQuery({
-    queryKey: lookupKeys.languages,
+    queryKey: [...lookupKeys.languages, localeKey],
     queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/languages'),
+    enabled,
+    staleTime: LOOKUPS_STALE_TIME,
+  });
+
+  const religionsQuery = useQuery({
+    queryKey: [...lookupKeys.religions, localeKey],
+    queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/religions'),
+    enabled,
+    staleTime: LOOKUPS_STALE_TIME,
+  });
+
+  const socialCategoriesQuery = useQuery({
+    queryKey: [...lookupKeys.socialCategories, localeKey],
+    queryFn: () => apiFetch<TenantLookupOption[]>('/lookups/social-categories'),
     enabled,
     staleTime: LOOKUPS_STALE_TIME,
   });
@@ -81,7 +102,9 @@ export function useLookups() {
     academicStandardsQuery.isLoading ||
     sectionsQuery.isLoading ||
     academicYearsQuery.isLoading ||
-    languagesQuery.isLoading;
+    languagesQuery.isLoading ||
+    religionsQuery.isLoading ||
+    socialCategoriesQuery.isLoading;
 
   const isError =
     bloodGroupsQuery.isError ||
@@ -90,7 +113,9 @@ export function useLookups() {
     academicStandardsQuery.isError ||
     sectionsQuery.isError ||
     academicYearsQuery.isError ||
-    languagesQuery.isError;
+    languagesQuery.isError ||
+    religionsQuery.isError ||
+    socialCategoriesQuery.isError;
 
   const currentAcademicYear =
     academicYearsQuery.data?.find((year) => year.isCurrent) ?? academicYearsQuery.data?.[0] ?? null;
@@ -103,6 +128,8 @@ export function useLookups() {
     sections: sectionsQuery.data ?? [],
     academicYears: academicYearsQuery.data ?? [],
     languages: languagesQuery.data ?? [],
+    religions: religionsQuery.data ?? [],
+    socialCategories: socialCategoriesQuery.data ?? [],
     currentAcademicYear,
     isLoading,
     isError,
@@ -113,6 +140,8 @@ export function useLookups() {
       academicStandardsQuery.error ??
       sectionsQuery.error ??
       academicYearsQuery.error ??
-      languagesQuery.error,
+      languagesQuery.error ??
+      religionsQuery.error ??
+      socialCategoriesQuery.error,
   };
 }

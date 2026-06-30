@@ -136,6 +136,18 @@ lookupRoutes.get(
   asyncHandler(lookupController.listLanguages),
 );
 
+lookupRoutes.get(
+  '/religions',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listReligions),
+);
+
+lookupRoutes.get(
+  '/social-categories',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listSocialCategories),
+);
+
 lookupRoutes.post(
   '/languages',
   extractTenantMiddleware,
@@ -150,4 +162,28 @@ lookupRoutes.patch(
   requirePermission('system:manage_lookups'),
   validateZod(updateLookupValueSchema),
   asyncHandler(lookupController.updateLanguage),
+);
+
+lookupRoutes.get(
+  '/remark-types',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listRemarkTypes),
+);
+
+lookupRoutes.get(
+  '/remark-categories',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listRemarkCategories),
+);
+
+lookupRoutes.get(
+  '/hostel-attendance-statuses',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listHostelAttendanceStatuses),
+);
+
+lookupRoutes.get(
+  '/medical-record-types',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listMedicalRecordTypes),
 );

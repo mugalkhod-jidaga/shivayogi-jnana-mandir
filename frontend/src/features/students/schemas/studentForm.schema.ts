@@ -1,92 +1,155 @@
 import { z } from 'zod';
-import { parseDobToIso } from '@/lib/date';
+import { parseDobToIso, type DateParseMessages } from '@/lib/date';
 import { normalizeIndianPhone } from '@/lib/phone';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
 
-const dateFieldSchema = z
-  .string()
-  .trim()
-  .min(1, 'Date is required')
-  .transform((value, ctx) => {
-    try {
-      return parseDobToIso(value);
-    } catch (error) {
-      ctx.addIssue({
-        code: 'custom',
-        message: error instanceof Error ? error.message : 'Enter a valid date as DD/MM/YYYY',
-      });
-      return z.NEVER;
-    }
+export type StudentFormValidationMessages = {
+  dateRequired: string;
+  invalidDate: string;
+  dobRequired: string;
+  firstNameRequired: string;
+  phone: string;
+  contactNameRequired: string;
+  relationshipRequired: string;
+  rollNumberRequired: string;
+  villageRequired: string;
+  talukRequired: string;
+  districtRequired: string;
+  pincodeRequired: string;
+  aadhaar: string;
+  satsId: string;
+  reasonRequired: string;
+  dateParse: DateParseMessages;
+};
+
+const DEFAULT_VALIDATION: StudentFormValidationMessages = {
+  dateRequired: 'Date is required',
+  invalidDate: 'Enter a valid date as DD/MM/YYYY',
+  dobRequired: 'Date of birth is required',
+  firstNameRequired: 'First name is required',
+  phone: 'Enter a 10-digit mobile number',
+  contactNameRequired: 'Contact name is required',
+  relationshipRequired: 'Relationship is required',
+  rollNumberRequired: 'Roll number is required',
+  villageRequired: 'Village / town is required',
+  talukRequired: 'Taluk / mandal is required',
+  districtRequired: 'District is required',
+  pincodeRequired: 'Pincode is required',
+  aadhaar: 'Aadhaar must be exactly 12 digits',
+  satsId: 'SATS ID must be exactly 9 digits',
+  reasonRequired: 'Reason is required',
+  dateParse: {
+    required: 'Date of birth is required',
+    invalidFormat: 'Use DD/MM/YYYY (e.g. 15/05/2010)',
+    invalidYear: 'Enter a valid year',
+    invalidMonth: 'Enter a valid month',
+    invalidDay: 'Enter a valid day',
+    invalidDate: 'Enter a valid date',
+  },
+};
+
+function buildDateFieldSchema(msg: StudentFormValidationMessages) {
+  return z
+    .string()
+    .trim()
+    .min(1, msg.dateRequired)
+    .transform((value, ctx) => {
+      try {
+        return parseDobToIso(value, {
+          ...msg.dateParse,
+          required: msg.dateRequired,
+        });
+      } catch (error) {
+        ctx.addIssue({
+          code: 'custom',
+          message: error instanceof Error ? error.message : msg.invalidDate,
+        });
+        return z.NEVER;
+      }
+    });
+}
+
+export function buildStudentFormSchemas(msg: StudentFormValidationMessages = DEFAULT_VALIDATION) {
+  const dateFieldSchema = buildDateFieldSchema(msg);
+
+  const familyDetailsFormSchema = z.object({
+    fatherName: z.string().trim().max(100).optional(),
+    motherName: z.string().trim().max(100).optional(),
+    guardianName: z.string().trim().max(100).optional(),
+    parentStatus: parentStatusEnum,
+    annualIncome: z.string().optional(),
+    primaryContact: z.string().trim().regex(/^\d{10}$/, msg.phone),
+    houseDetails: z.string().trim().max(255).optional(),
+    villageTown: z.string().trim().min(1, msg.villageRequired).max(150),
+    talukMandal: z.string().trim().min(1, msg.talukRequired).max(150),
+    district: z.string().trim().min(1, msg.districtRequired).max(150),
+    state: z.string().trim().min(1).max(150),
+    pincode: z.string().trim().min(6, msg.pincodeRequired).max(10),
   });
 
-const dobFieldSchema = dateFieldSchema;
+  const emergencyContactFormSchema = z.object({
+    contactName: z.string().trim().min(1, msg.contactNameRequired).max(100),
+    relationship: z.string().trim().min(1, msg.relationshipRequired).max(100),
+    phone: z.string().trim().regex(/^\d{10}$/, msg.phone),
+  });
 
-const familyDetailsFormSchema = z.object({
-  fatherName: z.string().trim().max(100).optional(),
-  motherName: z.string().trim().max(100).optional(),
-  guardianName: z.string().trim().max(100).optional(),
-  parentStatus: parentStatusEnum,
-  annualIncome: z.string().optional(),
-  primaryContact: z
-    .string()
-    .trim()
-    .regex(/^\d{10}$/, 'Enter a 10-digit mobile number'),
-  houseDetails: z.string().trim().max(255).optional(),
-  villageTown: z.string().trim().min(1, 'Village / town is required').max(150),
-  talukMandal: z.string().trim().min(1, 'Taluk / mandal is required').max(150),
-  district: z.string().trim().min(1, 'District is required').max(150),
-  state: z.string().trim().min(1).max(150),
-  pincode: z.string().trim().min(6, 'Pincode is required').max(10),
-});
+  const academicPlacementFormSchema = z.object({
+    rollNumber: z.string().trim().min(1, msg.rollNumberRequired).max(20),
+    previousSchool: z.string().trim().max(255).optional(),
+    previousSchoolAddress: z.string().trim().max(2000).optional(),
+    lastClassStudied: z.string().trim().max(100).optional(),
+  });
 
-const emergencyContactFormSchema = z.object({
-  contactName: z.string().trim().min(1, 'Contact name is required').max(100),
-  relationship: z.string().trim().min(1, 'Relationship is required').max(100),
-  phone: z.string().trim().regex(/^\d{10}$/, 'Enter a 10-digit mobile number'),
-});
+  const socialDetailsFormSchema = z.object({
+    caste: z.string().trim().max(100).optional(),
+    subCaste: z.string().trim().max(100).optional(),
+    rdNumber: z.string().trim().max(50).optional(),
+    rdNumberSecondary: z.string().trim().max(50).optional(),
+  });
 
-const academicPlacementFormSchema = z.object({
-  rollNumber: z.string().trim().min(1, 'Roll number is required').max(20),
-  previousSchool: z.string().trim().max(255).optional(),
-  lastClassStudied: z.string().trim().max(100).optional(),
-});
+  const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
 
-export const createStudentFormSchema = z.object({
-  admissionNumber: z.string().trim().min(1, 'Admission number is required').max(100),
-  firstName: z.string().trim().min(1, 'First name is required').max(100),
-  lastName: z.string().trim().max(100).optional(),
-  dob: dobFieldSchema,
-  gender: genderEnum,
-  admissionDate: dateFieldSchema,
-  aadhaarNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
-    .optional()
-    .or(z.literal('')),
-  academicPlacement: academicPlacementFormSchema,
-  emergencyContacts: z.array(emergencyContactFormSchema).min(1),
-  familyDetails: familyDetailsFormSchema,
-});
+  const createStudentFormSchema = z.object({
+    firstName: z.string().trim().min(1, msg.firstNameRequired).max(100),
+    lastName: z.string().trim().max(100).optional(),
+    dob: dateFieldSchema,
+    gender: genderEnum,
+    admissionDate: dateFieldSchema,
+    aadhaarNumber: z
+      .string()
+      .trim()
+      .regex(/^\d{12}$/, msg.aadhaar)
+      .optional()
+      .or(z.literal('')),
+    satsId: z
+      .string()
+      .trim()
+      .regex(/^\d{9}$/, msg.satsId)
+      .optional()
+      .or(z.literal('')),
+    satsTransferStatus: satsTransferStatusEnum.optional(),
+    academicPlacement: academicPlacementFormSchema,
+    emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+    socialDetails: socialDetailsFormSchema.optional(),
+    familyDetails: familyDetailsFormSchema,
+  });
 
-export const updateStudentFormSchema = z.object({
-  firstName: z.string().trim().min(1, 'First name is required').max(100),
-  lastName: z.string().trim().max(100).optional(),
-  dob: dobFieldSchema,
-  gender: genderEnum,
-  admissionDate: dateFieldSchema,
-  aadhaarNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{12}$/, 'Aadhaar must be exactly 12 digits')
-    .optional()
-    .or(z.literal('')),
-  academicPlacement: academicPlacementFormSchema,
-  emergencyContacts: z.array(emergencyContactFormSchema).min(1),
-  familyDetails: familyDetailsFormSchema,
-});
+  const updateStudentFormSchema = createStudentFormSchema;
+
+  const deactivateStudentFormSchema = z.object({
+    status: z.enum(['Alumni', 'Discontinued']),
+    statusReason: z.string().trim().min(1, msg.reasonRequired).max(500),
+  });
+
+  return { createStudentFormSchema, updateStudentFormSchema, deactivateStudentFormSchema };
+}
+
+const defaultSchemas = buildStudentFormSchemas();
+export const createStudentFormSchema = defaultSchemas.createStudentFormSchema;
+export const updateStudentFormSchema = defaultSchemas.updateStudentFormSchema;
+export const deactivateStudentFormSchema = defaultSchemas.deactivateStudentFormSchema;
 
 export type CreateStudentFormValues = z.infer<typeof createStudentFormSchema>;
 export type UpdateStudentFormValues = z.infer<typeof updateStudentFormSchema>;
@@ -114,6 +177,8 @@ type LookupIds = {
   bloodGroupId?: string;
   admissionCategoryId?: string;
   motherTongueId?: string;
+  religionId?: string;
+  socialCategoryId?: string;
   academicYearId: string;
   standardId: string;
   sectionId?: string;
@@ -124,7 +189,6 @@ export function buildCreateStudentPayload(
   lookupIds: LookupIds,
 ) {
   return {
-    admissionNumber: values.admissionNumber,
     firstName: values.firstName,
     lastName: values.lastName || undefined,
     dob: values.dob,
@@ -136,16 +200,31 @@ export function buildCreateStudentPayload(
       : undefined,
     motherTongueId: lookupIds.motherTongueId ? Number(lookupIds.motherTongueId) : undefined,
     aadhaarNumber: values.aadhaarNumber?.trim() || undefined,
+    satsId: values.satsId?.trim() || undefined,
+    satsTransferStatus: values.satsTransferStatus,
     academicPlacement: {
       academicYearId: Number(lookupIds.academicYearId),
       standardId: Number(lookupIds.standardId),
       sectionId: lookupIds.sectionId ? Number(lookupIds.sectionId) : undefined,
       rollNumber: values.academicPlacement.rollNumber,
       previousSchool: values.academicPlacement.previousSchool || undefined,
+      previousSchoolAddress: values.academicPlacement.previousSchoolAddress || undefined,
       lastClassStudied: values.academicPlacement.lastClassStudied || undefined,
       enrolledAt: values.admissionDate,
     },
     emergencyContacts: mapEmergencyContacts(values.emergencyContacts),
+    socialDetails: values.socialDetails
+      ? {
+          religionId: lookupIds.religionId ? Number(lookupIds.religionId) : undefined,
+          socialCategoryId: lookupIds.socialCategoryId
+            ? Number(lookupIds.socialCategoryId)
+            : undefined,
+          caste: values.socialDetails.caste || undefined,
+          subCaste: values.socialDetails.subCaste || undefined,
+          rdNumber: values.socialDetails.rdNumber || undefined,
+          rdNumberSecondary: values.socialDetails.rdNumberSecondary || undefined,
+        }
+      : undefined,
     familyDetails: mapFamilyDetails(values.familyDetails),
   };
 }
@@ -167,12 +246,15 @@ export function buildUpdateStudentPayload(
       : null,
     motherTongueId: lookupIds.motherTongueId ? Number(lookupIds.motherTongueId) : null,
     aadhaarNumber: values.aadhaarNumber?.trim() || null,
+    satsId: values.satsId?.trim() || null,
+    satsTransferStatus: values.satsTransferStatus,
     academicPlacement: {
       academicYearId: Number(lookupIds.academicYearId),
       standardId: Number(lookupIds.standardId),
       sectionId: lookupIds.sectionId ? Number(lookupIds.sectionId) : null,
       rollNumber: values.academicPlacement.rollNumber,
       previousSchool: values.academicPlacement.previousSchool || null,
+      previousSchoolAddress: values.academicPlacement.previousSchoolAddress || null,
       lastClassStudied: values.academicPlacement.lastClassStudied || null,
       enrolledAt: values.admissionDate,
     },
@@ -181,15 +263,22 @@ export function buildUpdateStudentPayload(
 
   if (includeFamily) {
     payload.familyDetails = mapFamilyDetails(values.familyDetails);
+    if (values.socialDetails) {
+      payload.socialDetails = {
+        religionId: lookupIds.religionId ? Number(lookupIds.religionId) : null,
+        socialCategoryId: lookupIds.socialCategoryId
+          ? Number(lookupIds.socialCategoryId)
+          : null,
+        caste: values.socialDetails.caste || null,
+        subCaste: values.socialDetails.subCaste || null,
+        rdNumber: values.socialDetails.rdNumber || null,
+        rdNumberSecondary: values.socialDetails.rdNumberSecondary || null,
+      };
+    }
   }
 
   return payload;
 }
-
-export const deactivateStudentFormSchema = z.object({
-  status: z.enum(['Alumni', 'Discontinued']),
-  statusReason: z.string().trim().min(1, 'Reason is required').max(500),
-});
 
 export type DeactivateStudentFormValues = z.infer<typeof deactivateStudentFormSchema>;
 
@@ -212,5 +301,13 @@ export const defaultEmergencyContact: CreateStudentFormValues['emergencyContacts
 export const defaultAcademicPlacement: CreateStudentFormValues['academicPlacement'] = {
   rollNumber: '',
   previousSchool: '',
+  previousSchoolAddress: '',
   lastClassStudied: '',
+};
+
+export const defaultSocialDetails: NonNullable<CreateStudentFormValues['socialDetails']> = {
+  caste: '',
+  subCaste: '',
+  rdNumber: '',
+  rdNumberSecondary: '',
 };

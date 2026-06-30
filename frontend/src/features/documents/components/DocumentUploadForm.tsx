@@ -1,5 +1,6 @@
 import { Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { DocumentTypeSelect } from '@/components/lookups/DocumentTypeSelect';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ type DocumentUploadFormProps = {
 };
 
 export function DocumentUploadForm({ studentId }: DocumentUploadFormProps) {
+  const { t } = useTranslation('documents');
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useDocumentUpload(studentId);
   const [documentTypeId, setDocumentTypeId] = useState('');
@@ -24,7 +26,7 @@ export function DocumentUploadForm({ studentId }: DocumentUploadFormProps) {
 
     const typeId = Number(documentTypeId);
     if (!documentTypeId || !Number.isFinite(typeId)) {
-      toast.error('Choose a document type first');
+      toast.error(t('upload.typeRequired'));
       return;
     }
 
@@ -34,7 +36,7 @@ export function DocumentUploadForm({ studentId }: DocumentUploadFormProps) {
       file.name.toLowerCase().endsWith('.pdf');
 
     if (!isAllowed) {
-      toast.error('Only PDF and image files are allowed');
+      toast.error(t('upload.invalidFile'));
       return;
     }
 
@@ -44,34 +46,32 @@ export function DocumentUploadForm({ studentId }: DocumentUploadFormProps) {
         documentTypeId: typeId,
         expiryDate: expiryDate || undefined,
       });
-      toast.success('Document uploaded');
+      toast.success(t('upload.success'));
       setExpiryDate('');
       if (inputRef.current) inputRef.current.value = '';
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not upload document';
+      const message = error instanceof Error ? error.message : t('upload.error');
       toast.error(message);
     }
   };
 
   return (
     <div className="rounded-lg border p-6">
-      <h3 className="font-medium">Upload document</h3>
-      <p className="mt-1 text-sm text-muted-foreground">
-        PDF or image files up to 25 MB. Uploads go to secure storage and start as Pending Review.
-      </p>
+      <h3 className="font-medium">{t('upload.title')}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{t('upload.description')}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="document-type">Document type</Label>
+          <Label htmlFor="document-type">{t('upload.type')}</Label>
           <DocumentTypeSelect
             id="document-type"
             value={documentTypeId}
             onChange={setDocumentTypeId}
-            placeholder="Select type"
+            placeholder={t('upload.typePlaceholder')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="expiry-date">Expiry date (optional)</Label>
+          <Label htmlFor="expiry-date">{t('upload.expiryDate')}</Label>
           <Input
             id="expiry-date"
             type="date"
@@ -99,11 +99,11 @@ export function DocumentUploadForm({ studentId }: DocumentUploadFormProps) {
         onClick={() => inputRef.current?.click()}
       >
         {upload.isPending ? (
-          'Uploading…'
+          t('upload.submitting')
         ) : (
           <>
             <Upload className="size-4" />
-            Choose file
+            {t('upload.chooseFile')}
           </>
         )}
       </Button>

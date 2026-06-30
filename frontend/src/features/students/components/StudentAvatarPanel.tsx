@@ -1,5 +1,6 @@
 import { RefreshCw } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
@@ -20,6 +21,8 @@ export function StudentAvatarPanel({
   photoUrl,
   canEdit,
 }: StudentAvatarPanelProps) {
+  const { t } = useTranslation('students');
+  const { t: tc } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useAvatarUpload(studentId);
   const [loadRequested, setLoadRequested] = useState(false);
@@ -38,7 +41,7 @@ export function StudentAvatarPanel({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file');
+      toast.error(t('detail.avatar.invalidFile'));
       return;
     }
 
@@ -46,20 +49,17 @@ export function StudentAvatarPanel({
       await upload.mutateAsync(file);
       setLoadRequested(true);
       await refetch();
-      toast.success('Photo updated');
+      toast.success(t('detail.avatar.success'));
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not upload photo';
+      const message = error instanceof Error ? error.message : t('detail.avatar.error');
       toast.error(message);
     }
   };
 
   return (
     <div className="rounded-lg border p-6">
-      <h3 className="font-medium">Student photo</h3>
-      <p className="mt-1 text-sm text-muted-foreground">
-        The list uses free initials avatars. Uploaded photos are stored in R2 and load only when you
-        click &quot;View photo&quot; here.
-      </p>
+      <h3 className="font-medium">{t('detail.avatar.title')}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{t('detail.avatar.description')}</p>
 
       <div className="mt-6 flex flex-col items-start gap-4">
         {!loadRequested && (
@@ -67,7 +67,7 @@ export function StudentAvatarPanel({
             <StudentInitialsAvatar firstName={firstName} lastName={lastName} size="lg" />
             {hasPhoto && (
               <Button type="button" size="sm" variant="secondary" onClick={() => setLoadRequested(true)}>
-                View uploaded photo
+                {t('detail.avatar.viewPhoto')}
               </Button>
             )}
           </div>
@@ -75,15 +75,15 @@ export function StudentAvatarPanel({
 
         {hasPhoto && loadRequested && isLoadingUrl && (
           <div className="flex h-40 w-40 items-center justify-center rounded-lg border bg-muted/40 text-sm text-muted-foreground">
-            Loading…
+            {tc('loading')}
           </div>
         )}
 
         {hasPhoto && loadRequested && isUrlError && (
           <div className="space-y-2">
-            <p className="text-sm text-destructive">Could not load photo.</p>
+            <p className="text-sm text-destructive">{t('detail.avatar.loadError')}</p>
             <Button type="button" size="sm" variant="outline" onClick={() => void refetch()}>
-              Retry
+              {t('detail.avatar.retry')}
             </Button>
           </div>
         )}
@@ -91,7 +91,7 @@ export function StudentAvatarPanel({
         {avatarData?.downloadUrl && (
           <img
             src={avatarData.downloadUrl}
-            alt="Student"
+            alt={t('detail.avatar.alt')}
             className="h-40 w-40 rounded-lg border object-cover"
           />
         )}
@@ -116,21 +116,21 @@ export function StudentAvatarPanel({
               onClick={() => inputRef.current?.click()}
             >
               {upload.isPending ? (
-                'Uploading…'
+                t('detail.avatar.uploading')
               ) : hasPhoto ? (
                 <>
                   <RefreshCw className="size-4" />
-                  Replace photo
+                  {t('detail.avatar.replacePhoto')}
                 </>
               ) : (
-                'Upload photo'
+                t('detail.avatar.uploadPhoto')
               )}
             </Button>
           </>
         )}
 
         {!canEdit && !hasPhoto && (
-          <p className="text-sm text-muted-foreground">No uploaded photo for this student.</p>
+          <p className="text-sm text-muted-foreground">{t('detail.avatar.noPhoto')}</p>
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
@@ -13,6 +14,7 @@ import { Select } from '@/components/ui/select';
 import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { useStudentsList } from '@/hooks/useStudents';
 import { formatDobDisplay } from '@/lib/date';
+import { pdfExports } from '@/lib/pdfDownload';
 import type { StudentStatus } from '@/types/student';
 
 function formatName(firstName: string, lastName: string | null) {
@@ -20,6 +22,8 @@ function formatName(firstName: string, lastName: string | null) {
 }
 
 export function StudentListPage() {
+  const { t } = useTranslation('students');
+  const { t: tc } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -33,6 +37,7 @@ export function StudentListPage() {
   const [standardFilter, setStandardFilter] = useState(standardIdParam);
   const [academicYearFilter, setAcademicYearFilter] = useState(academicYearIdParam);
   const [categoryFilter, setCategoryFilter] = useState(categoryIdParam);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     setSearchInput(searchParam);
@@ -74,18 +79,39 @@ export function StudentListPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Students"
-        description="Search, filter, and manage student records."
-      >
-        <RequirePermission permission="students:create">
-          <Button asChild>
-            <Link to="/students/new">
-              <Plus className="size-4" />
-              Add student
-            </Link>
-          </Button>
-        </RequirePermission>
+      <PageHeader title={t('list.title')} description={t('list.description')}>
+        <div className="flex gap-2">
+          <RequirePermission permission="exports:pdf">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pdfLoading}
+              onClick={() => {
+                setPdfLoading(true);
+                void pdfExports
+                  .students({
+                    search: searchParam || undefined,
+                    status: statusParam,
+                    standardId: standardIdParam || undefined,
+                    academicYearId: academicYearIdParam || undefined,
+                    admissionCategoryId: categoryIdParam || undefined,
+                  })
+                  .finally(() => setPdfLoading(false));
+              }}
+            >
+              <Download className="size-4" />
+              PDF
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="students:create">
+            <Button asChild>
+              <Link to="/students/new">
+                <Plus className="size-4" />
+                {t('list.addStudent')}
+              </Link>
+            </Button>
+          </RequirePermission>
+        </div>
       </PageHeader>
 
       <form
@@ -101,19 +127,19 @@ export function StudentListPage() {
             <Input
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by name or admission number"
+              placeholder={t('list.searchPlaceholder')}
               className="pl-9"
             />
           </div>
-          <Button type="submit">Apply</Button>
+          <Button type="submit">{tc('actions.apply')}</Button>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option value="">All statuses</option>
-            <option value="Active">Active</option>
-            <option value="Alumni">Alumni</option>
-            <option value="Discontinued">Discontinued</option>
+            <option value="">{t('list.allStatuses')}</option>
+            <option value="Active">{tc('status.active')}</option>
+            <option value="Alumni">{tc('status.alumni')}</option>
+            <option value="Discontinued">{tc('status.discontinued')}</option>
           </Select>
           <AcademicStandardSelect value={standardFilter} onChange={setStandardFilter} />
           <AcademicYearSelect value={academicYearFilter} onChange={setAcademicYearFilter} />
@@ -121,21 +147,19 @@ export function StudentListPage() {
         </div>
       </form>
 
-      {isError && (
-        <p className="text-sm text-destructive">Could not load students. Is the backend running?</p>
-      )}
+      {isError && <p className="text-sm text-destructive">{tc('errors.loadStudents')}</p>}
 
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="w-14 px-4 py-3 font-medium" />
-              <th className="px-4 py-3 font-medium">Admission #</th>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Standard</th>
-              <th className="px-4 py-3 font-medium">Roll #</th>
-              <th className="px-4 py-3 font-medium">Admission date</th>
-              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.admissionNumber')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.name')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.standard')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.rollNumber')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.admissionDate')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.status')}</th>
               <th className="px-4 py-3 font-medium" />
             </tr>
           </thead>
@@ -143,7 +167,7 @@ export function StudentListPage() {
             {isLoading && (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                  Loading students…
+                  {t('list.loading')}
                 </td>
               </tr>
             )}
@@ -151,7 +175,7 @@ export function StudentListPage() {
             {!isLoading && students.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                  No students found.
+                  {t('list.noResults')}
                 </td>
               </tr>
             )}
@@ -174,7 +198,7 @@ export function StudentListPage() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Button asChild variant="ghost" size="sm">
-                    <Link to={`/students/${student.id}`}>View</Link>
+                    <Link to={`/students/${student.id}`}>{tc('actions.view')}</Link>
                   </Button>
                 </td>
               </tr>
@@ -186,7 +210,11 @@ export function StudentListPage() {
       {meta && meta.total > 0 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <p>
-            Page {meta.page} of {totalPages} · {meta.total} total
+            {t('list.pageOf', {
+              page: meta.page,
+              totalPages,
+              total: meta.total,
+            })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -196,7 +224,7 @@ export function StudentListPage() {
               disabled={meta.page <= 1}
               onClick={() => goToPage(meta.page - 1)}
             >
-              Previous
+              {tc('actions.previous')}
             </Button>
             <Button
               type="button"
@@ -205,7 +233,7 @@ export function StudentListPage() {
               disabled={meta.page >= totalPages}
               onClick={() => goToPage(meta.page + 1)}
             >
-              Next
+              {tc('actions.next')}
             </Button>
           </div>
         </div>
