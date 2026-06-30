@@ -10,6 +10,7 @@ import {
   writePdfTable,
   type PdfTableColumn,
 } from '../pdf/pdfBuilder';
+import { pdfLabels, type PdfLocale } from '../pdf/pdfLabels';
 
 function formatStudentName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
@@ -22,15 +23,17 @@ export const exportService = {
     userId: string,
     permissions: string[],
     res: import('express').Response,
+    locale: PdfLocale = 'en',
   ) {
+    const labels = pdfLabels(locale);
     const parsed = studentListQuerySchema.parse({ ...(query as object), page: 1, limit: 100 });
     const { data } = await studentService.list(tenantId, parsed, userId, permissions);
 
     const columns: PdfTableColumn[] = [
-      { header: 'Admission #', width: 80 },
-      { header: 'Name', width: 140 },
-      { header: 'Standard', width: 60 },
-      { header: 'Status', width: 70 },
+      { header: labels.admissionNumber, width: 80 },
+      { header: labels.name, width: 140 },
+      { header: labels.standard, width: 60 },
+      { header: labels.status, width: 70 },
     ];
 
     const rows = data.map((student) => [
@@ -42,8 +45,9 @@ export const exportService = {
 
     const buffer = await createPdfBuffer((doc) => {
       writePdfHeader(doc, {
-        title: 'Student List',
-        subtitle: parsed.search ? `Search: ${parsed.search}` : undefined,
+        title: labels.studentList,
+        subtitle: parsed.search ? `${labels.search}: ${parsed.search}` : undefined,
+        locale,
       });
       writePdfTable(doc, columns, rows);
     });
@@ -57,23 +61,26 @@ export const exportService = {
     userId: string,
     permissions: string[],
     res: import('express').Response,
+    locale: PdfLocale = 'en',
   ) {
+    const labels = pdfLabels(locale);
     const student = await studentService.getById(studentId, tenantId, userId, permissions);
     const enrollment = student.currentEnrollment;
 
     const buffer = await createPdfBuffer((doc) => {
       writePdfHeader(doc, {
-        title: 'Student Profile',
+        title: labels.studentProfile,
         subtitle: student.admissionNumber,
+        locale,
       });
       writePdfKeyValues(doc, [
-        { label: 'Name', value: formatStudentName(student.firstName, student.lastName) },
-        { label: 'Gender', value: student.gender },
-        { label: 'DOB', value: student.dob },
-        { label: 'Status', value: student.status },
-        { label: 'Standard', value: enrollment?.standard?.value ?? '—' },
-        { label: 'Section', value: enrollment?.section?.value ?? '—' },
-        { label: 'Roll #', value: enrollment?.rollNumber ?? '—' },
+        { label: labels.name, value: formatStudentName(student.firstName, student.lastName) },
+        { label: labels.gender, value: student.gender },
+        { label: labels.dob, value: student.dob },
+        { label: labels.status, value: student.status },
+        { label: labels.standard, value: enrollment?.standard?.value ?? '—' },
+        { label: labels.section, value: enrollment?.section?.value ?? '—' },
+        { label: labels.rollNumber, value: enrollment?.rollNumber ?? '—' },
       ]);
     });
 
@@ -85,15 +92,17 @@ export const exportService = {
     query: unknown,
     userId: string,
     res: import('express').Response,
+    locale: PdfLocale = 'en',
   ) {
+    const labels = pdfLabels(locale);
     const parsed = remarkListQuerySchema.parse({ ...(query as object), page: 1, limit: 100 });
     const { data } = await remarkService.list(tenantId, parsed, userId);
 
     const columns: PdfTableColumn[] = [
-      { header: 'Date', width: 75 },
-      { header: 'Student', width: 110 },
-      { header: 'Type', width: 65 },
-      { header: 'Title', width: 150 },
+      { header: labels.date, width: 75 },
+      { header: labels.student, width: 110 },
+      { header: labels.type, width: 65 },
+      { header: labels.title, width: 150 },
     ];
 
     const rows = data.map((remark) => [
@@ -104,7 +113,7 @@ export const exportService = {
     ]);
 
     const buffer = await createPdfBuffer((doc) => {
-      writePdfHeader(doc, { title: 'Student Remarks' });
+      writePdfHeader(doc, { title: labels.remarks, locale });
       writePdfTable(doc, columns, rows);
     });
 

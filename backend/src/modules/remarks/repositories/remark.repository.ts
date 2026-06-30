@@ -106,7 +106,7 @@ class RemarkRepository extends BaseRepository {
       .select(REMARK_SELECT, { count: 'exact' })
       .eq('tenant_id', tenantId)
       .is('deleted_at', null)
-      .eq('students.deleted_at', null);
+      .is('students.deleted_at', null);
 
     if (studentId) dbQuery = dbQuery.eq('student_id', studentId);
     if (scopedIds) dbQuery = dbQuery.in('student_id', scopedIds);

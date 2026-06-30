@@ -9,6 +9,9 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 5. `005_bulk_insert_extended.sql` — extended bulk RPC for new student fields
 6. `006_fix_deactivated_students_visibility.sql` — restore Alumni/Discontinued students to list queries
 7. `007_sats_social_admission_seq.sql` — SATS ID, social/caste details, SJM admission sequence, lookup i18n labels
+8. `008_remarks_hostel_medical.sql` — student remarks, hostel blocks/rooms/allocations, hostel attendance, basic medical records, PDF export permission
+
+Apply `008` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 
 After migrations, insert the Phase 1 tenant (Section 5.4):
 

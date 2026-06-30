@@ -6,6 +6,7 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { StudentSearchPicker } from '@/components/students/StudentSearchPicker';
 import {
   useCreateAllocation,
   useCreateBlock,
@@ -158,8 +159,11 @@ export function HostelPage() {
             }}
           >
             <div>
-              <Label>{t('allocations.studentId')}</Label>
-              <Input value={allocStudentId} onChange={(e) => setAllocStudentId(e.target.value)} required />
+              <StudentSearchPicker
+                label={t('allocations.student')}
+                value={allocStudentId}
+                onChange={(studentId) => setAllocStudentId(studentId)}
+              />
             </div>
             <div>
               <Label>{t('allocations.room')}</Label>

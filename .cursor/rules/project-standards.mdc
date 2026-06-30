@@ -12,5 +12,5 @@ alwaysApply: true
 - Every POST/PATCH body must be validated with a Zod schema before reaching controller logic. Use the shared `/backend/src/utils/validators.ts` for E.164 phone numbers.
 - Follow Controller → Service → Repository. No business logic in controllers, no direct Supabase calls outside repositories.
 - Phone numbers are stored in E.164 format (+91XXXXXXXXXX) everywhere — required for future WhatsApp notification integration.
-- Do NOT build: hostel management, attendance, gradebooks, gate passes, notifications (WhatsApp/email), or payments. See PROJECT_CONTEXT.md Section 14.
+- lets build: **school** attendance, gradebooks, gate passes, notifications (WhatsApp/email), or payments. Hostel management, hostel attendance, student remarks, basic medical records, and PDF exports **are in scope** (migration `008`). See PROJECT_CONTEXT.md Section 14.
 - Full schema, API catalog, frontend plan, and build order live in PROJECT_CONTEXT.md — read the relevant section before starting any new module.

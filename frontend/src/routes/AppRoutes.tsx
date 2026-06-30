@@ -10,6 +10,7 @@ import { HostelAttendanceMarkPage } from '@/features/hostel/HostelAttendanceMark
 import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
 import { HostelPage } from '@/features/hostel/HostelPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
+import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
@@ -74,6 +75,14 @@ export function AppRoutes() {
             element={
               <PermissionRoute permission="remarks:read">
                 <RemarksPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/medical-records"
+            element={
+              <PermissionRoute permission="medical:read">
+                <MedicalRecordsPage />
               </PermissionRoute>
             }
           />

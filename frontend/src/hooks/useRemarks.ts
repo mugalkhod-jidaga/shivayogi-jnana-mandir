@@ -1,11 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
-import type {
-  CreateRemarkInput,
-  RemarkListFilters,
-  RemarkStats,
-  RemarkSummary,
-} from '@/types/remark';
+import type { CreateRemarkInput, RemarkListFilters, RemarkStats, RemarkSummary } from '@/types/remark';
+
+export type UpdateRemarkInput = {
+  title?: string;
+  description?: string;
+  severity?: RemarkSummary['severity'] | null;
+  tags?: string[];
+  isFlagged?: boolean;
+  followUpNote?: string;
+  resolved?: boolean;
+};
 
 export const remarkKeys = {
   all: ['remarks'] as const,
@@ -62,6 +67,20 @@ export function useCreateRemark(studentId: string) {
     mutationFn: (input: CreateRemarkInput) =>
       apiFetch<RemarkSummary>(`/students/${studentId}/remarks`, {
         method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: remarkKeys.all });
+    },
+  });
+}
+
+export function useUpdateRemark() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateRemarkInput }) =>
+      apiFetch<RemarkSummary>(`/remarks/${id}`, {
+        method: 'PATCH',
         body: JSON.stringify(input),
       }),
     onSuccess: () => {

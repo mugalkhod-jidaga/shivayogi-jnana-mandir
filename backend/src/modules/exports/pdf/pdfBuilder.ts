@@ -12,6 +12,7 @@ export type PdfDocumentMeta = {
   subtitle?: string;
   generatedAt?: Date;
   tenantName?: string;
+  locale?: 'en' | 'kn';
 };
 
 export type PdfTableRow = string[];
@@ -41,11 +42,13 @@ export function writePdfHeader(doc: PDFKit.PDFDocument, meta: PdfDocumentMeta) {
     doc.fontSize(11).font('Helvetica').fillColor('#4b5563').text(meta.subtitle);
   }
   const generated = meta.generatedAt ?? new Date();
+  const localeTag = meta.locale === 'kn' ? 'kn-IN' : 'en-IN';
+  const generatedLabel = meta.locale === 'kn' ? 'ರಚಿಸಿದ ಸಮಯ' : 'Generated';
   doc.moveDown(0.3);
   doc
     .fontSize(9)
     .fillColor('#6b7280')
-    .text(`Generated: ${generated.toLocaleString('en-IN')}`, { align: 'left' });
+    .text(`${generatedLabel}: ${generated.toLocaleString(localeTag)}`, { align: 'left' });
   if (meta.tenantName) {
     doc.text(meta.tenantName, { align: 'left' });
   }

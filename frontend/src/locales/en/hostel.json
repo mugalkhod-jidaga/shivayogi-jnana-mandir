@@ -19,7 +19,7 @@
   },
   "allocations": {
     "title": "Active allocations",
-    "studentId": "Student ID (UUID)",
+    "student": "Student",
     "room": "Room",
     "selectRoom": "Select room",
     "from": "From date",

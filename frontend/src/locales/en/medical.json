@@ -2,6 +2,19 @@
   "loading": "Loading medical records…",
   "empty": "No medical records for this student yet.",
   "ongoing": "Ongoing",
+  "list": {
+    "title": "Medical Records",
+    "description": "View and filter student medical records across the school.",
+    "allTypes": "All record types",
+    "empty": "No medical records found.",
+    "pagination": "Page {{page}} of {{totalPages}} ({{total}} total)",
+    "columns": {
+      "date": "Recorded on",
+      "student": "Student",
+      "type": "Type",
+      "title": "Title"
+    }
+  },
   "actions": {
     "addRecord": "Add record",
     "cancel": "Cancel",

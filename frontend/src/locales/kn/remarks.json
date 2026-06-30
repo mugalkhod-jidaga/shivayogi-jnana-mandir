@@ -29,7 +29,12 @@
     "downloadPdf": "PDF ಡೌನ್‌ಲೋಡ್",
     "addRemark": "ಟಿಪ್ಪಣಿ ಸೇರಿಸಿ",
     "cancel": "ರದ್ದು",
-    "saveRemark": "ಟಿಪ್ಪಣಿ ಉಳಿಸಿ"
+    "saveRemark": "ಟಿಪ್ಪಣಿ ಉಳಿಸಿ",
+    "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "edit": "ಸಂಪಾದಿಸಿ",
+    "cancelEdit": "ಸಂಪಾದನೆ ರದ್ದು",
+    "resolve": "ಪರಿಹರಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ",
+    "reopen": "ಮರು ತೆರೆಯಿರಿ"
   },
   "form": {
     "type": "ಟಿಪ್ಪಣಿ ಪ್ರಕಾರ",
@@ -37,6 +42,7 @@
     "severity": "ತೀವ್ರತೆ",
     "title": "ಶೀರ್ಷಿಕೆ",
     "description": "ವಿವರಣೆ",
+    "followUpNote": "ಫಾಲೋ-ಅಪ್ ಟಿಪ್ಪಣಿ",
     "selectType": "ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ",
     "selectCategory": "ವರ್ಗ ಆಯ್ಕೆಮಾಡಿ",
     "selectSeverity": "ತೀವ್ರತೆ ಆಯ್ಕೆಮಾಡಿ"
@@ -46,6 +52,7 @@
     "medium": "ಮಧ್ಯಮ",
     "high": "ಹೆಚ್ಚು"
   },
+  "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
   "byAuthor": "{{name}} ರಿಂದ",
   "pagination": "ಪುಟ {{page}} / {{totalPages}} (ಒಟ್ಟು {{total}})",
   "errors": {

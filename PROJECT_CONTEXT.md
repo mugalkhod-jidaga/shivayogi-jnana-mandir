@@ -930,16 +930,20 @@ export const defaultLimiter = rateLimit({ windowMs: 60_000, max: 60 });
 
 ---
 
-## 14. Roadmap Beyond Phase 1 (Awareness Only — Not Built Now)
+## 14. Roadmap Beyond Phase 1
 
-This section exists so Phase 1 naming and schema choices don't conflict with what's coming. Nothing here is implemented in the current phase, per the project's own "no overbuilding before validation" principle — confirm market fit with Phase 1 before any of this is built.
+### Built in Phase 2 (migration `008`)
+- **Student remarks** — `student_remarks`, remark type/category lookups, stats, PDF export
+- **Hostel** — `hostel_blocks`, `hostel_rooms`, `room_allocations` (no gate passes yet)
+- **Hostel attendance** — residential daily attendance only (`hostel_attendance_*`); not school/class attendance
+- **Basic medical records** — `student_medical_records` with type lookup
+- **Reusable PDF exports** — `GET /api/v1/exports/pdf/*` (students, student detail, remarks); labels respect `Accept-Language` (`en` / `kn`)
 
-### Hostel Management (Phase 2+)
-Anticipated tables: `hostel_blocks`, `hostel_rooms`, `room_allocations` (`student_id`, `room_id`, `allocated_from`, `allocated_to`), `gate_passes` (`student_id`, `out_time`, `in_time`, `approved_by`), `daily_headcounts`.
-The `Warden` role already exists in RBAC under "Teacher/Warden" — when this module ships, it will likely split into its own dedicated permission set rather than sharing Teacher's. No schema work needed today.
+### Still out of scope (Phase 2+)
 
-### Notification Service (Phase 2+)
-Planned channels: WhatsApp (Wati.io or Interakt) and email. Anticipated table: `notification_logs` (`recipient`, `channel`, `template`, `status`, `sent_at`) — not created now.
+**Gate passes & school attendance** — `gate_passes`, class/school attendance tables (hostel attendance is separate).
+
+**Notifications** — Planned channels: WhatsApp (Wati.io or Interakt) and email. Anticipated table: `notification_logs` (`recipient`, `channel`, `template`, `status`, `sent_at`) — not created now.
 Two decisions already baked into the current schema for this:
 - All phone numbers stored in E.164 format (Section 3, Rule #11) — required by WhatsApp Business API providers.
 - `user_profiles.email` exists now (nullable, unused in Phase 1) so it isn't a migration later.

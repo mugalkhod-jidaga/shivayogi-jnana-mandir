@@ -29,7 +29,12 @@
     "downloadPdf": "Download PDF",
     "addRemark": "Add remark",
     "cancel": "Cancel",
-    "saveRemark": "Save remark"
+    "saveRemark": "Save remark",
+    "saveChanges": "Save changes",
+    "edit": "Edit",
+    "cancelEdit": "Cancel edit",
+    "resolve": "Mark resolved",
+    "reopen": "Reopen"
   },
   "form": {
     "type": "Remark type",
@@ -37,6 +42,7 @@
     "severity": "Severity",
     "title": "Title",
     "description": "Description",
+    "followUpNote": "Follow-up note",
     "selectType": "Select type",
     "selectCategory": "Select category",
     "selectSeverity": "Select severity"
@@ -46,6 +52,7 @@
     "medium": "Medium",
     "high": "High"
   },
+  "resolved": "Resolved",
   "byAuthor": "By {{name}}",
   "pagination": "Page {{page}} of {{totalPages}} ({{total}} total)",
   "errors": {
