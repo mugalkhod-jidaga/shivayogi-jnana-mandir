@@ -57,3 +57,19 @@ export function useDeactivateLookupValue(resource: LookupResource) {
     },
   });
 }
+
+export function useUpdateLookupLabels(resource: LookupResource) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, labelKn }: { id: number; labelKn: string }) =>
+      apiFetch<TenantLookupOption>(`/lookups/${resource}/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ labelKn: labelKn.trim() || null }),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
+      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+    },
+  });
+}

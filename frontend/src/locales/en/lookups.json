@@ -42,6 +42,7 @@
   "admin": {
     "add": "Add",
     "adding": "Adding…",
+    "edit": "Edit",
     "noValues": "No active values yet.",
     "columns": {
       "name": "Name",
@@ -50,7 +51,8 @@
       "actions": "Actions"
     },
     "active": "Active",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "deactivating": "Deactivating…"
   },
   "addDialog": {
     "title": "Add {{label}}",
@@ -61,6 +63,14 @@
     "valueRequired": "Value is required",
     "success": "{{label}} added",
     "error": "Could not add {{label}}"
+  },
+  "editDialog": {
+    "title": "Edit {{label}}",
+    "description": "Update the Kannada label shown when the UI language is Kannada.",
+    "nameEn": "Name (English)",
+    "nameKn": "Name (Kannada)",
+    "success": "{{label}} updated",
+    "error": "Could not update {{label}}"
   },
   "deactivateDialog": {
     "title": "Deactivate {{label}}",

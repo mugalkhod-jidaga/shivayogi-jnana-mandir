@@ -42,6 +42,7 @@
   "admin": {
     "add": "ಸೇರಿಸಿ",
     "adding": "ಸೇರಿಸಲಾಗುತ್ತಿದೆ…",
+    "edit": "ಸಂಪಾದಿಸಿ",
     "noValues": "ಇನ್ನೂ ಸಕ್ರಿಯ ಮೌಲ್ಯಗಳಿಲ್ಲ.",
     "columns": {
       "name": "ಹೆಸರು",
@@ -50,7 +51,8 @@
       "actions": "ಕ್ರಿಯೆಗಳು"
     },
     "active": "ಸಕ್ರಿಯ",
-    "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+    "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+    "deactivating": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"
   },
   "addDialog": {
     "title": "{{label}} ಸೇರಿಸಿ",
@@ -61,6 +63,14 @@
     "valueRequired": "ಮೌಲ್ಯ ಅಗತ್ಯ",
     "success": "{{label}} ಸೇರಿಸಲಾಗಿದೆ",
     "error": "{{label}} ಸೇರಿಸಲಾಗಲಿಲ್ಲ"
+  },
+  "editDialog": {
+    "title": "{{label}} ಸಂಪಾದಿಸಿ",
+    "description": "UI ಭಾಷೆ ಕನ್ನಡವಾಗಿರುವಾಗ ತೋರಿಸುವ ಕನ್ನಡ ಲೇಬಲ್ ನವೀಕರಿಸಿ.",
+    "nameEn": "ಹೆಸರು (ಇಂಗ್ಲಿಷ್)",
+    "nameKn": "ಹೆಸರು (ಕನ್ನಡ)",
+    "success": "{{label}} ನವೀಕರಿಸಲಾಗಿದೆ",
+    "error": "{{label}} ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ"
   },
   "deactivateDialog": {
     "title": "{{label}} ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",

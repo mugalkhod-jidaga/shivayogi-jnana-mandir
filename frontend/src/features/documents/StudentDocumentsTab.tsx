@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { RequirePermission } from '@/components/RequirePermission';
 import { DocumentActions } from '@/features/documents/components/DocumentActions';
 import { DocumentStatusBadge } from '@/features/documents/components/DocumentStatusBadge';
@@ -10,6 +11,7 @@ type StudentDocumentsTabProps = {
 };
 
 export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
+  const { t } = useTranslation('documents');
   const { data: documents = [], isLoading, isError } = useStudentDocuments(studentId);
 
   return (
@@ -20,20 +22,18 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
 
       <div className="rounded-lg border">
         <div className="border-b px-6 py-4">
-          <h3 className="font-medium">Uploaded documents</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Finance users only see Income Certificate and BPL Card here.
-          </p>
+          <h3 className="font-medium">{t('studentTab.uploadedTitle')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t('studentTab.financeNote')}</p>
         </div>
 
-        {isLoading && <p className="p-6 text-sm text-muted-foreground">Loading documents…</p>}
+        {isLoading && <p className="p-6 text-sm text-muted-foreground">{t('studentTab.loading')}</p>}
 
         {isError && (
-          <p className="p-6 text-sm text-destructive">Could not load documents for this student.</p>
+          <p className="p-6 text-sm text-destructive">{t('studentTab.error')}</p>
         )}
 
         {!isLoading && !isError && documents.length === 0 && (
-          <p className="p-6 text-sm text-muted-foreground">No documents uploaded yet.</p>
+          <p className="p-6 text-sm text-muted-foreground">{t('studentTab.empty')}</p>
         )}
 
         {!isLoading && !isError && documents.length > 0 && (
@@ -41,12 +41,12 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/40 text-left">
-                  <th className="px-6 py-3 font-medium">Type</th>
-                  <th className="px-6 py-3 font-medium">File</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
-                  <th className="px-6 py-3 font-medium">Uploaded</th>
-                  <th className="px-6 py-3 font-medium">Expiry</th>
-                  <th className="px-6 py-3 font-medium">Actions</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.type')}</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.file')}</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.status')}</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.uploaded')}</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.expires')}</th>
+                  <th className="px-6 py-3 font-medium">{t('studentTab.columns.actions')}</th>
                 </tr>
               </thead>
               <tbody>

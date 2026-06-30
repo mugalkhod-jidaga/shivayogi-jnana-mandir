@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { AddLookupDialog } from '@/features/lookups/components/AddLookupDialog';
 import { DeactivateLookupDialog } from '@/features/lookups/components/DeactivateLookupDialog';
+import { EditLookupDialog } from '@/features/lookups/components/EditLookupDialog';
 import type { LookupResource } from '@/hooks/useLookupAdmin';
 import type { TenantLookupOption } from '@/types/lookup';
 
@@ -29,6 +30,7 @@ export function LookupAdminPanel({
   const { t } = useTranslation('lookups');
   const { t: tc } = useTranslation();
   const [addOpen, setAddOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<TenantLookupOption | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<TenantLookupOption | null>(null);
 
   return (
@@ -56,6 +58,9 @@ export function LookupAdminPanel({
             <thead>
               <tr className="border-b bg-muted/40 text-left">
                 <th className="px-4 py-3 font-medium">{t('admin.columns.name')}</th>
+                {supportsKannadaLabel && (
+                  <th className="px-4 py-3 font-medium">{t('admin.columns.nameKn')}</th>
+                )}
                 <th className="px-4 py-3 font-medium">{t('admin.columns.status')}</th>
                 <th className="px-4 py-3 font-medium">{t('admin.columns.actions')}</th>
               </tr>
@@ -63,21 +68,36 @@ export function LookupAdminPanel({
             <tbody>
               {items.map((item) => (
                 <tr key={item.id} className="border-b last:border-b-0">
-                  <td className="px-4 py-3">{item.value}</td>
+                  <td className="px-4 py-3">{item.labels?.en ?? item.value}</td>
+                  {supportsKannadaLabel && (
+                    <td className="px-4 py-3 text-muted-foreground">{item.labels?.kn ?? '—'}</td>
+                  )}
                   <td className="px-4 py-3">
                     <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
                       {t('admin.active')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeactivateTarget(item)}
-                    >
-                      {t('admin.deactivate')}
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      {supportsKannadaLabel && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditTarget(item)}
+                        >
+                          {t('admin.edit')}
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDeactivateTarget(item)}
+                      >
+                        {t('admin.deactivate')}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -94,11 +114,23 @@ export function LookupAdminPanel({
         supportsKannadaLabel={supportsKannadaLabel}
       />
 
+      {editTarget && (
+        <EditLookupDialog
+          resource={resource}
+          label={singularLabel}
+          item={editTarget}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditTarget(null);
+          }}
+        />
+      )}
+
       {deactivateTarget && (
         <DeactivateLookupDialog
           resource={resource}
           label={singularLabel}
-          value={deactivateTarget.value}
+          value={deactivateTarget.labels?.en ?? deactivateTarget.value}
           id={deactivateTarget.id}
           open
           onOpenChange={(open) => {

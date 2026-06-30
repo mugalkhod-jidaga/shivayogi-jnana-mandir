@@ -20,8 +20,10 @@ export function Layout() {
   const navItems = useNavItems();
 
   const visibleNavItems = navItems.filter((item) => hasPermission(item.permission));
-  const displayName = me ? [me.firstName, me.lastName].filter(Boolean).join(' ') : 'Staff';
-  const roleName = me?.roles[0]?.name ?? 'Staff';
+  const displayName = me
+    ? [me.firstName, me.lastName].filter(Boolean).join(' ')
+    : t('staffFallback');
+  const roleName = me?.roles[0]?.name ?? t('staffFallback');
 
   const handleSignOut = () => {
     void (async () => {

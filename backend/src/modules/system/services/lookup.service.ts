@@ -83,17 +83,19 @@ export const lookupService = {
   },
 
   updateAdmissionCategory(id: number, tenantId: number, input: UpdateLookupValueInput) {
-    const changes: { value?: string; is_active?: boolean } = {};
-    if (input.value !== undefined) changes.value = input.value;
-    if (input.isActive !== undefined) changes.is_active = input.isActive;
-    return lookupRepository.updateAdmissionCategory(id, tenantId, changes);
+    return lookupRepository.updateAdmissionCategory(id, tenantId, {
+      value: input.value,
+      is_active: input.isActive,
+      labelKn: input.labelKn,
+    });
   },
 
   updateDocumentType(id: number, tenantId: number, input: UpdateLookupValueInput) {
-    const changes: { value?: string; is_active?: boolean } = {};
-    if (input.value !== undefined) changes.value = input.value;
-    if (input.isActive !== undefined) changes.is_active = input.isActive;
-    return lookupRepository.updateDocumentType(id, tenantId, changes);
+    return lookupRepository.updateDocumentType(id, tenantId, {
+      value: input.value,
+      is_active: input.isActive,
+      labelKn: input.labelKn,
+    });
   },
 
   updateAcademicStandard(

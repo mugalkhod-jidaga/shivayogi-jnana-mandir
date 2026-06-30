@@ -122,6 +122,21 @@
     "hiddenFamily": {
       "title": "Family details hidden",
       "description": "Your role can view basic student profiles only. Family and income information is not shown."
+    },
+    "avatar": {
+      "title": "Student photo",
+      "description": "The list uses free initials avatars. Uploaded photos are stored in R2 and load only when you click \"View photo\" here.",
+      "viewPhoto": "View uploaded photo",
+      "loadError": "Could not load photo.",
+      "retry": "Retry",
+      "uploading": "Uploading…",
+      "replacePhoto": "Replace photo",
+      "uploadPhoto": "Upload photo",
+      "noPhoto": "No uploaded photo for this student.",
+      "invalidFile": "Please choose an image file",
+      "success": "Photo updated",
+      "error": "Could not upload photo",
+      "alt": "Student photo"
     }
   },
   "deactivate": {

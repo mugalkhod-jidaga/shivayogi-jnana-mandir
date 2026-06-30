@@ -23,28 +23,35 @@
       "actions": "Actions"
     }
   },
-  "studentTab": {
-    "title": "Documents",
-    "financeNote": "Finance role users can only view Income Certificate and BPL Card.",
-    "loading": "Loading documents…",
-    "error": "Could not load documents.",
-    "empty": "No documents uploaded yet.",
-    "columns": {
-      "type": "Type",
-      "status": "Status",
-      "uploaded": "Uploaded",
-      "expires": "Expires",
-      "actions": "Actions"
-    }
-  },
   "upload": {
     "title": "Upload document",
+    "description": "PDF or image files up to 25 MB. Uploads go to secure storage and start as Pending Review.",
     "type": "Document type",
+    "typePlaceholder": "Select type",
+    "expiryDate": "Expiry date (optional)",
+    "chooseFile": "Choose file",
     "file": "File",
     "submit": "Upload",
     "submitting": "Uploading…",
     "success": "Document uploaded",
-    "error": "Could not upload document"
+    "error": "Could not upload document",
+    "typeRequired": "Choose a document type first",
+    "invalidFile": "Only PDF and image files are allowed"
+  },
+  "studentTab": {
+    "uploadedTitle": "Uploaded documents",
+    "financeNote": "Finance users only see Income Certificate and BPL Card here.",
+    "loading": "Loading documents…",
+    "error": "Could not load documents for this student.",
+    "empty": "No documents uploaded yet.",
+    "columns": {
+      "type": "Type",
+      "file": "File",
+      "status": "Status",
+      "uploaded": "Uploaded",
+      "expires": "Expiry",
+      "actions": "Actions"
+    }
   },
   "actions": {
     "download": "Download",
@@ -54,6 +61,8 @@
     "verifySuccess": "Document verified",
     "rejectSuccess": "Document rejected",
     "renewalSuccess": "Marked as renewal needed",
-    "error": "Action failed"
+    "downloadError": "Could not download document",
+    "updateError": "Could not update document status",
+    "markedAs": "Document marked as {{status}}"
   }
 }

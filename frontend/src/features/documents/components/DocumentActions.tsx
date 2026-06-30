@@ -1,4 +1,6 @@
 import { Download } from 'lucide-react';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { RequirePermission } from '@/components/RequirePermission';
 import { Button } from '@/components/ui/button';
@@ -10,33 +12,48 @@ type DocumentActionsProps = {
   compact?: boolean;
 };
 
-const verifyOptions: Array<{ status: Exclude<DocumentStatus, 'Pending Review'>; label: string }> =
-  [
-    { status: 'Verified', label: 'Verify' },
-    { status: 'Rejected', label: 'Reject' },
-    { status: 'Renewal Needed', label: 'Renewal needed' },
-  ];
-
 export function DocumentActions({ document, compact = false }: DocumentActionsProps) {
+  const { t } = useTranslation('documents');
   const download = useDocumentDownload();
   const verify = useDocumentVerify();
   const canVerify = document.status === 'Pending Review';
+
+  const verifyOptions = useMemo(
+    () =>
+      [
+        { status: 'Verified' as const, label: t('actions.verify'), success: t('actions.verifySuccess') },
+        { status: 'Rejected' as const, label: t('actions.reject'), success: t('actions.rejectSuccess') },
+        {
+          status: 'Renewal Needed' as const,
+          label: t('actions.renewalNeeded'),
+          success: t('actions.renewalSuccess'),
+        },
+      ] satisfies Array<{
+        status: Exclude<DocumentStatus, 'Pending Review'>;
+        label: string;
+        success: string;
+      }>,
+    [t],
+  );
 
   const handleDownload = async () => {
     try {
       await download.mutateAsync(document.id);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not download document';
+      const message = error instanceof Error ? error.message : t('actions.downloadError');
       toast.error(message);
     }
   };
 
-  const handleVerify = async (status: Exclude<DocumentStatus, 'Pending Review'>) => {
+  const handleVerify = async (
+    status: Exclude<DocumentStatus, 'Pending Review'>,
+    successMessage: string,
+  ) => {
     try {
       await verify.mutateAsync({ documentId: document.id, status });
-      toast.success(`Document marked as ${status}`);
+      toast.success(successMessage);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not update document status';
+      const message = error instanceof Error ? error.message : t('actions.updateError');
       toast.error(message);
     }
   };
@@ -52,7 +69,7 @@ export function DocumentActions({ document, compact = false }: DocumentActionsPr
           onClick={() => void handleDownload()}
         >
           <Download className="size-4" />
-          Download
+          {t('actions.download')}
         </Button>
       </RequirePermission>
 
@@ -65,7 +82,7 @@ export function DocumentActions({ document, compact = false }: DocumentActionsPr
               size={compact ? 'sm' : 'default'}
               variant={option.status === 'Verified' ? 'default' : 'outline'}
               disabled={verify.isPending}
-              onClick={() => void handleVerify(option.status)}
+              onClick={() => void handleVerify(option.status, option.success)}
             >
               {option.label}
             </Button>

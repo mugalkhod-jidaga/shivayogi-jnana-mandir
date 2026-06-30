@@ -117,11 +117,8 @@ export function ImportPage() {
               <FileSpreadsheet className="size-6 text-muted-foreground" />
             </div>
             <div>
-              <h2 className="text-lg font-medium">Upload spreadsheet</h2>
-              <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                CSV or Excel (.xlsx / .xls), up to 5 MB. Date of birth uses DD/MM/YYYY (e.g.
-                15/05/2010). Other columns match the sample file.
-              </p>
+              <h2 className="text-lg font-medium">{t('upload.title')}</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">{t('upload.description')}</p>
             </div>
             <a
               href={SAMPLE_URL}
@@ -142,11 +139,11 @@ export function ImportPage() {
             />
             <Button type="button" disabled={parse.isPending} onClick={() => inputRef.current?.click()}>
               {parse.isPending ? (
-                'Parsing…'
+                t('upload.parsing')
               ) : (
                 <>
                   <Upload className="size-4" />
-                  Choose file
+                  {t('upload.chooseFile')}
                 </>
               )}
             </Button>
@@ -158,26 +155,28 @@ export function ImportPage() {
         <div className="space-y-6">
           <div className="rounded-lg border p-4 text-sm">
             <p>
-              <span className="font-medium">{fileName}</span> — {parseResult.validRows} valid row(s)
+              {t('preview.summary', { name: fileName, valid: parseResult.validRows })}
               {parseResult.errorRows.length > 0 && (
-                <>, {parseResult.errorRows.length} error(s)</>
+                <>{t('preview.errorsSuffix', { count: parseResult.errorRows.length })}</>
               )}
             </p>
           </div>
 
           {parseResult.preview.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-lg font-medium">Valid rows ({parseResult.preview.length})</h2>
+              <h2 className="text-lg font-medium">
+                {t('preview.validRowsTitle', { count: parseResult.preview.length })}
+              </h2>
               <div className="overflow-x-auto rounded-lg border">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium">Row</th>
-                      <th className="px-4 py-3 font-medium">Admission #</th>
-                      <th className="px-4 py-3 font-medium">Name</th>
-                      <th className="px-4 py-3 font-medium">DOB</th>
-                      <th className="px-4 py-3 font-medium">District</th>
-                      <th className="px-4 py-3 font-medium">Contact</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.row')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.admissionNumber')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.name')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.dob')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.district')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.contact')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -200,18 +199,15 @@ export function ImportPage() {
           {parseResult.errorRows.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-lg font-medium text-destructive">
-                Errors ({parseResult.errorRows.length})
+                {t('preview.errorsTitle', { count: parseResult.errorRows.length })}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                These rows will not be imported. Fix the file and upload again, or commit the valid
-                rows only.
-              </p>
+              <p className="text-sm text-muted-foreground">{t('preview.errorsHint')}</p>
               <div className="overflow-x-auto rounded-lg border border-destructive/30">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-destructive/5 text-left">
-                      <th className="px-4 py-3 font-medium">Row</th>
-                      <th className="px-4 py-3 font-medium">Error</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.row')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.error')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,7 +232,9 @@ export function ImportPage() {
               disabled={parseResult.preview.length === 0 || commit.isPending}
               onClick={() => void handleCommit()}
             >
-              {commit.isPending ? t('preview.committing') : t('preview.commit')}
+              {commit.isPending
+                ? t('preview.committing')
+                : t('preview.commit', { count: parseResult.preview.length })}
             </Button>
           </div>
         </div>

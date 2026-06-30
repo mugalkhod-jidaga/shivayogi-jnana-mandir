@@ -45,6 +45,38 @@ function serializeTenantLookup(row: TenantLookupRow, locale: SupportedLocale = '
   };
 }
 
+async function buildLabelsUpdate(
+  table: 'lookup_admission_categories' | 'lookup_document_types',
+  id: number,
+  tenantId: number,
+  patch: { value?: string; labelKn?: string | null },
+): Promise<Record<string, string> | undefined> {
+  if (patch.labelKn === undefined && patch.value === undefined) return undefined;
+
+  const { data: existing, error } = await supabase
+    .from(table)
+    .select('value, labels')
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (error || !existing) return undefined;
+
+  const baseValue = patch.value ?? existing.value;
+  const labels: Record<string, string> = {
+    ...((existing.labels as Record<string, string> | null) ?? { en: existing.value }),
+    en: baseValue,
+  };
+
+  if (patch.labelKn !== undefined) {
+    const kn = patch.labelKn?.trim();
+    if (kn) labels.kn = kn;
+    else delete labels.kn;
+  }
+
+  return labels;
+}
+
 function serializeAcademicStandard(row: AcademicStandardRow) {
   return {
     id: row.id,
@@ -166,14 +198,24 @@ class LookupRepository {
   async updateAdmissionCategory(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_admission_categories', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_admission_categories')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
@@ -190,14 +232,24 @@ class LookupRepository {
   async updateDocumentType(
     id: number,
     tenantId: number,
-    changes: { value?: string; is_active?: boolean },
+    patch: { value?: string; is_active?: boolean; labelKn?: string | null },
   ) {
+    const changes: { value?: string; is_active?: boolean; labels?: Record<string, string> } = {};
+    if (patch.value !== undefined) changes.value = patch.value;
+    if (patch.is_active !== undefined) changes.is_active = patch.is_active;
+
+    const labels = await buildLabelsUpdate('lookup_document_types', id, tenantId, {
+      value: patch.value,
+      labelKn: patch.labelKn,
+    });
+    if (labels) changes.labels = labels;
+
     const { data, error } = await supabase
       .from('lookup_document_types')
       .update(changes)
       .eq('id', id)
       .eq('tenant_id', tenantId)
-      .select('id, tenant_id, value, is_active')
+      .select('id, tenant_id, value, labels, is_active')
       .single();
 
     if (error) {
