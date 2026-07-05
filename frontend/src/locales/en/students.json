@@ -24,7 +24,7 @@
     "editDescription": "Update record for {{admissionNumber}}",
     "loadingStudent": "Loading student…",
     "nextAdmissionNumber": "Admission number",
-    "nextAdmissionHelp": "Assigned automatically when you save (SJM format).",
+    "nextAdmissionHelp": "Enter manually or use the suggested SJM number. Must be unique within your school.",
     "admissionNumberLoading": "Loading…",
     "sections": {
       "basic": "Basic information",
@@ -36,7 +36,8 @@
     "hints": {
       "emergency": "A separate emergency contact in addition to the family primary contact.",
       "social": "Sensitive information — visible only to authorized staff.",
-      "family": "Sensitive family and income details — visible only to authorized staff."
+      "family": "Sensitive family and income details — visible only to authorized staff.",
+      "obcIncomeRdSync": "For OBC categories, Income RD matches Caste RD automatically."
     },
     "fields": {
       "firstName": "First name",
@@ -67,6 +68,8 @@
       "socialCategory": "Social category",
       "caste": "Caste",
       "subCaste": "Sub-caste",
+      "casteRdNumber": "Caste RD number",
+      "incomeRdNumber": "Income RD number",
       "rdNumber": "RD number",
       "rdNumberSecondary": "RD number (secondary)",
       "fatherName": "Father's name",
@@ -168,6 +171,16 @@
     "pincodeRequired": "Pincode is required",
     "aadhaar": "Aadhaar must be exactly 12 digits",
     "satsId": "SATS ID must be exactly 9 digits",
-    "reasonRequired": "Reason is required"
+    "reasonRequired": "Reason is required",
+    "admissionNumberRequired": "Admission number is required",
+    "rd": {
+      "casteRdRequired": "Valid Caste RD number required (e.g. RD1218...)",
+      "casteRdInvalid": "Valid Caste RD number required (e.g. RD1218...)",
+      "incomeRdRequired": "Valid Income RD number required",
+      "incomeRdInvalid": "Valid Income RD number required",
+      "scStDifferent": "SC/ST must have different Caste and Income RD numbers",
+      "obcIncomeMustMatch": "OBC Income RD must match your Caste RD",
+      "gmIncomeInvalid": "Invalid Income RD format"
+    }
   }
 }

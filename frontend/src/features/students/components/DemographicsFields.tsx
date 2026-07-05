@@ -1,19 +1,20 @@
-import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { BloodGroupSelect } from '@/components/lookups/BloodGroupSelect';
 import { LanguageSelect } from '@/components/lookups/LanguageSelect';
+import { DateField } from '@/components/ui/date-field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
-import type {
-  CreateStudentFormValues,
-  UpdateStudentFormValues,
-} from '@/features/students/schemas/studentForm.schema';
+import type { CreateStudentFormValues } from '@/features/students/schemas/studentForm.schema';
+
+type StudentFormValues = CreateStudentFormValues;
 
 type DemographicsFieldsProps = {
-  register: UseFormRegister<CreateStudentFormValues | UpdateStudentFormValues>;
-  errors: FieldErrors<CreateStudentFormValues | UpdateStudentFormValues>;
+  register: UseFormRegister<StudentFormValues>;
+  control: Control<StudentFormValues>;
+  errors: FieldErrors<StudentFormValues>;
   bloodGroupId?: string;
   admissionCategoryId?: string;
   motherTongueId?: string;
@@ -27,6 +28,7 @@ type DemographicsFieldsProps = {
 
 export function DemographicsFields({
   register,
+  control,
   errors,
   bloodGroupId,
   admissionCategoryId,
@@ -45,17 +47,20 @@ export function DemographicsFields({
     <div className="grid gap-4 sm:grid-cols-2">
       {isCreate && (
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="admissionNumberPreview">{t('form.nextAdmissionNumber')}</Label>
+          <Label htmlFor="admissionNumber">{t('form.nextAdmissionNumber')}</Label>
           <Input
-            id="admissionNumberPreview"
-            readOnly
-            value={
+            id="admissionNumber"
+            placeholder={
               isLoadingAdmissionNumber
                 ? t('form.admissionNumberLoading')
-                : (nextAdmissionNumber ?? '—')
+                : (nextAdmissionNumber ?? 'SJM00001')
             }
-            className="bg-muted"
+            className="font-mono"
+            {...register('admissionNumber')}
           />
+          {errors.admissionNumber && (
+            <p className="text-sm text-destructive">{errors.admissionNumber.message}</p>
+          )}
           <p className="text-xs text-muted-foreground">{t('form.nextAdmissionHelp')}</p>
         </div>
       )}
@@ -72,29 +77,21 @@ export function DemographicsFields({
         {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="dob">{t('form.fields.dob')}</Label>
-        <Input
-          id="dob"
-          placeholder={t('form.fields.dobPlaceholder')}
-          inputMode="numeric"
-          {...register('dob')}
-        />
-        {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
-      </div>
+      <DateField
+        control={control}
+        name="dob"
+        id="dob"
+        label={t('form.fields.dob')}
+        error={errors.dob?.message}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="admissionDate">{t('form.fields.admissionDate')}</Label>
-        <Input
-          id="admissionDate"
-          placeholder={t('form.fields.dobPlaceholder')}
-          inputMode="numeric"
-          {...register('admissionDate')}
-        />
-        {errors.admissionDate && (
-          <p className="text-sm text-destructive">{errors.admissionDate.message}</p>
-        )}
-      </div>
+      <DateField
+        control={control}
+        name="admissionDate"
+        id="admissionDate"
+        label={t('form.fields.admissionDate')}
+        error={errors.admissionDate?.message}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="gender">{t('form.fields.gender')}</Label>

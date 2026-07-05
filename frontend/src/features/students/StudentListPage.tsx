@@ -1,7 +1,7 @@
 import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { AcademicYearSelect } from '@/components/lookups/AcademicYearSelect';
@@ -24,6 +24,7 @@ function formatName(firstName: string, lastName: string | null) {
 export function StudentListPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -149,24 +150,22 @@ export function StudentListPage() {
 
       {isError && <p className="text-sm text-destructive">{tc('errors.loadStudents')}</p>}
 
-      <div className="overflow-hidden rounded-lg border">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="w-14 px-4 py-3 font-medium" />
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionNumber')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.name')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.standard')}</th>
-              <th className="px-4 py-3 font-medium">{t('list.columns.rollNumber')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionDate')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.status')}</th>
-              <th className="px-4 py-3 font-medium" />
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.loading')}
                 </td>
               </tr>
@@ -174,14 +173,18 @@ export function StudentListPage() {
 
             {!isLoading && students.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.noResults')}
                 </td>
               </tr>
             )}
 
             {students.map((student) => (
-              <tr key={student.id} className="border-t">
+              <tr
+                key={student.id}
+                className="cursor-pointer border-t transition-colors hover:bg-muted/50"
+                onClick={() => navigate(`/students/${student.id}`)}
+              >
                 <td className="px-4 py-3">
                   <StudentInitialsAvatar
                     firstName={student.firstName}
@@ -191,15 +194,9 @@ export function StudentListPage() {
                 <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
                 <td className="px-4 py-3">{formatName(student.firstName, student.lastName)}</td>
                 <td className="px-4 py-3">{student.currentEnrollment?.standard?.value ?? '—'}</td>
-                <td className="px-4 py-3">{student.currentEnrollment?.rollNumber ?? '—'}</td>
                 <td className="px-4 py-3">{formatDobDisplay(student.admissionDate)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={student.status} />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button asChild variant="ghost" size="sm">
-                    <Link to={`/students/${student.id}`}>{tc('actions.view')}</Link>
-                  </Button>
                 </td>
               </tr>
             ))}

@@ -4,6 +4,7 @@ import { AppError } from '../../../utils/AppError';
 import { auditLogService } from '../../system/services/auditLog.service';
 import type {
   AcademicPlacementInput,
+  UpdateAcademicPlacementInput,
   EmergencyContactInput,
   FamilyDetailsInput,
   SocialDetailsInput,
@@ -373,7 +374,11 @@ export class StudentsRepository extends BaseRepository {
     return full;
   }
 
-  async updateEnrollment(studentId: string, changes: Partial<AcademicPlacementInput>, admissionDate?: string) {
+  async updateEnrollment(
+    studentId: string,
+    changes: UpdateAcademicPlacementInput,
+    admissionDate?: string,
+  ) {
     const enrollment = await supabase
       .from('student_enrollments')
       .select('id')

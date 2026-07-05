@@ -39,6 +39,7 @@ function serializeTenantLookup(row: TenantLookupRow, locale: SupportedLocale = '
   return {
     id: row.id,
     tenantId: row.tenant_id,
+    code: row.value,
     value,
     labels: labels ?? { en: row.value },
     isActive: row.is_active,

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { DemographicsFields } from '@/features/students/components/DemographicsF
 import { EmergencyContactFields } from '@/features/students/components/EmergencyContactFields';
 import { FamilyDetailsFields } from '@/features/students/components/FamilyDetailsFields';
 import { SocialDetailsFields } from '@/features/students/components/SocialDetailsFields';
+import { isGmSocialCategory } from '@/features/students/schemas/karnatakaRd.validation';
 import {
   buildCreateStudentPayload,
   buildUpdateStudentPayload,
@@ -25,7 +26,6 @@ import { useStudentFormSchemas } from '@/hooks/useStudentFormSchemas';
 import { useLookups } from '@/hooks/useLookups';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useCreateStudent, useNextAdmissionNumber, useStudent, useUpdateStudent } from '@/hooks/useStudent';
-import { formatDobDisplay } from '@/lib/date';
 import { phoneToDisplay } from '@/lib/phone';
 import { ApiError } from '@/lib/api';
 
@@ -37,7 +37,7 @@ export function StudentFormPage() {
   const isEdit = Boolean(id);
   const { hasPermission } = usePermissions();
   const canViewFamily = hasPermission('students:view_sensitive_data');
-  const { currentAcademicYear } = useLookups();
+  const { currentAcademicYear, socialCategories } = useLookups();
   const { createStudentFormSchema, updateStudentFormSchema } = useStudentFormSchemas();
 
   const { data: student, isLoading } = useStudent(isEdit ? id : undefined);
@@ -47,11 +47,22 @@ export function StudentFormPage() {
   const createStudent = useCreateStudent();
   const updateStudent = useUpdateStudent(id ?? '');
 
+  const createResolver = useMemo(
+    () => zodResolver(createStudentFormSchema),
+    [createStudentFormSchema],
+  );
+  const updateResolver = useMemo(
+    () => zodResolver(updateStudentFormSchema),
+    [updateStudentFormSchema],
+  );
+
   const createForm = useForm<CreateStudentFormValues>({
-    resolver: zodResolver(createStudentFormSchema),
+    resolver: createResolver,
     defaultValues: {
+      admissionNumber: '',
+      socialCategoryCode: '',
       gender: 'Male',
-      admissionDate: formatDobDisplay(new Date().toISOString().slice(0, 10)),
+      admissionDate: new Date().toISOString().slice(0, 10),
       academicPlacement: defaultAcademicPlacement,
       emergencyContacts: [defaultEmergencyContact],
       socialDetails: defaultSocialDetails,
@@ -60,14 +71,17 @@ export function StudentFormPage() {
   });
 
   const editForm = useForm<UpdateStudentFormValues>({
-    resolver: zodResolver(updateStudentFormSchema),
+    resolver: updateResolver,
     defaultValues: {
+      socialCategoryCode: '',
       gender: 'Male',
       academicPlacement: defaultAcademicPlacement,
       emergencyContacts: [defaultEmergencyContact],
       socialDetails: defaultSocialDetails,
     },
   });
+
+  type SharedFormValues = CreateStudentFormValues;
 
   const [bloodGroupId, setBloodGroupId] = useState('');
   const [admissionCategoryId, setAdmissionCategoryId] = useState('');
@@ -77,6 +91,73 @@ export function StudentFormPage() {
   const [sectionId, setSectionId] = useState('');
   const [religionId, setReligionId] = useState('');
   const [socialCategoryId, setSocialCategoryId] = useState('');
+
+  const socialCategoryCode = useMemo(() => {
+    const match = socialCategories.find((category) => String(category.id) === socialCategoryId);
+    return match?.code?.toLowerCase() ?? '';
+  }, [socialCategories, socialCategoryId]);
+
+  const syncSocialCategoryCode = useCallback(
+    (form: typeof createForm, code: string) => {
+      form.setValue('socialCategoryCode', code, { shouldValidate: true });
+    },
+    [],
+  );
+
+  const syncEditSocialCategoryCode = useCallback(
+    (code: string) => {
+      editForm.setValue('socialCategoryCode', code, { shouldValidate: true });
+    },
+    [editForm],
+  );
+
+  const handleCreateSocialCategoryChange = useCallback(
+    (value: string) => {
+      setSocialCategoryId(value);
+      const code =
+        socialCategories.find((category) => String(category.id) === value)?.code?.toLowerCase() ??
+        '';
+      syncSocialCategoryCode(createForm, code);
+      if (isGmSocialCategory(code)) {
+        createForm.setValue('socialDetails.rdNumber', '', { shouldValidate: true });
+      }
+    },
+    [socialCategories, syncSocialCategoryCode, createForm],
+  );
+
+  const handleEditSocialCategoryChange = useCallback(
+    (value: string) => {
+      setSocialCategoryId(value);
+      const code =
+        socialCategories.find((category) => String(category.id) === value)?.code?.toLowerCase() ??
+        '';
+      syncEditSocialCategoryCode(code);
+      if (isGmSocialCategory(code)) {
+        editForm.setValue('socialDetails.rdNumber', '', { shouldValidate: true });
+      }
+    },
+    [socialCategories, syncEditSocialCategoryCode, editForm],
+  );
+
+  useEffect(() => {
+    if (!isEdit && nextAdmission?.admissionNumber && !createForm.getValues('admissionNumber')) {
+      createForm.setValue('admissionNumber', nextAdmission.admissionNumber, { shouldDirty: false });
+    }
+  }, [isEdit, nextAdmission, createForm]);
+
+  useEffect(() => {
+    if (isEdit) {
+      syncEditSocialCategoryCode(socialCategoryCode);
+    } else {
+      syncSocialCategoryCode(createForm, socialCategoryCode);
+    }
+  }, [
+    socialCategoryCode,
+    isEdit,
+    createForm,
+    syncSocialCategoryCode,
+    syncEditSocialCategoryCode,
+  ]);
 
   useEffect(() => {
     if (!isEdit && currentAcademicYear && !academicYearId) {
@@ -88,11 +169,12 @@ export function StudentFormPage() {
     if (!isEdit || !student) return;
 
     editForm.reset({
+      socialCategoryCode: '',
       firstName: student.firstName,
       lastName: student.lastName ?? '',
-      dob: formatDobDisplay(student.dob),
+      dob: student.dob,
       gender: student.gender,
-      admissionDate: formatDobDisplay(student.admissionDate),
+      admissionDate: student.admissionDate,
       aadhaarNumber: student.aadhaarNumber?.replace(/\D/g, '').length === 12
         ? student.aadhaarNumber.replace(/\D/g, '')
         : '',
@@ -251,11 +333,11 @@ export function StudentFormPage() {
     onSectionChange: setSectionId,
   };
 
-  const socialProps = {
+  const socialPropsBase = {
     religionId,
     socialCategoryId,
+    socialCategoryCode,
     onReligionChange: setReligionId,
-    onSocialCategoryChange: setSocialCategoryId,
   };
 
   return (
@@ -279,13 +361,15 @@ export function StudentFormPage() {
           <div className="mt-4">
             {isEdit ? (
               <DemographicsFields
-                register={editForm.register}
-                errors={editForm.formState.errors}
+                register={editForm.register as import('react-hook-form').UseFormRegister<SharedFormValues>}
+                control={editForm.control as import('react-hook-form').Control<SharedFormValues>}
+                errors={editForm.formState.errors as import('react-hook-form').FieldErrors<SharedFormValues>}
                 {...demographicsProps}
               />
             ) : (
               <DemographicsFields
                 register={createForm.register}
+                control={createForm.control}
                 errors={createForm.formState.errors}
                 {...demographicsProps}
                 isCreate
@@ -340,15 +424,21 @@ export function StudentFormPage() {
             <div className="mt-4">
               {isEdit ? (
                 <SocialDetailsFields
-                  register={editForm.register}
-                  errors={editForm.formState.errors}
-                  {...socialProps}
+                  register={editForm.register as import('react-hook-form').UseFormRegister<SharedFormValues>}
+                  setValue={editForm.setValue as import('react-hook-form').UseFormSetValue<SharedFormValues>}
+                  watch={editForm.watch as import('react-hook-form').UseFormWatch<SharedFormValues>}
+                  errors={editForm.formState.errors as import('react-hook-form').FieldErrors<SharedFormValues>}
+                  {...socialPropsBase}
+                  onSocialCategoryChange={handleEditSocialCategoryChange}
                 />
               ) : (
                 <SocialDetailsFields
                   register={createForm.register}
+                  setValue={createForm.setValue}
+                  watch={createForm.watch}
                   errors={createForm.formState.errors}
-                  {...socialProps}
+                  {...socialPropsBase}
+                  onSocialCategoryChange={handleCreateSocialCategoryChange}
                 />
               )}
             </div>
