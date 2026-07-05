@@ -65,6 +65,12 @@ export const healthController = {
     res.json({ success: true, data });
   },
 
+  async getReports(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.getReports(tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
   async suggestMedicines(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const query = medicineCatalogSuggestQuerySchema.parse(req.query);

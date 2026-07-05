@@ -281,6 +281,159 @@ class HealthRepository extends BaseRepository {
     };
   }
 
+  async getReports(tenantId: number, assignedStandardIds?: number[]) {
+    const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
+    if (scopedIds && scopedIds.length === 0) {
+      return {
+        totalVisits: 0,
+        visitsThisMonth: 0,
+        visitsThisWeek: 0,
+        uniqueStudentsVisited: 0,
+        visitsBySeverity: [],
+        visitsByDay: [],
+        topIssueTypes: [],
+        topMedicines: [],
+        studentsByHealthStatus: [],
+      };
+    }
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 89);
+    const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().slice(0, 10);
+
+    const [severitiesRes, visitsRes, medicinesRes, studentsRes] = await Promise.all([
+      supabase.from('lookup_health_severities').select('id, code, value, sort_order').order('sort_order'),
+      supabase
+        .from('health_visits')
+        .select(
+          'id, student_id, visit_date, issue_type, severity_id, severity:lookup_health_severities!inner(id, code, value)',
+        )
+        .eq('tenant_id', tenantId)
+        .is('deleted_at', null)
+        .gte('visit_date', ninetyDaysAgoStr),
+      supabase
+        .from('health_visit_medicines')
+        .select('medicine_name, health_visit_id, health_visits!inner(tenant_id, visit_date, deleted_at)')
+        .eq('health_visits.tenant_id', tenantId)
+        .is('deleted_at', null)
+        .gte('health_visits.visit_date', ninetyDaysAgoStr),
+      supabase
+        .from('students')
+        .select('health_status')
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .is('deleted_at', null),
+    ]);
+
+    for (const res of [severitiesRes, visitsRes, medicinesRes, studentsRes]) {
+      if (res.error) throw new AppError(500, res.error.message);
+    }
+
+    let visitRows = (visitsRes.data ?? []) as unknown as Array<{
+      id: string;
+      student_id: string;
+      visit_date: string;
+      issue_type: string;
+      severity_id: number;
+    }>;
+
+    if (scopedIds) {
+      visitRows = visitRows.filter((v) => scopedIds.includes(v.student_id));
+    }
+
+    const totalVisits = visitRows.length;
+    const visitsThisMonth = visitRows.filter((v) => v.visit_date >= monthStart).length;
+    const visitsThisWeek = visitRows.filter((v) => v.visit_date >= weekAgoStr).length;
+    const uniqueStudentsVisited = new Set(visitRows.map((v) => v.student_id)).size;
+
+    const severityCounts = new Map<number, number>();
+    for (const row of visitRows) {
+      severityCounts.set(row.severity_id, (severityCounts.get(row.severity_id) ?? 0) + 1);
+    }
+
+    const visitsBySeverity = (severitiesRes.data ?? []).map((severity) => ({
+      severityId: severity.id as number,
+      code: severity.code as string,
+      label: severity.value as string,
+      count: severityCounts.get(severity.id as number) ?? 0,
+    }));
+
+    const dayCounts = new Map<string, number>();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - (29 - i));
+      dayCounts.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const row of visitRows) {
+      if (dayCounts.has(row.visit_date)) {
+        dayCounts.set(row.visit_date, (dayCounts.get(row.visit_date) ?? 0) + 1);
+      }
+    }
+    const visitsByDay = [...dayCounts.entries()].map(([date, count]) => ({ date, count }));
+
+    const issueCounts = new Map<string, number>();
+    for (const row of visitRows) {
+      for (const issue of row.issue_type.split(',').map((s) => s.trim()).filter(Boolean)) {
+        issueCounts.set(issue, (issueCounts.get(issue) ?? 0) + 1);
+      }
+    }
+    const topIssueTypes = [...issueCounts.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const medicineCounts = new Map<string, number>();
+    for (const row of medicinesRes.data ?? []) {
+      const name = (row as { medicine_name: string }).medicine_name.trim();
+      if (!name) continue;
+      medicineCounts.set(name, (medicineCounts.get(name) ?? 0) + 1);
+    }
+    const topMedicines = [...medicineCounts.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+
+    let studentRows = studentsRes.data ?? [];
+    if (scopedIds) {
+      const { data: scopedStudents, error } = await supabase
+        .from('students')
+        .select('health_status')
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .is('deleted_at', null)
+        .in('id', scopedIds);
+      if (error) throw new AppError(500, error.message);
+      studentRows = scopedStudents ?? [];
+    }
+
+    const healthStatusCounts = new Map<string, number>();
+    for (const row of studentRows) {
+      const status = (row.health_status as string | null) ?? 'healthy';
+      healthStatusCounts.set(status, (healthStatusCounts.get(status) ?? 0) + 1);
+    }
+    const studentsByHealthStatus = ['healthy', 'sick', 'recovering'].map((status) => ({
+      status,
+      count: healthStatusCounts.get(status) ?? 0,
+    }));
+
+    return {
+      totalVisits,
+      visitsThisMonth,
+      visitsThisWeek,
+      uniqueStudentsVisited,
+      visitsBySeverity,
+      visitsByDay,
+      topIssueTypes,
+      topMedicines,
+      studentsByHealthStatus,
+    };
+  }
+
   async getDashboardStats(tenantId: number, assignedStandardIds?: number[]) {
     const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
     if (scopedIds && scopedIds.length === 0) {

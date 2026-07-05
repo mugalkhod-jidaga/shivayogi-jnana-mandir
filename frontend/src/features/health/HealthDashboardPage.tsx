@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
-import { Button } from '@/components/ui/button';
 import { KpiCard } from '@/features/dashboard/components/KpiCard';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
 import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
@@ -17,12 +15,7 @@ export function HealthDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
-        <Button asChild>
-          <Link to="/health/record-visit">{t('recent.recordVisit')}</Link>
-        </Button>
-      </div>
+      <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
 
       {isError && <p className="text-destructive">{t('dashboard.error')}</p>}
 

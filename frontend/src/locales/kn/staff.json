@@ -65,7 +65,8 @@
     "superAdmin": "ಸೂಪರ್ ಅಡ್ಮಿನ್",
     "admissionsClerk": "ಪ್ರವೇಶ ಕ್ಲರ್ಕ್",
     "finance": "ಹಣಕಾಸು",
-    "teacherWarden": "ಶಿಕ್ಷಕ/ವಾರ್ಡನ್"
+    "teacherWarden": "ಶಿಕ್ಷಕ/ವಾರ್ಡನ್",
+    "medicalStaff": "ವೈದ್ಯಕೀಯ ಸಿಬ್ಬಂದಿ"
   },
   "validation": {
     "firstNameRequired": "ಮೊದಲ ಹೆಸರು ಅಗತ್ಯ",

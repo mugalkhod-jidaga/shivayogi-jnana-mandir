@@ -19,12 +19,7 @@ export function RecentVisitsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader title={t('recent.title')} description={t('recent.description')} />
-        <Button asChild>
-          <Link to="/health/record-visit">{t('recent.recordVisit')}</Link>
-        </Button>
-      </div>
+      <PageHeader title={t('recent.title')} description={t('recent.description')} />
 
       <form
         className="flex gap-2"

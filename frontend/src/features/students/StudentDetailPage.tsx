@@ -12,7 +12,6 @@ import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
 import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
-import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';

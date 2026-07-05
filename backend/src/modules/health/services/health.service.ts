@@ -116,6 +116,11 @@ export const healthService = {
     return healthRepository.getDashboardStats(tenantId, assignedStandardIds);
   },
 
+  async getReports(tenantId: number, userId: string) {
+    const assignedStandardIds = await resolveStandardScope(userId);
+    return healthRepository.getReports(tenantId, assignedStandardIds);
+  },
+
   async suggestMedicines(tenantId: number, query: MedicineCatalogSuggestQuery) {
     const issueTypes = query.issueTypes
       ? query.issueTypes.split(',').map((s) => s.trim()).filter(Boolean)

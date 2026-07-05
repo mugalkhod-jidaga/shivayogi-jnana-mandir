@@ -14,6 +14,7 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 10. `010_health_phase2.sql` — medicine catalog, visit photo attachments, catalog seed
 11. `011_karnataka_social_categories.sql` — Karnataka social category codes (sc, st, cat_*)
 12. `012_bulk_import_social.sql` — optional blood/admission category; SATS + social details in bulk import
+13. `013_medical_staff_role.sql` — Medical Staff role (infirmary-only: medical + student read)
 
 Apply migrations through `012` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 

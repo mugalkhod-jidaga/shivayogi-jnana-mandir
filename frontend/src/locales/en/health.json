@@ -1,5 +1,11 @@
 {
   "loading": "Loading…",
+  "nav": {
+    "dashboard": "Dashboard",
+    "recordVisit": "Record visit",
+    "recentVisits": "Recent visits",
+    "reports": "Reports"
+  },
   "record": {
     "title": "Record Visit",
     "description": "Search for a student, review their history, and log a new infirmary visit.",
@@ -108,5 +114,46 @@
     "photos": "Reference photos",
     "viewProfile": "View student health profile",
     "photoLightbox": "Photo preview"
+  },
+  "reports": {
+    "title": "Health reports",
+    "description": "Infirmary analytics — visit trends, severity, common issues, and medicines (last 90 days).",
+    "errorTitle": "Could not load reports",
+    "errorDescription": "Check that the backend is running and try again.",
+    "empty": "No visit data yet.",
+    "visitsLabel": "visits",
+    "kpis": {
+      "totalVisits": "Total visits (90 days)",
+      "totalVisitsHelp": "All infirmary entries in range",
+      "visitsMonth": "Visits this month",
+      "visitsWeek": "Visits this week",
+      "uniqueStudents": "Students seen",
+      "uniqueStudentsHelp": "Distinct students with visits"
+    },
+    "trend": {
+      "title": "Daily visit trend",
+      "description": "Infirmary visits over the last 30 days."
+    },
+    "bySeverity": {
+      "title": "Visits by severity",
+      "description": "Normal, medium, and urgent cases."
+    },
+    "healthStatus": {
+      "title": "Student health status",
+      "description": "Current health status among active students.",
+      "healthy": "Healthy",
+      "sick": "Sick",
+      "recovering": "Recovering"
+    },
+    "topIssues": {
+      "title": "Top issue types",
+      "description": "Most frequent reasons for infirmary visits."
+    },
+    "topMedicines": {
+      "title": "Most prescribed medicines",
+      "description": "Medicines dispensed during visits.",
+      "columnMedicine": "Medicine",
+      "columnTimes": "Times prescribed"
+    }
   }
 }

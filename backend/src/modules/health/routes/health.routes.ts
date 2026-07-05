@@ -12,6 +12,13 @@ import {
 export const healthRoutes = Router();
 
 healthRoutes.get(
+  '/reports',
+  extractTenantMiddleware,
+  requirePermission('medical:read'),
+  asyncHandler(healthController.getReports),
+);
+
+healthRoutes.get(
   '/dashboard/stats',
   extractTenantMiddleware,
   requirePermission('medical:read'),

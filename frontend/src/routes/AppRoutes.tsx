@@ -11,9 +11,11 @@ import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
 import { HostelPage } from '@/features/hostel/HostelPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
+import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
+import { HealthLayout } from '@/features/health/HealthLayout';
+import { HealthReportsPage } from '@/features/health/HealthReportsPage';
 import { RecordVisitPage } from '@/features/health/RecordVisitPage';
 import { RecentVisitsPage } from '@/features/health/RecentVisitsPage';
-import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
 import { StudentHealthProfilePage } from '@/features/health/StudentHealthProfilePage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
@@ -88,22 +90,6 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="/health/record-visit"
-            element={
-              <PermissionRoute permission="medical:create">
-                <RecordVisitPage />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/health/dashboard"
-            element={
-              <PermissionRoute permission="medical:read">
-                <HealthDashboardPage />
-              </PermissionRoute>
-            }
-          />
-          <Route
             path="/health/students/:studentId"
             element={
               <PermissionRoute permission="medical:read">
@@ -112,17 +98,29 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="/health/recent"
-            element={
-              <PermissionRoute permission="medical:read">
-                <RecentVisitsPage />
-              </PermissionRoute>
-            }
+            path="/health/dashboard"
+            element={<Navigate to="/health" replace />}
           />
           <Route
             path="/health"
-            element={<Navigate to="/health/dashboard" replace />}
-          />
+            element={
+              <PermissionRoute permission="medical:read">
+                <HealthLayout />
+              </PermissionRoute>
+            }
+          >
+            <Route index element={<HealthDashboardPage />} />
+            <Route
+              path="record-visit"
+              element={
+                <PermissionRoute permission="medical:create">
+                  <RecordVisitPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="recent" element={<RecentVisitsPage />} />
+            <Route path="reports" element={<HealthReportsPage />} />
+          </Route>
           <Route
             path="/medical-records"
             element={

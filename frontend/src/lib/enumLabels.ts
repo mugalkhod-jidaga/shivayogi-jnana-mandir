@@ -56,6 +56,7 @@ const ROLE_KEY_MAP: Record<string, string> = {
   'Admissions Clerk': 'admissionsClerk',
   Finance: 'finance',
   'Teacher/Warden': 'teacherWarden',
+  'Medical Staff': 'medicalStaff',
 };
 
 export function roleLabel(t: TFunction, name: string | null | undefined): string {

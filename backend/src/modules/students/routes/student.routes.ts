@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { extractTenantMiddleware } from '../../../middlewares/extractTenant';
-import { requirePermission } from '../../../middlewares/requirePermission';
+import { requireAnyPermission, requirePermission } from '../../../middlewares/requirePermission';
 import { uploadLimiter } from '../../../middlewares/rateLimiters';
 import { validateZod } from '../../../middlewares/validateZod';
 import { asyncHandler } from '../../../utils/asyncHandler';
@@ -32,7 +32,7 @@ studentRoutes.get(
 studentRoutes.get(
   '/',
   extractTenantMiddleware,
-  requirePermission('students:read'),
+  requireAnyPermission('students:read', 'medical:read'),
   asyncHandler(studentController.list),
 );
 
@@ -47,7 +47,7 @@ studentRoutes.post(
 studentRoutes.get(
   '/:id',
   extractTenantMiddleware,
-  requirePermission('students:read'),
+  requireAnyPermission('students:read', 'medical:read'),
   asyncHandler(studentController.getById),
 );
 
