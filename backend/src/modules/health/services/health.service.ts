@@ -1,5 +1,5 @@
 import { AppError } from '../../../utils/AppError';
-import { getUploadUrl } from '../../documents/services/presignedUrl.service';
+import { getDownloadUrl, getUploadUrl } from '../../documents/services/presignedUrl.service';
 import { usersRepository } from '../../auth/repositories/users.repository';
 import { lookupRepository } from '../../system/repositories/lookup.repository';
 import {
@@ -136,6 +136,13 @@ export const healthService = {
       'health-visits',
       input.mimeType,
     );
+  },
+
+  async getAttachmentDownloadUrl(attachmentId: string, tenantId: number, userId: string) {
+    const attachment = await healthAttachmentRepository.findById(attachmentId, tenantId);
+    if (!attachment) throw new AppError(404, 'Attachment not found');
+    await assertStudentIdAccess(attachment.student_id, tenantId, userId);
+    return getDownloadUrl(attachment.file_url);
   },
 
   async saveVisit(tenantId: number, input: CreateHealthVisitInput, userId: string) {

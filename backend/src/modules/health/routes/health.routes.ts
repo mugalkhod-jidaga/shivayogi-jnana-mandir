@@ -41,6 +41,13 @@ healthRoutes.post(
 );
 
 healthRoutes.get(
+  '/attachments/:id/download',
+  extractTenantMiddleware,
+  requirePermission('medical:read'),
+  asyncHandler(healthController.downloadAttachment),
+);
+
+healthRoutes.get(
   '/visits',
   extractTenantMiddleware,
   requirePermission('medical:read'),

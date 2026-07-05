@@ -89,6 +89,16 @@ export const healthController = {
     res.json({ success: true, data });
   },
 
+  async downloadAttachment(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.getAttachmentDownloadUrl(
+      paramId(req),
+      tenantId,
+      profileId,
+    );
+    res.json({ success: true, data });
+  },
+
   async createVisit(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const data = await healthService.saveVisit(

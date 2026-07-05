@@ -57,6 +57,8 @@ export type StudentSummary = {
   status: StudentStatus;
   statusReason: string | null;
   statusChangedAt: string | null;
+  healthStatus?: string;
+  medicalAlerts?: string | null;
 };
 
 export type FamilyDetails = {

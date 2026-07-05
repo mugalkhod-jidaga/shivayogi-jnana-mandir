@@ -1,15 +1,19 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { KpiCard } from '@/features/dashboard/components/KpiCard';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
+import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
-import { useHealthDashboardStats } from '@/hooks/useHealth';
+import { useHealthDashboardStats, useHealthVisit } from '@/hooks/useHealth';
 
 export function HealthDashboardPage() {
   const { t } = useTranslation('health');
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
   const { data, isLoading, isError } = useHealthDashboardStats();
+  const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
   return (
     <div className="space-y-6">
@@ -51,7 +55,12 @@ export function HealthDashboardPage() {
           )}
           <div className="mt-3 space-y-3">
             {(data?.urgentAlerts ?? []).map((visit) => (
-              <article key={visit.id} className="rounded-md border border-red-100 bg-red-50/50 p-3 text-sm">
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-md border border-red-100 bg-red-50/50 p-3 text-left text-sm transition-colors hover:bg-red-50"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{formatStudentName(visit)}</span>
                   <span className="text-muted-foreground">{visit.visitDate}</span>
@@ -59,7 +68,7 @@ export function HealthDashboardPage() {
                 </div>
                 <p className="mt-1">{visit.issueType}</p>
                 <p className="line-clamp-2 text-muted-foreground">{visit.symptoms}</p>
-              </article>
+              </button>
             ))}
           </div>
         </div>
@@ -71,18 +80,29 @@ export function HealthDashboardPage() {
           )}
           <div className="mt-3 space-y-3">
             {(data?.recentEntries ?? []).map((visit) => (
-              <article key={visit.id} className="rounded-md border p-3 text-sm">
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-md border p-3 text-left text-sm transition-colors hover:bg-muted/50"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{formatStudentName(visit)}</span>
                   <span className="text-muted-foreground">{visit.visitDate}</span>
                   <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
                 </div>
                 <p className="mt-1">{visit.issueType}</p>
-              </article>
+              </button>
             ))}
           </div>
         </div>
       </section>
+
+      <VisitDetailModal
+        visit={selectedVisit ?? null}
+        open={Boolean(selectedVisitId && selectedVisit)}
+        onClose={() => setSelectedVisitId(null)}
+      />
     </div>
   );
 }

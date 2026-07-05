@@ -6,13 +6,14 @@ type Props = {
   summary: HealthVisitSummary | undefined;
   visits: HealthVisit[];
   loading: boolean;
+  onVisitClick?: (visitId: string) => void;
 };
 
 function formatName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
 }
 
-export function VisitHistoryPanel({ summary, visits, loading }: Props) {
+export function VisitHistoryPanel({ summary, visits, loading, onVisitClick }: Props) {
   const { t } = useTranslation('health');
 
   if (loading) {
@@ -34,23 +35,24 @@ export function VisitHistoryPanel({ summary, visits, loading }: Props) {
       </p>
       <div className="max-h-48 space-y-2 overflow-y-auto">
         {visits.map((visit) => (
-          <details key={visit.id} className="rounded-md border p-3 text-sm">
-            <summary className="flex cursor-pointer items-center gap-2 font-medium">
+          <button
+            key={visit.id}
+            type="button"
+            className="w-full rounded-md border p-3 text-left text-sm transition-colors hover:bg-muted/50"
+            onClick={() => onVisitClick?.(visit.id)}
+          >
+            <div className="flex flex-wrap items-center gap-2 font-medium">
               <span>{visit.visitDate}</span>
               <span className="text-muted-foreground">· {visit.issueType}</span>
               <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
-            </summary>
-            <p className="mt-2 text-muted-foreground">{visit.symptoms}</p>
-            {visit.medicines.length > 0 && (
-              <ul className="mt-2 list-inside list-disc text-muted-foreground">
-                {visit.medicines.map((med) => (
-                  <li key={med.id}>
-                    {med.medicineName} — {med.treatmentDoses ?? `${med.doseAmount} ${med.doseUnit.value}`}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </details>
+              {visit.attachments?.length > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  · {visit.attachments.length} 📷
+                </span>
+              )}
+            </div>
+            <p className="mt-2 line-clamp-2 text-muted-foreground">{visit.symptoms}</p>
+          </button>
         ))}
       </div>
     </div>

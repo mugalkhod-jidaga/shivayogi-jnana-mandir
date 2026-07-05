@@ -74,6 +74,18 @@ export const healthAttachmentRepository = {
     }
     return map;
   },
+
+  async findById(id: string, tenantId: number) {
+    const { data, error } = await supabase
+      .from('health_visit_attachments')
+      .select('id, file_name, file_url, mime_type, size_bytes, upload_status, student_id, health_visit_id')
+      .eq('id', id)
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
+      .maybeSingle();
+    if (error) throw new AppError(500, error.message);
+    return data as (AttachmentRow & { student_id: string; health_visit_id: string }) | null;
+  },
 };
 
 export function assertHealthAttachmentKey(key: string, tenantId: number, studentId: string) {

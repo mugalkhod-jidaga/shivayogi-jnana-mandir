@@ -75,6 +75,27 @@ export function useStudentHealthSummary(studentId: string | undefined) {
   });
 }
 
+export function useHealthVisit(visitId: string | undefined) {
+  return useQuery({
+    queryKey: healthKeys.detail(visitId ?? ''),
+    queryFn: () => apiFetch<HealthVisit>(`/health/visits/${visitId}`),
+    enabled: Boolean(visitId),
+  });
+}
+
+const ATTACHMENT_URL_STALE = 50 * 60 * 1000;
+
+export function useHealthAttachmentUrl(attachmentId: string | undefined) {
+  return useQuery({
+    queryKey: [...healthKeys.all, 'attachment', attachmentId ?? ''],
+    queryFn: () =>
+      apiFetch<{ downloadUrl: string }>(`/health/attachments/${attachmentId}/download`),
+    enabled: Boolean(attachmentId),
+    staleTime: ATTACHMENT_URL_STALE,
+    retry: false,
+  });
+}
+
 export function useCreateHealthVisit() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -5,14 +5,17 @@ import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
+import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
-import { useRecentHealthVisits } from '@/hooks/useHealth';
+import { useHealthVisit, useRecentHealthVisits } from '@/hooks/useHealth';
 
 export function RecentVisitsPage() {
   const { t } = useTranslation('health');
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
   const { data: visits, isLoading } = useRecentHealthVisits(appliedSearch || undefined);
+  const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
   return (
     <div className="space-y-6">
@@ -47,9 +50,20 @@ export function RecentVisitsPage() {
 
       <div className="space-y-3">
         {(visits ?? []).map((visit) => (
-          <article key={visit.id} className="rounded-lg border p-4">
+          <button
+            key={visit.id}
+            type="button"
+            className="w-full rounded-lg border p-4 text-left transition-colors hover:bg-muted/50"
+            onClick={() => setSelectedVisitId(visit.id)}
+          >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{formatStudentName(visit)}</span>
+              <Link
+                to={`/health/students/${visit.studentId}`}
+                className="font-medium text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {formatStudentName(visit)}
+              </Link>
               <span className="text-sm text-muted-foreground">{visit.student.admissionNumber}</span>
               <span className="text-sm text-muted-foreground">· {visit.visitDate}</span>
               <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
@@ -66,9 +80,15 @@ export function RecentVisitsPage() {
                 {t('recent.photoCount', { count: visit.attachments.length })}
               </p>
             )}
-          </article>
+          </button>
         ))}
       </div>
+
+      <VisitDetailModal
+        visit={selectedVisit ?? null}
+        open={Boolean(selectedVisitId && selectedVisit)}
+        onClose={() => setSelectedVisitId(null)}
+      />
     </div>
   );
 }

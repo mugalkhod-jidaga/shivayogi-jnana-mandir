@@ -84,5 +84,28 @@
       "urgentWeek": "ತುರ್ತು (7 ದಿನ)",
       "visitsWeek": "ಈ ವಾರದ ಭೇಟಿಗಳು"
     }
+  },
+  "profile": {
+    "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "healthStatusLabel": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ",
+    "healthStatus": {
+      "healthy": "ಆರೋಗ್ಯವಾಗಿದೆ",
+      "sick": "ಅಸ್ವಸ್ಥ",
+      "recovering": "ಗುಣಮುಖವಾಗುತ್ತಿದೆ"
+    },
+    "bloodGroup": "ರಕ್ತ ಗುಂಪು",
+    "dob": "ಜನ್ಮ ದಿನಾಂಕ",
+    "gender": "ಲಿಂಗ",
+    "allergies": "ವೈದ್ಯಕೀಯ ಎಚ್ಚರಿಕೆ / ಅಲರ್ಜಿ",
+    "guardian": "ಪೋಷಕ",
+    "guardianPhone": "ಪೋಷಕರ ಫೋನ್",
+    "visitHistory": "ಭೇಟಿ ಇತಿಹಾಸ",
+    "noVisits": "ಇನ್ನೂ ಯಾವುದೇ infirmary ಭೇಟಿಗಳಿಲ್ಲ."
+  },
+  "visitDetail": {
+    "close": "ಮುಚ್ಚಿ",
+    "photos": "ಉಲ್ಲೇಖ ಫೋಟೋಗಳು",
+    "viewProfile": "ವಿದ್ಯಾರ್ಥಿ ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್ ನೋಡಿ",
+    "photoLightbox": "ಫೋಟೋ ಪೂರ್ವಾವಲೋಕನ"
   }
 }

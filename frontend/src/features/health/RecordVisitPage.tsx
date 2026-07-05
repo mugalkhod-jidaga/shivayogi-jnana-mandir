@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { StudentSearchPicker } from '@/components/students/StudentSearchPicker';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,15 @@ import { MedicineRowForm } from '@/features/health/components/MedicineRowForm';
 import { PhotoCapture, emptyPendingPhotos } from '@/features/health/components/PhotoCapture';
 import { StaffSearchPicker } from '@/features/health/components/StaffSearchPicker';
 import { VisitHistoryPanel } from '@/features/health/components/VisitHistoryPanel';
+import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import {
   useCreateHealthVisit,
   uploadPendingPhotos,
+  useHealthVisit,
   useStudentHealthSummary,
   useStudentHealthVisits,
 } from '@/hooks/useHealth';
+import { useStudent } from '@/hooks/useStudent';
 import { EMPTY_SCHEDULE, useHealthLookups } from '@/hooks/useHealthLookups';
 import type { MedicineRowInput, PendingPhoto } from '@/types/health';
 import type { StudentSummary } from '@/types/student';
@@ -40,12 +43,17 @@ function emptyMedicine(): MedicineRowInput {
 
 export function RecordVisitPage() {
   const { t } = useTranslation('health');
+  const [searchParams] = useSearchParams();
+  const presetStudentId = searchParams.get('studentId');
+  const { data: presetStudent } = useStudent(presetStudentId ?? undefined);
   const { severities, issueTypes, doseUnits, foodTimings, schedulePresets, isLoading: lookupsLoading } =
     useHealthLookups();
   const createVisit = useCreateHealthVisit();
 
   const [studentId, setStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null);
+  const [presetApplied, setPresetApplied] = useState(false);
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [customIssue, setCustomIssue] = useState('');
   const [visitDate, setVisitDate] = useState(new Date().toISOString().slice(0, 10));
@@ -67,6 +75,15 @@ export function RecordVisitPage() {
   const { data: historyData, isLoading: historyLoading } = useStudentHealthVisits(studentId || undefined, {
     limit: 10,
   });
+  const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
+
+  useEffect(() => {
+    if (presetStudent && !presetApplied) {
+      setStudentId(presetStudent.id);
+      setSelectedStudent(presetStudent);
+      setPresetApplied(true);
+    }
+  }, [presetStudent, presetApplied]);
 
   const defaultSeverityId = severities.find((s) => s.code === 'normal')?.id;
   const defaultDoseUnitId = doseUnits.find((u) => u.code === 'tablet')?.id ?? doseUnits[0]?.id;
@@ -227,6 +244,7 @@ export function RecordVisitPage() {
               summary={summaryData}
               visits={historyData?.data ?? []}
               loading={historyLoading}
+              onVisitClick={setSelectedVisitId}
             />
           )}
         </section>
@@ -374,6 +392,12 @@ export function RecordVisitPage() {
           {uploading || createVisit.isPending ? t('record.saving') : t('record.saveVisit')}
         </Button>
       </form>
+
+      <VisitDetailModal
+        visit={selectedVisit ?? null}
+        open={Boolean(selectedVisitId && selectedVisit)}
+        onClose={() => setSelectedVisitId(null)}
+      />
     </div>
   );
 }

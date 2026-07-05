@@ -55,6 +55,7 @@ export interface StudentRow {
   status: string;
   status_reason: string | null;
   status_changed_at: string | null;
+  health_status?: string | null;
   blood_group?: { id: number; value: string } | null;
   admission_category?: { id: number; value: string } | null;
   mother_tongue?: { id: number; value: string } | null;

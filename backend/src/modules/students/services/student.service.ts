@@ -108,6 +108,8 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     status: student.status,
     statusReason: student.status_reason,
     statusChangedAt: student.status_changed_at,
+    healthStatus: student.health_status ?? 'healthy',
+    medicalAlerts: student.medical_alerts,
   };
 
   if (!includeFamily || !canViewSensitive) {

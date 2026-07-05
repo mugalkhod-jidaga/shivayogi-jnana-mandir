@@ -84,5 +84,28 @@
       "urgentWeek": "Urgent (7 days)",
       "visitsWeek": "Visits this week"
     }
+  },
+  "profile": {
+    "recordVisit": "Record visit",
+    "healthStatusLabel": "Health status",
+    "healthStatus": {
+      "healthy": "Healthy",
+      "sick": "Sick",
+      "recovering": "Recovering"
+    },
+    "bloodGroup": "Blood group",
+    "dob": "Date of birth",
+    "gender": "Gender",
+    "allergies": "Medical alerts / allergies",
+    "guardian": "Guardian",
+    "guardianPhone": "Guardian phone",
+    "visitHistory": "Visit history",
+    "noVisits": "No infirmary visits recorded yet."
+  },
+  "visitDetail": {
+    "close": "Close",
+    "photos": "Reference photos",
+    "viewProfile": "View student health profile",
+    "photoLightbox": "Photo preview"
   }
 }
