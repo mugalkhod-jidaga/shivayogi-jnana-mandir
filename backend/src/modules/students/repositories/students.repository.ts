@@ -380,19 +380,75 @@ export class StudentsRepository extends BaseRepository {
     changes: UpdateAcademicPlacementInput,
     admissionDate?: string,
   ) {
-    const enrollment = await supabase
+    const now = new Date().toISOString();
+
+    const { data: current, error: currentError } = await supabase
       .from('student_enrollments')
       .select('id')
       .eq('student_id', studentId)
       .eq('is_current', true)
       .is('deleted_at', null)
-      .single();
+      .maybeSingle();
 
-    if (enrollment.error || !enrollment.data) {
-      throw new AppError(404, 'Current enrollment not found');
+    if (currentError) throw new AppError(500, currentError.message);
+
+    let enrollmentId = current?.id;
+
+    if (!enrollmentId) {
+      const { data: latest, error: latestError } = await supabase
+        .from('student_enrollments')
+        .select('id')
+        .eq('student_id', studentId)
+        .is('deleted_at', null)
+        .order('enrolled_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestError) throw new AppError(500, latestError.message);
+
+      if (latest) {
+        enrollmentId = latest.id;
+        await supabase
+          .from('student_enrollments')
+          .update({ is_current: false, updated_at: now })
+          .eq('student_id', studentId)
+          .is('deleted_at', null);
+
+        const { error: promoteError } = await supabase
+          .from('student_enrollments')
+          .update({ is_current: true, updated_at: now })
+          .eq('id', enrollmentId);
+
+        if (promoteError) throw new AppError(500, promoteError.message);
+      }
     }
 
-    const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (!enrollmentId) {
+      if (!changes.academicYearId || !changes.standardId || changes.rollNumber === undefined) {
+        throw new AppError(
+          400,
+          'Academic year, standard, and roll number are required to create enrollment',
+        );
+      }
+
+      const { error: insertError } = await supabase.from('student_enrollments').insert({
+        student_id: studentId,
+        academic_year_id: changes.academicYearId,
+        standard_id: changes.standardId,
+        section_id: changes.sectionId ?? null,
+        roll_number: changes.rollNumber,
+        previous_school: changes.previousSchool ?? null,
+        previous_school_address: changes.previousSchoolAddress ?? null,
+        last_class_studied: changes.lastClassStudied ?? null,
+        is_current: true,
+        enrolled_at: changes.enrolledAt ?? admissionDate ?? now.slice(0, 10),
+      });
+
+      if (insertError) throw new AppError(500, insertError.message);
+      return;
+    }
+
+    const dbChanges: Record<string, unknown> = { updated_at: now };
     if (changes.academicYearId !== undefined) dbChanges.academic_year_id = changes.academicYearId;
     if (changes.standardId !== undefined) dbChanges.standard_id = changes.standardId;
     if (changes.sectionId !== undefined) dbChanges.section_id = changes.sectionId;
@@ -408,7 +464,7 @@ export class StudentsRepository extends BaseRepository {
     const { error } = await supabase
       .from('student_enrollments')
       .update(dbChanges)
-      .eq('id', enrollment.data.id);
+      .eq('id', enrollmentId);
 
     if (error) throw new AppError(500, error.message);
   }
