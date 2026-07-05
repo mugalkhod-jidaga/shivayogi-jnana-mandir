@@ -18,6 +18,13 @@ export const medicineRowSchema = z.object({
   medicineNotes: z.string().trim().max(1000).optional(),
 });
 
+export const visitAttachmentSchema = z.object({
+  key: z.string().trim().min(1).max(500),
+  fileName: z.string().trim().min(1).max(255),
+  mimeType: z.string().trim().max(100).optional(),
+  sizeBytes: z.coerce.number().int().nonnegative().optional(),
+});
+
 export const createHealthVisitSchema = z.object({
   studentId: z.string().uuid(),
   visitDate: dateInputSchema,
@@ -30,6 +37,7 @@ export const createHealthVisitSchema = z.object({
   bloodPressure: z.string().trim().max(20).optional(),
   oxygenLevel: z.string().trim().max(20).optional(),
   medicines: z.array(medicineRowSchema).min(1).max(10),
+  attachments: z.array(visitAttachmentSchema).max(4).optional(),
 });
 
 export const healthVisitListQuerySchema = paginationSchema.extend({
@@ -42,7 +50,28 @@ export const recentVisitsQuerySchema = z.object({
   search: z.string().trim().max(100).optional(),
 });
 
+export const medicineCatalogSuggestQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  issueTypes: z.string().trim().max(500).optional(),
+  limit: z.coerce.number().int().min(1).max(20).default(10),
+});
+
+export const staffSearchQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  limit: z.coerce.number().int().min(1).max(20).default(6),
+});
+
+export const attachmentPresignSchema = z.object({
+  studentId: z.string().uuid(),
+  filename: z.string().trim().min(1).max(255),
+  mimeType: z.string().trim().max(100).optional(),
+});
+
 export type CreateHealthVisitInput = z.infer<typeof createHealthVisitSchema>;
 export type MedicineRowInput = z.infer<typeof medicineRowSchema>;
+export type VisitAttachmentInput = z.infer<typeof visitAttachmentSchema>;
 export type HealthVisitListQuery = z.infer<typeof healthVisitListQuerySchema>;
 export type RecentVisitsQuery = z.infer<typeof recentVisitsQuerySchema>;
+export type MedicineCatalogSuggestQuery = z.infer<typeof medicineCatalogSuggestQuerySchema>;
+export type StaffSearchQuery = z.infer<typeof staffSearchQuerySchema>;
+export type AttachmentPresignInput = z.infer<typeof attachmentPresignSchema>;

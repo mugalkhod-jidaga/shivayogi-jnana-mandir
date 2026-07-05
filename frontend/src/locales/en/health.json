@@ -16,16 +16,23 @@
     "bloodPressure": "Blood pressure",
     "oxygenLevel": "Oxygen level",
     "treatedBy": "Treated by",
+    "treatedByPlaceholder": "Search staff name…",
+    "noStaffResults": "No staff found",
     "notes": "Visit notes",
     "addMedicine": "Add another medicine",
     "removeMedicine": "Remove",
     "medicineNumber": "Medicine {{number}}",
     "medicineName": "Medicine name",
+    "medicinePlaceholder": "Type or pick from list…",
+    "medicineSuggestionsFor": "Suggestions for: {{issues}}",
+    "catalogUseCount": "used {{count}}×",
     "doseAmount": "Dose amount",
     "doseUnit": "Dose unit",
     "schedulePreset": "Schedule",
     "foodTiming": "Food timing",
     "medicineNotes": "Medicine notes",
+    "takePhoto": "Take / choose photo",
+    "photoCount": "{{count}} / {{max}} photos",
     "saveVisit": "Save visit",
     "saving": "Saving…",
     "successTitle": "Visit saved",
@@ -37,7 +44,8 @@
     "sections": {
       "findStudent": "1. Find student",
       "visitDetails": "2. Visit details",
-      "treatment": "3. Treatment"
+      "treatment": "3. Treatment",
+      "photos": "4. Reference photos (optional)"
     },
     "schedule": {
       "morning": "Morning",
@@ -59,6 +67,22 @@
     "recordVisit": "Record visit",
     "searchPlaceholder": "Search by issue or symptoms…",
     "search": "Search",
-    "empty": "No visits found."
+    "empty": "No visits found.",
+    "photoCount": "{{count}} photo(s)"
+  },
+  "dashboard": {
+    "title": "Health Dashboard",
+    "description": "Infirmary overview — sick students, urgent alerts, and recent visits.",
+    "error": "Could not load dashboard stats.",
+    "urgentAlerts": "Emergency alerts (last 7 days)",
+    "noUrgent": "No urgent visits in the last 7 days.",
+    "recentEntries": "Recent entries",
+    "noRecent": "No visits this week yet.",
+    "kpis": {
+      "totalStudents": "Active students",
+      "sickToday": "Sick today",
+      "urgentWeek": "Urgent (7 days)",
+      "visitsWeek": "Visits this week"
+    }
   }
 }

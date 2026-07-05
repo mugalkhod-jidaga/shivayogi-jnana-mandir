@@ -2,9 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
 import type {
   CreateHealthVisitInput,
+  HealthDashboardStats,
+  HealthStaffOption,
   HealthVisit,
   HealthVisitListFilters,
   HealthVisitSummary,
+  MedicineCatalogItem,
+  PendingPhoto,
+  VisitAttachmentInput,
 } from '@/types/health';
 
 export const healthKeys = {
@@ -15,6 +20,10 @@ export const healthKeys = {
     [...healthKeys.all, 'student', studentId, filters] as const,
   summary: (studentId: string) => [...healthKeys.all, 'summary', studentId] as const,
   detail: (id: string) => [...healthKeys.all, 'detail', id] as const,
+  dashboard: ['health', 'dashboard'] as const,
+  catalog: (q: string, issueTypes: string) =>
+    [...healthKeys.all, 'catalog', q, issueTypes] as const,
+  staff: (q: string) => [...healthKeys.all, 'staff', q] as const,
 };
 
 function buildListQuery(filters: HealthVisitListFilters) {
@@ -79,4 +88,77 @@ export function useCreateHealthVisit() {
       void queryClient.invalidateQueries({ queryKey: ['students'] });
     },
   });
+}
+
+export function useHealthDashboardStats() {
+  return useQuery({
+    queryKey: healthKeys.dashboard,
+    queryFn: () => apiFetch<HealthDashboardStats>('/health/dashboard/stats'),
+    staleTime: 60_000,
+  });
+}
+
+export function useMedicineCatalogSuggest(query: string, issueTypes: string[]) {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set('q', query.trim());
+  if (issueTypes.length) params.set('issueTypes', issueTypes.join(','));
+  params.set('limit', '10');
+
+  return useQuery({
+    queryKey: healthKeys.catalog(query, issueTypes.join(',')),
+    queryFn: () => apiFetch<MedicineCatalogItem[]>(`/health/medicine-catalog/suggest?${params}`),
+    enabled: query.trim().length >= 1 || issueTypes.length > 0,
+    staleTime: 30_000,
+  });
+}
+
+export function useHealthStaffSearch(query: string) {
+  const params = new URLSearchParams({ limit: '6' });
+  if (query.trim()) params.set('q', query.trim());
+
+  return useQuery({
+    queryKey: healthKeys.staff(query),
+    queryFn: () => apiFetch<HealthStaffOption[]>(`/health/staff/search?${params}`),
+    enabled: query.trim().length >= 2,
+    staleTime: 30_000,
+  });
+}
+
+export async function uploadHealthAttachment(
+  studentId: string,
+  file: File,
+): Promise<VisitAttachmentInput> {
+  const contentType = file.type || 'application/octet-stream';
+  const presign = await apiFetch<{ uploadUrl: string; key: string }>('/health/attachments/presign', {
+    method: 'POST',
+    body: JSON.stringify({ studentId, filename: file.name, mimeType: contentType }),
+  });
+
+  const uploadResponse = await fetch(presign.uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: { 'Content-Type': contentType },
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Photo upload failed (${uploadResponse.status})`);
+  }
+
+  return {
+    key: presign.key,
+    fileName: file.name,
+    mimeType: contentType,
+    sizeBytes: file.size,
+  };
+}
+
+export async function uploadPendingPhotos(
+  studentId: string,
+  photos: PendingPhoto[],
+): Promise<VisitAttachmentInput[]> {
+  const results: VisitAttachmentInput[] = [];
+  for (const photo of photos) {
+    results.push(await uploadHealthAttachment(studentId, photo.file));
+  }
+  return results;
 }

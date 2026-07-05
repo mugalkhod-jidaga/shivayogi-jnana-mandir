@@ -16,6 +16,58 @@ export type MedicineSchedule = {
   night: boolean;
 };
 
+export type HealthVisitAttachment = {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  uploadStatus: string;
+};
+
+export type MedicineCatalogItem = {
+  id: string;
+  name: string;
+  issueTypes: string[];
+  defaultDoseAmount: string | null;
+  defaultSchedule: MedicineSchedule | null;
+  useCount: number;
+  isCustom: boolean;
+  defaultDoseUnit: { id: number; code: string; value: string } | null;
+  defaultFoodTiming: { id: number; code: string; value: string } | null;
+  defaultSchedulePreset: { id: number; code: string; value: string } | null;
+};
+
+export type HealthStaffOption = {
+  id: string;
+  firstName: string;
+  lastName: string | null;
+  phoneNumber: string;
+  status: string;
+};
+
+export type HealthDashboardStats = {
+  totalStudents: number;
+  sickToday: number;
+  urgentCount: number;
+  visitsThisWeek: number;
+  urgentAlerts: HealthVisit[];
+  recentEntries: HealthVisit[];
+};
+
+export type VisitAttachmentInput = {
+  key: string;
+  fileName: string;
+  mimeType?: string;
+  sizeBytes?: number;
+};
+
+export type PendingPhoto = {
+  id: string;
+  file: File;
+  previewUrl: string;
+};
+
 export type HealthVisitMedicine = {
   id: string;
   medicineName: string;
@@ -56,6 +108,7 @@ export type HealthVisit = {
     lastName: string | null;
   };
   medicines: HealthVisitMedicine[];
+  attachments: HealthVisitAttachment[];
 };
 
 export type HealthVisitSummary = {
@@ -86,6 +139,7 @@ export type CreateHealthVisitInput = {
   bloodPressure?: string;
   oxygenLevel?: string;
   medicines: MedicineRowInput[];
+  attachments?: VisitAttachmentInput[];
 };
 
 export type HealthVisitListFilters = {

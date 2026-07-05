@@ -61,6 +61,11 @@ export function RecentVisitsPage() {
                 {visit.medicines.map((m) => m.medicineName).join(', ')}
               </p>
             )}
+            {visit.attachments?.length > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t('recent.photoCount', { count: visit.attachments.length })}
+              </p>
+            )}
           </article>
         ))}
       </div>

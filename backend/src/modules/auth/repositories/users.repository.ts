@@ -86,6 +86,34 @@ export class UsersRepository extends BaseRepository {
 
     if (insertError) throw new AppError(500, insertError.message);
   }
+
+  async searchActiveStaff(tenantId: number, search: string | undefined, limit: number) {
+    let query = supabase
+      .from('user_profiles')
+      .select('id, first_name, last_name, phone_number, status')
+      .eq('tenant_id', tenantId)
+      .eq('status', 'Active')
+      .is('deleted_at', null)
+      .order('first_name')
+      .limit(limit);
+
+    if (search?.trim()) {
+      query = query.or(
+        `first_name.ilike.%${search.trim()}%,last_name.ilike.%${search.trim()}%`,
+      );
+    }
+
+    const { data, error } = await query;
+    if (error) throw new AppError(500, error.message);
+
+    return (data ?? []).map((row) => ({
+      id: row.id as string,
+      firstName: row.first_name as string,
+      lastName: row.last_name as string | null,
+      phoneNumber: row.phone_number as string,
+      status: row.status as string,
+    }));
+  }
 }
 
 export const usersRepository = new UsersRepository();

@@ -31,7 +31,7 @@ export async function getUploadUrl(
   tenantId: number,
   studentId: string,
   filename: string,
-  kind: 'documents' | 'avatar',
+  kind: 'documents' | 'avatar' | 'health-visits',
   contentType?: string,
 ) {
   const key = `tenant_${tenantId}/student_${studentId}/${kind}/${randomUUID()}_${filename}`;

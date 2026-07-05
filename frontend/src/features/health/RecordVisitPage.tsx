@@ -9,14 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { MedicineRowForm } from '@/features/health/components/MedicineRowForm';
+import { PhotoCapture, emptyPendingPhotos } from '@/features/health/components/PhotoCapture';
+import { StaffSearchPicker } from '@/features/health/components/StaffSearchPicker';
 import { VisitHistoryPanel } from '@/features/health/components/VisitHistoryPanel';
 import {
   useCreateHealthVisit,
+  uploadPendingPhotos,
   useStudentHealthSummary,
   useStudentHealthVisits,
 } from '@/hooks/useHealth';
 import { EMPTY_SCHEDULE, useHealthLookups } from '@/hooks/useHealthLookups';
-import type { MedicineRowInput } from '@/types/health';
+import type { MedicineRowInput, PendingPhoto } from '@/types/health';
 import type { StudentSummary } from '@/types/student';
 
 function formatName(firstName: string, lastName: string | null) {
@@ -55,6 +58,8 @@ export function RecordVisitPage() {
   const [oxygenLevel, setOxygenLevel] = useState('');
   const [showVitals, setShowVitals] = useState(false);
   const [medicines, setMedicines] = useState<MedicineRowInput[]>([emptyMedicine()]);
+  const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>(emptyPendingPhotos());
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -82,6 +87,7 @@ export function RecordVisitPage() {
   };
 
   const issueTypeValue = [...selectedIssues, customIssue.trim()].filter(Boolean).join(', ');
+  const issueTypesList = [...selectedIssues, customIssue.trim()].filter(Boolean);
 
   const resetForm = () => {
     setStudentId('');
@@ -104,6 +110,10 @@ export function RecordVisitPage() {
         schedulePresetId: defaultPresetId ?? 0,
       },
     ]);
+    pendingPhotos.forEach((p) => {
+      if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+    });
+    setPendingPhotos(emptyPendingPhotos());
     setError(null);
     setSuccess(false);
   };
@@ -132,6 +142,10 @@ export function RecordVisitPage() {
     }
 
     try {
+      setUploading(true);
+      const attachments =
+        pendingPhotos.length > 0 ? await uploadPendingPhotos(studentId, pendingPhotos) : undefined;
+
       await createVisit.mutateAsync({
         studentId,
         visitDate,
@@ -143,6 +157,7 @@ export function RecordVisitPage() {
         temperature: temperature.trim() || undefined,
         bloodPressure: bloodPressure.trim() || undefined,
         oxygenLevel: oxygenLevel.trim() || undefined,
+        attachments,
         medicines: medicines.map((m) => ({
           ...m,
           doseUnitId: m.doseUnitId || defaultDoseUnitId!,
@@ -150,9 +165,15 @@ export function RecordVisitPage() {
           schedulePresetId: m.schedulePresetId || defaultPresetId!,
         })),
       });
+      pendingPhotos.forEach((p) => {
+        if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+      });
+      setPendingPhotos(emptyPendingPhotos());
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('record.errors.saveFailed'));
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -297,6 +318,7 @@ export function RecordVisitPage() {
               key={index}
               index={index}
               medicine={med}
+              issueTypes={issueTypesList}
               canRemove={medicines.length > 1}
               doseUnits={doseUnits}
               foodTimings={foodTimings}
@@ -325,20 +347,31 @@ export function RecordVisitPage() {
             {t('record.addMedicine')}
           </Button>
 
-          <div>
-            <Label>{t('record.treatedBy')}</Label>
-            <Input value={treatedBy} onChange={(e) => setTreatedBy(e.target.value)} />
-          </div>
+          <StaffSearchPicker value={treatedBy} onChange={setTreatedBy} />
           <div>
             <Label>{t('record.notes')}</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
           </div>
         </section>
 
+        <section className="space-y-4 rounded-lg border p-4">
+          <h2 className="font-semibold">{t('record.sections.photos')}</h2>
+          <PhotoCapture
+            photos={pendingPhotos}
+            onChange={setPendingPhotos}
+            disabled={!studentId || uploading || createVisit.isPending}
+          />
+        </section>
+
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={createVisit.isPending}>
-          {createVisit.isPending ? t('record.saving') : t('record.saveVisit')}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={createVisit.isPending || uploading}
+        >
+          {uploading || createVisit.isPending ? t('record.saving') : t('record.saveVisit')}
         </Button>
       </form>
     </div>

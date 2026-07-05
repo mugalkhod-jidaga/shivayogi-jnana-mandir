@@ -1,14 +1,24 @@
 import { AppError } from '../../../utils/AppError';
+import { getUploadUrl } from '../../documents/services/presignedUrl.service';
+import { usersRepository } from '../../auth/repositories/users.repository';
 import { lookupRepository } from '../../system/repositories/lookup.repository';
 import {
   assertStudentIdAccess,
   resolveStandardScope,
 } from '../../students/services/studentScope.service';
 import type {
+  AttachmentPresignInput,
   CreateHealthVisitInput,
   HealthVisitListQuery,
+  MedicineCatalogSuggestQuery,
   RecentVisitsQuery,
+  StaffSearchQuery,
 } from '../schemas/health.schemas';
+import {
+  assertHealthAttachmentKey,
+  healthAttachmentRepository,
+} from '../repositories/healthAttachment.repository';
+import { medicineCatalogRepository } from '../repositories/medicineCatalog.repository';
 import { healthRepository } from '../repositories/health.repository';
 
 function formatDoseDisplay(amount: string, unitValue: string, unitCode: string): string {
@@ -19,6 +29,13 @@ function formatDoseDisplay(amount: string, unitValue: string, unitCode: string):
 
 function hasScheduleSlot(schedule: CreateHealthVisitInput['medicines'][0]['schedule']) {
   return schedule.morning || schedule.noon || schedule.evening || schedule.night;
+}
+
+function parseIssueTypes(issueType: string): string[] {
+  return issueType
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 async function validateLookups(tenantId: number, input: CreateHealthVisitInput) {
@@ -44,6 +61,12 @@ async function validateLookups(tenantId: number, input: CreateHealthVisitInput) 
 
     if (preset.code !== 'as_needed' && !hasScheduleSlot(med.schedule)) {
       throw new AppError(400, `Medicine ${i + 1}: select at least one schedule slot`);
+    }
+  }
+
+  if (input.attachments?.length) {
+    for (const attachment of input.attachments) {
+      assertHealthAttachmentKey(attachment.key, tenantId, input.studentId);
     }
   }
 
@@ -88,10 +111,38 @@ export const healthService = {
     return visit;
   },
 
+  async getDashboardStats(tenantId: number, userId: string) {
+    const assignedStandardIds = await resolveStandardScope(userId);
+    return healthRepository.getDashboardStats(tenantId, assignedStandardIds);
+  },
+
+  async suggestMedicines(tenantId: number, query: MedicineCatalogSuggestQuery) {
+    const issueTypes = query.issueTypes
+      ? query.issueTypes.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    return medicineCatalogRepository.suggest(tenantId, query.q ?? '', issueTypes, query.limit);
+  },
+
+  async searchStaff(tenantId: number, query: StaffSearchQuery) {
+    return usersRepository.searchActiveStaff(tenantId, query.q, query.limit);
+  },
+
+  async presignAttachment(tenantId: number, input: AttachmentPresignInput, userId: string) {
+    await assertStudentIdAccess(input.studentId, tenantId, userId);
+    return getUploadUrl(
+      tenantId,
+      input.studentId,
+      input.filename,
+      'health-visits',
+      input.mimeType,
+    );
+  },
+
   async saveVisit(tenantId: number, input: CreateHealthVisitInput, userId: string) {
     await assertStudentIdAccess(input.studentId, tenantId, userId);
 
     const severity = await validateLookups(tenantId, input);
+    const issueTypes = parseIssueTypes(input.issueType);
 
     const [doseUnits] = await Promise.all([lookupRepository.listMedicineDoseUnits()]);
 
@@ -112,6 +163,32 @@ export const healthService = {
 
     const visit = await healthRepository.createVisit(tenantId, userId, input, medicineRows);
 
+    if (input.attachments?.length) {
+      await healthAttachmentRepository.createMany(
+        tenantId,
+        visit.id,
+        input.studentId,
+        input.attachments.map((a) => ({
+          fileName: a.fileName,
+          fileUrl: a.key,
+          mimeType: a.mimeType,
+          sizeBytes: a.sizeBytes,
+        })),
+      );
+    }
+
+    for (const med of input.medicines) {
+      await medicineCatalogRepository.recordUsage(tenantId, {
+        name: med.medicineName,
+        issueTypes,
+        doseAmount: med.doseAmount,
+        doseUnitId: med.doseUnitId,
+        foodTimingId: med.foodTimingId,
+        schedule: med.schedule,
+        schedulePresetId: med.schedulePresetId,
+      });
+    }
+
     await healthRepository.updateStudentHealthStatus(
       input.studentId,
       tenantId,
@@ -119,6 +196,8 @@ export const healthService = {
       userId,
     );
 
-    return visit;
+    const full = await healthRepository.findById(visit.id, tenantId);
+    if (!full) throw new AppError(500, 'Failed to load created visit');
+    return full;
   },
 };

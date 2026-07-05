@@ -3,14 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
+import { MedicineAutocomplete } from '@/features/health/components/MedicineAutocomplete';
 import { EMPTY_SCHEDULE, presetSchedule } from '@/hooks/useHealthLookups';
 import type { DoseUnitOption } from '@/types/health';
 import type { HealthLookupOption } from '@/types/health';
+import type { MedicineCatalogItem } from '@/types/health';
 import type { MedicineRowInput } from '@/types/health';
 
 type Props = {
   index: number;
   medicine: MedicineRowInput;
+  issueTypes: string[];
   canRemove: boolean;
   doseUnits: DoseUnitOption[];
   foodTimings: (HealthLookupOption & { code: string })[];
@@ -22,6 +25,7 @@ type Props = {
 export function MedicineRowForm({
   index,
   medicine,
+  issueTypes,
   canRemove,
   doseUnits,
   foodTimings,
@@ -40,6 +44,18 @@ export function MedicineRowForm({
       ...medicine,
       schedulePresetId: presetId,
       schedule: selected ? presetSchedule(selected.code) : EMPTY_SCHEDULE(),
+    });
+  };
+
+  const handleCatalogSelect = (item: MedicineCatalogItem) => {
+    onChange({
+      ...medicine,
+      medicineName: item.name,
+      doseAmount: item.defaultDoseAmount ?? medicine.doseAmount,
+      doseUnitId: item.defaultDoseUnit?.id ?? medicine.doseUnitId,
+      foodTimingId: item.defaultFoodTiming?.id ?? medicine.foodTimingId,
+      schedulePresetId: item.defaultSchedulePreset?.id ?? medicine.schedulePresetId,
+      schedule: item.defaultSchedule ?? medicine.schedule,
     });
   };
 
@@ -64,14 +80,12 @@ export function MedicineRowForm({
         )}
       </div>
 
-      <div>
-        <Label>{t('record.medicineName')}</Label>
-        <Input
-          value={medicine.medicineName}
-          onChange={(e) => onChange({ ...medicine, medicineName: e.target.value })}
-          required
-        />
-      </div>
+      <MedicineAutocomplete
+        value={medicine.medicineName}
+        issueTypes={issueTypes}
+        onChange={(v) => onChange({ ...medicine, medicineName: v })}
+        onSelectCatalog={handleCatalogSelect}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

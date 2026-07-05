@@ -16,16 +16,23 @@
     "bloodPressure": "ರಕ್ತದೊತ್ತಡ",
     "oxygenLevel": "ಆಮ್ಲಜನಕ ಮಟ್ಟ",
     "treatedBy": "ಚಿಕಿತ್ಸೆ ನೀಡಿದವರು",
+    "treatedByPlaceholder": "ಸಿಬ್ಬಂದಿ ಹೆಸರು ಹುಡುಕಿ…",
+    "noStaffResults": "ಸಿಬ್ಬandi ಕಂಡುಬಂದಿಲ್ಲ",
     "notes": "ಟಿಪ್ಪಣಿಗಳು",
     "addMedicine": "ಮತ್ತೊಂದು ಔಷಧಿ ಸೇರಿಸಿ",
     "removeMedicine": "ತೆಗೆದುಹಾಕಿ",
     "medicineNumber": "ಔಷಧಿ {{number}}",
     "medicineName": "ಔಷಧಿಯ ಹೆಸರು",
+    "medicinePlaceholder": "ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಪಟ್ಟಿಯಿಂದ ಆಯ್ಕೆ…",
+    "medicineSuggestionsFor": "ಸಲಹೆಗಳು: {{issues}}",
+    "catalogUseCount": "{{count}}× ಬಳಸಲಾಗಿದೆ",
     "doseAmount": "ಡೋಸ್ ಪ್ರಮಾಣ",
     "doseUnit": "ಡೋಸ್ ಘಟಕ",
     "schedulePreset": "ವೇಳಾಪಟ್ಟಿ",
     "foodTiming": "ಆಹಾರ ಸಮಯ",
     "medicineNotes": "ಔಷಧಿ ಟಿಪ್ಪಣಿಗಳು",
+    "takePhoto": "ಫೋಟೋ ತೆಗೆ / ಆಯ್ಕೆ",
+    "photoCount": "{{count}} / {{max}} ಫೋಟೋಗಳು",
     "saveVisit": "ಭೇಟಿ ಉಳಿಸಿ",
     "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
     "successTitle": "ಭೇಟಿ ಉಳಿಸಲಾಗಿದೆ",
@@ -37,7 +44,8 @@
     "sections": {
       "findStudent": "1. ವಿದ್ಯಾರ್ಥಿ ಹುಡುಕಿ",
       "visitDetails": "2. ಭೇಟಿ ವಿವರಗಳು",
-      "treatment": "3. ಚಿಕಿತ್ಸೆ"
+      "treatment": "3. ಚಿಕಿತ್ಸೆ",
+      "photos": "4. ಫೋಟೋಗಳು (ಐಚ್ಛಿಕ)"
     },
     "schedule": {
       "morning": "ಬೆಳಿಗ್ಗೆ",
@@ -59,6 +67,22 @@
     "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
     "searchPlaceholder": "ಸಮಸ್ಯೆ ಅಥವಾ ಲಕ್ಷಣಗಳಿಂದ ಹುಡುಕಿ…",
     "search": "ಹುಡುಕಿ",
-    "empty": "ಯಾವುದೇ ಭೇಟಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ."
+    "empty": "ಯಾವುದೇ ಭೇಟಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "photoCount": "{{count}} ಫೋಟೋ(ಗಳು)"
+  },
+  "dashboard": {
+    "title": "ಆರೋಗ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "description": "Infirmary ಅವಲೋಕನ — ಅಸ್ವಸ್ಥ ವಿದ್ಯಾರ್ಥಿಗಳು, ತುರ್ತು ಎಚ್ಚರಿಕೆಗಳು.",
+    "error": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಆಗಲಿಲ್ಲ.",
+    "urgentAlerts": "ತುರ್ತು ಎಚ್ಚರಿಕೆಗಳು (7 ದಿನ)",
+    "noUrgent": "ಕೊನೆಯ 7 ದಿನಗಳಲ್ಲಿ ತುರ್ತು ಭೇಟಿಗಳಿಲ್ಲ.",
+    "recentEntries": "ಇತ್ತೀಚಿನ ದಾಖಲೆಗಳು",
+    "noRecent": "ಈ ವಾರ ಯಾವುದೇ ಭೇಟಿಗಳಿಲ್ಲ.",
+    "kpis": {
+      "totalStudents": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "sickToday": "ಇಂದು ಅಸ್ವಸ್ಥ",
+      "urgentWeek": "ತುರ್ತು (7 ದಿನ)",
+      "visitsWeek": "ಈ ವಾರದ ಭೇಟಿಗಳು"
+    }
   }
 }

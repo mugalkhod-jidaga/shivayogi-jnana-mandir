@@ -13,6 +13,7 @@ import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
 import { RecordVisitPage } from '@/features/health/RecordVisitPage';
 import { RecentVisitsPage } from '@/features/health/RecentVisitsPage';
+import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
@@ -85,6 +86,14 @@ export function AppRoutes() {
             element={
               <PermissionRoute permission="medical:create">
                 <RecordVisitPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/health/dashboard"
+            element={
+              <PermissionRoute permission="medical:read">
+                <HealthDashboardPage />
               </PermissionRoute>
             }
           />

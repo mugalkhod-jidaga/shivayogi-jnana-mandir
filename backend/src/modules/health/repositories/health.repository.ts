@@ -3,6 +3,7 @@ import { AppError } from '../../../utils/AppError';
 import { BaseRepository } from '../../../repositories/BaseRepository';
 import { studentsRepository } from '../../students/repositories/students.repository';
 import type { CreateHealthVisitInput, HealthVisitListQuery, RecentVisitsQuery } from '../schemas/health.schemas';
+import { healthAttachmentRepository, serializeAttachment } from './healthAttachment.repository';
 
 type SeverityRow = { id: number; code: string; value: string };
 type DoseUnitRow = { id: number; code: string; value: string; dose_group: string };
@@ -93,7 +94,11 @@ function serializeMedicine(row: MedicineRow) {
   };
 }
 
-export function serializeHealthVisit(row: VisitRow, medicines: MedicineRow[] = []) {
+export function serializeHealthVisit(
+  row: VisitRow,
+  medicines: MedicineRow[] = [],
+  attachments: ReturnType<typeof serializeAttachment>[] = [],
+) {
   const meds = medicines.length ? medicines : row.health_visit_medicines ?? [];
   return {
     id: row.id,
@@ -127,6 +132,7 @@ export function serializeHealthVisit(row: VisitRow, medicines: MedicineRow[] = [
       lastName: row.creator.last_name,
     },
     medicines: meds.map(serializeMedicine),
+    attachments,
   };
 }
 
@@ -163,6 +169,21 @@ class HealthRepository extends BaseRepository {
     return map;
   }
 
+  private async enrichVisits(rows: VisitRow[], tenantId: number) {
+    const visitIds = rows.map((r) => r.id);
+    const [medicineMap, attachmentMap] = await Promise.all([
+      this.loadMedicines(visitIds, tenantId),
+      healthAttachmentRepository.listByVisitIds(visitIds, tenantId),
+    ]);
+    return rows.map((row) =>
+      serializeHealthVisit(
+        row,
+        medicineMap.get(row.id) ?? [],
+        attachmentMap.get(row.id) ?? [],
+      ),
+    );
+  }
+
   async list(tenantId: number, query: HealthVisitListQuery, assignedStandardIds?: number[]) {
     const { page, limit, search, studentId, severityId } = query;
     const cappedLimit = Math.min(limit, 100);
@@ -192,13 +213,9 @@ class HealthRepository extends BaseRepository {
     if (error) throw new AppError(500, error.message);
 
     const rows = (data ?? []) as unknown as VisitRow[];
-    const medicineMap = await this.loadMedicines(
-      rows.map((r) => r.id),
-      tenantId,
-    );
 
     return {
-      data: rows.map((row) => serializeHealthVisit(row, medicineMap.get(row.id) ?? [])),
+      data: await this.enrichVisits(rows, tenantId),
       meta: { total: count ?? 0, page, limit: cappedLimit },
     };
   }
@@ -226,11 +243,7 @@ class HealthRepository extends BaseRepository {
     if (error) throw new AppError(500, error.message);
 
     const rows = (data ?? []) as unknown as VisitRow[];
-    const medicineMap = await this.loadMedicines(
-      rows.map((r) => r.id),
-      tenantId,
-    );
-    return rows.map((row) => serializeHealthVisit(row, medicineMap.get(row.id) ?? []));
+    return this.enrichVisits(rows, tenantId);
   }
 
   async findById(id: string, tenantId: number) {
@@ -244,8 +257,8 @@ class HealthRepository extends BaseRepository {
     if (error) throw new AppError(500, error.message);
     if (!data) return null;
 
-    const medicineMap = await this.loadMedicines([id], tenantId);
-    return serializeHealthVisit(data as unknown as VisitRow, medicineMap.get(id) ?? []);
+    const enriched = await this.enrichVisits([data as unknown as VisitRow], tenantId);
+    return enriched[0] ?? null;
   }
 
   async getStudentSummary(studentId: string, tenantId: number) {
@@ -265,6 +278,84 @@ class HealthRepository extends BaseRepository {
       visitCount: visits.length,
       lastVisitDate: last?.visit_date ?? null,
       lastIssueType: last?.issue_type ?? null,
+    };
+  }
+
+  async getDashboardStats(tenantId: number, assignedStandardIds?: number[]) {
+    const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
+    if (scopedIds && scopedIds.length === 0) {
+      return {
+        totalStudents: 0,
+        sickToday: 0,
+        urgentCount: 0,
+        visitsThisWeek: 0,
+        urgentAlerts: [],
+        recentEntries: [],
+      };
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [activeStudentsRes, urgentSeverityRes, visitsRes] = await Promise.all([
+      supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .is('deleted_at', null),
+      supabase
+        .from('lookup_health_severities')
+        .select('id')
+        .eq('code', 'urgent')
+        .single(),
+      supabase
+        .from('health_visits')
+        .select(VISIT_SELECT)
+        .eq('tenant_id', tenantId)
+        .is('deleted_at', null)
+        .gte('visit_date', weekAgoStr)
+        .order('visit_date', { ascending: false })
+        .order('created_at', { ascending: false }),
+    ]);
+
+    if (activeStudentsRes.error) throw new AppError(500, activeStudentsRes.error.message);
+    if (urgentSeverityRes.error) throw new AppError(500, urgentSeverityRes.error.message);
+    if (visitsRes.error) throw new AppError(500, visitsRes.error.message);
+
+    let visitRows = (visitsRes.data ?? []) as unknown as VisitRow[];
+    if (scopedIds) {
+      visitRows = visitRows.filter((v) => scopedIds.includes(v.student_id));
+    }
+
+    const todayStudentIds = new Set(
+      visitRows.filter((v) => v.visit_date === today).map((v) => v.student_id),
+    );
+
+    const urgentSeverityId = urgentSeverityRes.data?.id as number;
+    const urgentVisits = visitRows.filter((v) => v.severity.id === urgentSeverityId);
+    const urgentIn7Days = urgentVisits.filter(
+      (v) => new Date(v.visit_date) >= sevenDaysAgo,
+    );
+
+    const recentRows = visitRows.slice(0, 5);
+    const urgentAlertRows = urgentIn7Days.slice(0, 5);
+    const [recentEntries, urgentAlerts] = await Promise.all([
+      this.enrichVisits(recentRows, tenantId),
+      this.enrichVisits(urgentAlertRows, tenantId),
+    ]);
+
+    return {
+      totalStudents: activeStudentsRes.count ?? 0,
+      sickToday: todayStudentIds.size,
+      urgentCount: urgentIn7Days.length,
+      visitsThisWeek: visitRows.length,
+      urgentAlerts,
+      recentEntries,
     };
   }
 

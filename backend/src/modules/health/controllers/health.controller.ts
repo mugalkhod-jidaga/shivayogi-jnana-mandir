@@ -1,9 +1,12 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
-import type { CreateHealthVisitInput } from '../schemas/health.schemas';
+import type { AttachmentPresignInput, CreateHealthVisitInput } from '../schemas/health.schemas';
 import {
+  attachmentPresignSchema,
   healthVisitListQuerySchema,
+  medicineCatalogSuggestQuerySchema,
   recentVisitsQuerySchema,
+  staffSearchQuerySchema,
 } from '../schemas/health.schemas';
 import { healthService } from '../services/health.service';
 
@@ -53,6 +56,36 @@ export const healthController = {
   async getById(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const data = await healthService.getById(paramId(req), tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
+  async getDashboardStats(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.getDashboardStats(tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
+  async suggestMedicines(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = medicineCatalogSuggestQuerySchema.parse(req.query);
+    const data = await healthService.suggestMedicines(tenantId, query);
+    res.json({ success: true, data });
+  },
+
+  async searchStaff(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = staffSearchQuerySchema.parse(req.query);
+    const data = await healthService.searchStaff(tenantId, query);
+    res.json({ success: true, data });
+  },
+
+  async presignAttachment(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.presignAttachment(
+      tenantId,
+      req.body as AttachmentPresignInput,
+      profileId,
+    );
     res.json({ success: true, data });
   },
 

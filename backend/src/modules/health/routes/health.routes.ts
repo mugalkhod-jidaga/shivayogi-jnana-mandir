@@ -4,9 +4,41 @@ import { requirePermission } from '../../../middlewares/requirePermission';
 import { validateZod } from '../../../middlewares/validateZod';
 import { asyncHandler } from '../../../utils/asyncHandler';
 import { healthController } from '../controllers/health.controller';
-import { createHealthVisitSchema } from '../schemas/health.schemas';
+import {
+  attachmentPresignSchema,
+  createHealthVisitSchema,
+} from '../schemas/health.schemas';
 
 export const healthRoutes = Router();
+
+healthRoutes.get(
+  '/dashboard/stats',
+  extractTenantMiddleware,
+  requirePermission('medical:read'),
+  asyncHandler(healthController.getDashboardStats),
+);
+
+healthRoutes.get(
+  '/medicine-catalog/suggest',
+  extractTenantMiddleware,
+  requirePermission('medical:read'),
+  asyncHandler(healthController.suggestMedicines),
+);
+
+healthRoutes.get(
+  '/staff/search',
+  extractTenantMiddleware,
+  requirePermission('medical:read'),
+  asyncHandler(healthController.searchStaff),
+);
+
+healthRoutes.post(
+  '/attachments/presign',
+  extractTenantMiddleware,
+  requirePermission('medical:create'),
+  validateZod(attachmentPresignSchema),
+  asyncHandler(healthController.presignAttachment),
+);
 
 healthRoutes.get(
   '/visits',
