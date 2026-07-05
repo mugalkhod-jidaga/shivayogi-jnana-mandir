@@ -9,7 +9,7 @@ import { toCommitRows, useMigrationCommit, useMigrationParse } from '@/hooks/use
 import { ApiError } from '@/lib/api';
 import { formatDobDisplay } from '@/lib/date';
 import { cn } from '@/lib/utils';
-import type { MigrationParseResult } from '@/types/migration';
+import type { MigrationParseResult, MigrationSkippedRow } from '@/types/migration';
 
 type Step = 'upload' | 'preview' | 'done';
 
@@ -18,6 +18,33 @@ const SAMPLE_URL = '/samples/sample-students.csv';
 
 function formatName(firstName: string, lastName?: string) {
   return [firstName, lastName].filter(Boolean).join(' ');
+}
+
+function downloadSkippedRowsCsv(rows: MigrationSkippedRow[]) {
+  const header = ['row', 'admission_number', 'first_name', 'standard', 'reason'];
+  const escape = (value: string) =>
+    value.includes(',') || value.includes('"') ? `"${value.replace(/"/g, '""')}"` : value;
+  const lines = [
+    header.join(','),
+    ...rows.map((row) =>
+      [
+        row.row,
+        row.admission_number ?? '',
+        row.first_name ?? '',
+        row.standard ?? '',
+        row.reason,
+      ]
+        .map(escape)
+        .join(','),
+    ),
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'migration-skipped-rows.csv';
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function ImportPage() {
@@ -45,7 +72,16 @@ export function ImportPage() {
       setFileName(file.name);
       setParseResult(result);
       setStep('preview');
-      toast.success(t('upload.parseSuccess', { count: result.validRows }));
+      if (result.skippedRows.length > 0) {
+        toast.success(
+          t('upload.parseSuccessWithSkipped', {
+            valid: result.validRows,
+            skipped: result.skippedRows.length,
+          }),
+        );
+      } else {
+        toast.success(t('upload.parseSuccess', { count: result.validRows }));
+      }
     } catch (error) {
       const message = error instanceof ApiError ? error.message : t('upload.parseError');
       toast.error(message);
@@ -156,11 +192,57 @@ export function ImportPage() {
           <div className="rounded-lg border p-4 text-sm">
             <p>
               {t('preview.summary', { name: fileName, valid: parseResult.validRows })}
+              {parseResult.skippedRows.length > 0 && (
+                <>{t('preview.skippedSuffix', { count: parseResult.skippedRows.length })}</>
+              )}
               {parseResult.errorRows.length > 0 && (
                 <>{t('preview.errorsSuffix', { count: parseResult.errorRows.length })}</>
               )}
             </p>
           </div>
+
+          {parseResult.skippedRows.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg font-medium text-amber-700 dark:text-amber-400">
+                  {t('preview.skippedTitle', { count: parseResult.skippedRows.length })}
+                </h2>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadSkippedRowsCsv(parseResult.skippedRows)}
+                >
+                  {t('preview.downloadSkipped')}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">{t('preview.skippedHint')}</p>
+              <div className="overflow-x-auto rounded-lg border border-amber-500/30">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-amber-500/5 text-left">
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.row')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.admissionNumber')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.name')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.standard')}</th>
+                      <th className="px-4 py-3 font-medium">{t('preview.columns.reason')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parseResult.skippedRows.map((row) => (
+                      <tr key={`skipped-${row.row}`} className="border-b last:border-b-0">
+                        <td className="px-4 py-3">{row.row}</td>
+                        <td className="px-4 py-3">{row.admission_number ?? '—'}</td>
+                        <td className="px-4 py-3">{row.first_name ?? '—'}</td>
+                        <td className="px-4 py-3">{row.standard ?? '—'}</td>
+                        <td className="px-4 py-3">{row.reason}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
 
           {parseResult.preview.length > 0 && (
             <section className="space-y-3">

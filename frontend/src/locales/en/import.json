@@ -14,12 +14,17 @@
     "parsing": "Parsing…",
     "invalidType": "Only .csv, .xlsx, and .xls files are allowed",
     "parseSuccess": "Parsed {{count}} valid row(s)",
+    "parseSuccessWithSkipped": "Parsed {{valid}} valid row(s); {{skipped}} row(s) skipped — fix in sheet and re-upload",
     "parseError": "Could not parse file"
   },
   "preview": {
     "summary": "{{name}} — {{valid}} valid row(s)",
     "errorsSuffix": ", {{count}} error(s)",
+    "skippedSuffix": ", {{count}} skipped",
     "validRowsTitle": "Valid rows ({{count}})",
+    "skippedTitle": "Skipped rows ({{count}})",
+    "skippedHint": "These rows are missing a student name or standard and will not be imported. Ask staff to fill in the sheet, then upload again.",
+    "downloadSkipped": "Download skipped rows CSV",
     "errorsTitle": "Errors ({{count}})",
     "errorsHint": "These rows will not be imported. Fix the file and upload again, or commit the valid rows only.",
     "commit": "Import {{count}} student(s)",
@@ -32,7 +37,9 @@
       "dob": "DOB",
       "district": "District",
       "contact": "Contact",
-      "error": "Error"
+      "standard": "Standard",
+      "error": "Error",
+      "reason": "Reason"
     }
   },
   "done": {

@@ -28,9 +28,18 @@ export type MigrationParseError = {
   error: string;
 };
 
+export type MigrationSkippedRow = {
+  row: number;
+  admission_number?: string;
+  first_name?: string;
+  standard?: string;
+  reason: string;
+};
+
 export type MigrationParseResult = {
   validRows: number;
   errorRows: MigrationParseError[];
+  skippedRows: MigrationSkippedRow[];
   preview: MigrationPreviewRow[];
 };
 

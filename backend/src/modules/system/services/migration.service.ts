@@ -1,5 +1,6 @@
 import { supabase } from '../../../config/supabase';
 import { AppError } from '../../../utils/AppError';
+import { parseMigrationDate } from '../../../utils/date';
 import { normalizeIndianPhone, phoneSchema } from '../../../utils/validators';
 import { parseSpreadsheet, type RawCsvRow } from '../../../utils/spreadsheet';
 import type { MigrationCommitRow } from '../schemas/migration.schemas';
@@ -20,6 +21,14 @@ interface ParseErrorRow {
   error: string;
 }
 
+export interface ParseSkippedRow {
+  row: number;
+  admission_number?: string;
+  first_name?: string;
+  standard?: string;
+  reason: string;
+}
+
 export interface MigrationPreviewRow extends MigrationCommitRow {
   row: number;
 }
@@ -27,7 +36,23 @@ export interface MigrationPreviewRow extends MigrationCommitRow {
 export interface MigrationParseResult {
   validRows: number;
   errorRows: ParseErrorRow[];
+  skippedRows: ParseSkippedRow[];
   preview: MigrationPreviewRow[];
+}
+
+function describeSkippedRow(raw: RawCsvRow, rowNumber: number): ParseSkippedRow {
+  const missing: string[] = [];
+  if (!raw.admission_number?.trim()) missing.push('admission_number');
+  if (!raw.first_name?.trim()) missing.push('first_name');
+  if (!raw.standard?.trim()) missing.push('standard');
+
+  return {
+    row: rowNumber,
+    admission_number: raw.admission_number?.trim() || undefined,
+    first_name: raw.first_name?.trim() || undefined,
+    standard: raw.standard?.trim() || undefined,
+    reason: `Missing required field(s): ${missing.join(', ')}`,
+  };
 }
 
 async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
@@ -105,6 +130,29 @@ async function findExistingAdmissionNumbers(
   return new Set((data ?? []).map((row) => row.admission_number));
 }
 
+const MIGRATION_PLACEHOLDER_PHONE = '+919900000000';
+
+function resolvePhone(raw: string | undefined, fallback: string): string {
+  if (!raw?.trim()) return fallback;
+  try {
+    const normalized = normalizeIndianPhone(raw);
+    phoneSchema.parse(normalized);
+    return normalized;
+  } catch {
+    return fallback;
+  }
+}
+
+function resolveAadhaar(raw: string | undefined): string | undefined {
+  const digits = (raw ?? '').replace(/\D/g, '');
+  return digits.length === 12 ? digits : undefined;
+}
+
+function resolveSatsId(raw: string | undefined): string | undefined {
+  const digits = (raw ?? '').replace(/\D/g, '');
+  return digits.length === 9 ? digits : undefined;
+}
+
 function mapRow(
   raw: RawCsvRow,
   rowNumber: number,
@@ -118,16 +166,10 @@ function mapRow(
 
   const row = parsed.data;
 
-  let primaryContact: string;
-  let emergencyPhone: string;
-  try {
-    primaryContact = normalizeIndianPhone(row.primary_contact);
-    phoneSchema.parse(primaryContact);
-    emergencyPhone = normalizeIndianPhone(row.emergency_contact_phone);
-    phoneSchema.parse(emergencyPhone);
-  } catch {
-    return { ok: false, error: 'Invalid phone number in primary or emergency contact' };
-  }
+  const primaryContact = resolvePhone(row.primary_contact, MIGRATION_PLACEHOLDER_PHONE);
+  const emergencyPhone = resolvePhone(row.emergency_contact_phone, primaryContact);
+  const dob = parseMigrationDate(row.dob);
+  const admissionDate = parseMigrationDate(row.admission_date, '2026-06-01');
 
   let bloodGroupId: number | undefined;
   if (row.blood_group) {
@@ -186,32 +228,36 @@ function mapRow(
       admission_number: row.admission_number,
       first_name: row.first_name,
       last_name: row.last_name,
-      dob: row.dob,
+      dob,
       gender: row.gender ?? 'Male',
       blood_group_id: bloodGroupId,
       admission_category_id: admissionCategoryId,
-      admission_date: row.admission_date,
+      admission_date: admissionDate,
       mother_tongue_id: motherTongueId,
-      aadhaar_number: row.aadhaar_number,
-      sats_id: row.sats_id,
+      aadhaar_number: resolveAadhaar(row.aadhaar_number),
+      sats_id: resolveSatsId(row.sats_id),
       academic_year_id: academicYearId,
       standard_id: standardId,
       section_id: sectionId,
-      roll_number: row.roll_number,
+      roll_number: row.roll_number?.trim() || String(rowNumber - 1).padStart(2, '0'),
       previous_school: row.previous_school,
       last_class_studied: row.last_class_studied,
-      emergency_contact_name: row.emergency_contact_name,
-      emergency_contact_relationship: row.emergency_contact_relationship,
+      emergency_contact_name:
+        row.emergency_contact_name?.trim() ||
+        row.father_name?.trim() ||
+        row.first_name,
+      emergency_contact_relationship:
+        row.emergency_contact_relationship?.trim() || 'Parent/Guardian',
       emergency_contact_phone: emergencyPhone,
       father_name: row.father_name,
       mother_name: row.mother_name,
       parent_status: 'Both Alive',
       primary_contact: primaryContact,
-      village_town: row.village_town,
-      taluk_mandal: row.taluk_mandal,
-      district: row.district,
-      state: row.state ?? 'Karnataka',
-      pincode: row.pincode,
+      village_town: row.village_town?.trim() || 'Unknown',
+      taluk_mandal: row.taluk_mandal?.trim() || 'Unknown',
+      district: row.district?.trim() || 'Unknown',
+      state: row.state?.trim() || 'Karnataka',
+      pincode: row.pincode?.trim() || '585302',
       social_category_id: socialCategoryId,
       caste: row.caste,
       rd_number: row.rd_number,
@@ -229,12 +275,20 @@ export const migrationService = {
 
     const maps = await loadLookupMaps(tenantId);
     const errorRows: ParseErrorRow[] = [];
+    const skippedRows: ParseSkippedRow[] = [];
     const preview: MigrationPreviewRow[] = [];
     const seenInFile = new Set<string>();
 
     for (let i = 0; i < rows.length; i++) {
       const rowNumber = i + 2;
-      const result = mapRow(rows[i], rowNumber, maps);
+      const raw = rows[i];
+
+      if (!raw.admission_number?.trim() || !raw.first_name?.trim() || !raw.standard?.trim()) {
+        skippedRows.push(describeSkippedRow(raw, rowNumber));
+        continue;
+      }
+
+      const result = mapRow(raw, rowNumber, maps);
 
       if (!result.ok) {
         errorRows.push({ row: rowNumber, error: result.error });
@@ -270,6 +324,7 @@ export const migrationService = {
     return {
       validRows: dedupedPreview.length,
       errorRows,
+      skippedRows,
       preview: dedupedPreview,
     };
   },
