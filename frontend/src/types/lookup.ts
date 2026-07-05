@@ -6,6 +6,7 @@ export type LookupOption = {
 
 export type TenantLookupOption = LookupOption & {
   tenantId: number;
+  code: string;
   labels?: Record<string, string>;
 };
 

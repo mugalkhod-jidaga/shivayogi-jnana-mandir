@@ -39,6 +39,7 @@ function serializeTenantLookup(row: TenantLookupRow, locale: SupportedLocale = '
   return {
     id: row.id,
     tenantId: row.tenant_id,
+    code: row.value,
     value,
     labels: labels ?? { en: row.value },
     isActive: row.is_active,
@@ -593,6 +594,78 @@ class LookupRepository {
       .order('value');
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listHealthSeverities(locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_health_severities')
+      .select('id, code, value, labels, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      id: row.id as number,
+      code: row.code as string,
+      value: resolveLocalizedLabel(row.labels as Record<string, string> | null, row.value as string, locale),
+      labels: (row.labels as Record<string, string> | null) ?? { en: row.value as string },
+    }));
+  }
+
+  async listHealthIssueTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_health_issue_types')
+      .select('id, tenant_id, value, labels, is_active')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('value');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
+  }
+
+  async listMedicineFoodTimings(locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_medicine_food_timings')
+      .select('id, code, value, labels, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      id: row.id as number,
+      code: row.code as string,
+      value: resolveLocalizedLabel(row.labels as Record<string, string> | null, row.value as string, locale),
+      labels: (row.labels as Record<string, string> | null) ?? { en: row.value as string },
+    }));
+  }
+
+  async listMedicineDoseUnits(locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_medicine_dose_units')
+      .select('id, code, value, dose_group, labels, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      id: row.id as number,
+      code: row.code as string,
+      value: resolveLocalizedLabel(row.labels as Record<string, string> | null, row.value as string, locale),
+      doseGroup: row.dose_group as string,
+      labels: (row.labels as Record<string, string> | null) ?? { en: row.value as string },
+    }));
+  }
+
+  async listMedicineSchedulePresets(locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_medicine_schedule_presets')
+      .select('id, code, value, labels, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      id: row.id as number,
+      code: row.code as string,
+      value: resolveLocalizedLabel(row.labels as Record<string, string> | null, row.value as string, locale),
+      labels: (row.labels as Record<string, string> | null) ?? { en: row.value as string },
+    }));
   }
 }
 

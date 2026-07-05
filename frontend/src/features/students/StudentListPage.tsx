@@ -1,8 +1,8 @@
 import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
-import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { SocialCategorySelect } from '@/components/lookups/SocialCategorySelect';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { AcademicYearSelect } from '@/components/lookups/AcademicYearSelect';
 import { PageHeader } from '@/components/PageHeader';
@@ -24,19 +24,21 @@ function formatName(firstName: string, lastName: string | null) {
 export function StudentListPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
   const statusParam = (searchParams.get('status') as StudentStatus | null) ?? undefined;
   const standardIdParam = searchParams.get('standardId') ?? '';
   const academicYearIdParam = searchParams.get('academicYearId') ?? '';
-  const categoryIdParam = searchParams.get('admissionCategoryId') ?? '';
+  const socialCategoryIdParam = searchParams.get('socialCategoryId') ?? '';
 
   const [searchInput, setSearchInput] = useState(searchParam);
   const [statusFilter, setStatusFilter] = useState(statusParam ?? '');
   const [standardFilter, setStandardFilter] = useState(standardIdParam);
   const [academicYearFilter, setAcademicYearFilter] = useState(academicYearIdParam);
-  const [categoryFilter, setCategoryFilter] = useState(categoryIdParam);
+  const [socialCategoryFilter, setSocialCategoryFilter] = useState(socialCategoryIdParam);
   const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
@@ -44,8 +46,8 @@ export function StudentListPage() {
     setStatusFilter(statusParam ?? '');
     setStandardFilter(standardIdParam);
     setAcademicYearFilter(academicYearIdParam);
-    setCategoryFilter(categoryIdParam);
-  }, [searchParam, statusParam, standardIdParam, academicYearIdParam, categoryIdParam]);
+    setSocialCategoryFilter(socialCategoryIdParam);
+  }, [searchParam, statusParam, standardIdParam, academicYearIdParam, socialCategoryIdParam]);
 
   const { data, isLoading, isError } = useStudentsList({
     page: Number.isFinite(page) && page > 0 ? page : 1,
@@ -53,7 +55,7 @@ export function StudentListPage() {
     status: statusParam,
     standardId: standardIdParam ? Number(standardIdParam) : undefined,
     academicYearId: academicYearIdParam ? Number(academicYearIdParam) : undefined,
-    admissionCategoryId: categoryIdParam ? Number(categoryIdParam) : undefined,
+    socialCategoryId: socialCategoryIdParam ? Number(socialCategoryIdParam) : undefined,
   });
 
   const students = data?.data ?? [];
@@ -66,7 +68,7 @@ export function StudentListPage() {
     if (statusFilter) next.set('status', statusFilter);
     if (standardFilter) next.set('standardId', standardFilter);
     if (academicYearFilter) next.set('academicYearId', academicYearFilter);
-    if (categoryFilter) next.set('admissionCategoryId', categoryFilter);
+    if (socialCategoryFilter) next.set('socialCategoryId', socialCategoryFilter);
     next.set('page', '1');
     setSearchParams(next);
   };
@@ -94,7 +96,7 @@ export function StudentListPage() {
                     status: statusParam,
                     standardId: standardIdParam || undefined,
                     academicYearId: academicYearIdParam || undefined,
-                    admissionCategoryId: categoryIdParam || undefined,
+                    socialCategoryId: socialCategoryIdParam || undefined,
                   })
                   .finally(() => setPdfLoading(false));
               }}
@@ -143,30 +145,33 @@ export function StudentListPage() {
           </Select>
           <AcademicStandardSelect value={standardFilter} onChange={setStandardFilter} />
           <AcademicYearSelect value={academicYearFilter} onChange={setAcademicYearFilter} />
-          <AdmissionCategorySelect value={categoryFilter} onChange={setCategoryFilter} />
+          <SocialCategorySelect
+            value={socialCategoryFilter}
+            onChange={setSocialCategoryFilter}
+            placeholder={t('list.allSocialCategories')}
+          />
         </div>
       </form>
 
       {isError && <p className="text-sm text-destructive">{tc('errors.loadStudents')}</p>}
 
-      <div className="overflow-hidden rounded-lg border">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="w-14 px-4 py-3 font-medium" />
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionNumber')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.name')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.standard')}</th>
-              <th className="px-4 py-3 font-medium">{t('list.columns.rollNumber')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.socialCategory')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionDate')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.status')}</th>
-              <th className="px-4 py-3 font-medium" />
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.loading')}
                 </td>
               </tr>
@@ -174,14 +179,22 @@ export function StudentListPage() {
 
             {!isLoading && students.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.noResults')}
                 </td>
               </tr>
             )}
 
             {students.map((student) => (
-              <tr key={student.id} className="border-t">
+              <tr
+                key={student.id}
+                className="cursor-pointer border-t transition-colors hover:bg-muted/50"
+                onClick={() =>
+                  navigate(`/students/${student.id}`, {
+                    state: { from: `${location.pathname}${location.search}` },
+                  })
+                }
+              >
                 <td className="px-4 py-3">
                   <StudentInitialsAvatar
                     firstName={student.firstName}
@@ -191,15 +204,10 @@ export function StudentListPage() {
                 <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
                 <td className="px-4 py-3">{formatName(student.firstName, student.lastName)}</td>
                 <td className="px-4 py-3">{student.currentEnrollment?.standard?.value ?? '—'}</td>
-                <td className="px-4 py-3">{student.currentEnrollment?.rollNumber ?? '—'}</td>
+                <td className="px-4 py-3">{student.socialCategory?.value ?? '—'}</td>
                 <td className="px-4 py-3">{formatDobDisplay(student.admissionDate)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={student.status} />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button asChild variant="ghost" size="sm">
-                    <Link to={`/students/${student.id}`}>{tc('actions.view')}</Link>
-                  </Button>
                 </td>
               </tr>
             ))}

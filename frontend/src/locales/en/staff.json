@@ -65,7 +65,8 @@
     "superAdmin": "Super Admin",
     "admissionsClerk": "Admissions Clerk",
     "finance": "Finance",
-    "teacherWarden": "Teacher/Warden"
+    "teacherWarden": "Teacher/Warden",
+    "medicalStaff": "Medical Staff"
   },
   "validation": {
     "firstNameRequired": "First name is required",

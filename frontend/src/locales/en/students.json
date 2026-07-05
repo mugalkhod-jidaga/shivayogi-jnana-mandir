@@ -1,4 +1,8 @@
 {
+  "nav": {
+    "directory": "Directory",
+    "reports": "Reports"
+  },
   "list": {
     "title": "Students",
     "description": "Search, filter, and manage student records.",
@@ -14,7 +18,47 @@
       "standard": "Standard",
       "rollNumber": "Roll #",
       "admissionDate": "Admission date",
-      "status": "Status"
+      "status": "Status",
+      "socialCategory": "Social category"
+    },
+    "allSocialCategories": "All social categories"
+  },
+  "reports": {
+    "title": "Student reports",
+    "description": "Enrollment analytics — standards, social categories, and demographics at a glance.",
+    "errorTitle": "Could not load reports",
+    "errorDescription": "Check that the backend is running and try again.",
+    "columnShare": "Share",
+    "kpis": {
+      "activeStudents": "Active students",
+      "totalEnrolled": "{{count}} total enrolled",
+      "admissionsYear": "Admissions this year",
+      "standards": "Standards represented",
+      "standardsHelp": "Classes with active enrollments",
+      "socialCategories": "Social categories",
+      "socialCategoriesHelp": "Categories with active students"
+    },
+    "byStandard": {
+      "title": "Students by standard",
+      "description": "Active enrollment across classes — click a row to filter the directory.",
+      "empty": "No enrollment data yet.",
+      "columnStandard": "Standard",
+      "columnStudents": "Students"
+    },
+    "bySocialCategory": {
+      "title": "Students by social category",
+      "description": "Reservation category breakdown for active students.",
+      "empty": "No social category data yet.",
+      "columnCategory": "Social category",
+      "columnStudents": "Students"
+    },
+    "byGender": {
+      "title": "Students by gender",
+      "description": "Gender distribution among active students."
+    },
+    "byStatus": {
+      "title": "Students by status",
+      "description": "Active, alumni, and discontinued — click a chip to view that list."
     }
   },
   "form": {
@@ -24,7 +68,7 @@
     "editDescription": "Update record for {{admissionNumber}}",
     "loadingStudent": "Loading student…",
     "nextAdmissionNumber": "Admission number",
-    "nextAdmissionHelp": "Assigned automatically when you save (SJM format).",
+    "nextAdmissionHelp": "Enter manually or use the suggested SJM number. Must be unique within your school.",
     "admissionNumberLoading": "Loading…",
     "sections": {
       "basic": "Basic information",
@@ -36,7 +80,8 @@
     "hints": {
       "emergency": "A separate emergency contact in addition to the family primary contact.",
       "social": "Sensitive information — visible only to authorized staff.",
-      "family": "Sensitive family and income details — visible only to authorized staff."
+      "family": "Sensitive family and income details — visible only to authorized staff.",
+      "obcIncomeRdSync": "For OBC categories, Income RD matches Caste RD automatically."
     },
     "fields": {
       "firstName": "First name",
@@ -67,6 +112,8 @@
       "socialCategory": "Social category",
       "caste": "Caste",
       "subCaste": "Sub-caste",
+      "casteRdNumber": "Caste RD number",
+      "incomeRdNumber": "Income RD number",
       "rdNumber": "RD number",
       "rdNumberSecondary": "RD number (secondary)",
       "fatherName": "Father's name",
@@ -107,7 +154,10 @@
     },
     "actions": {
       "edit": "Edit",
-      "deactivate": "Deactivate"
+      "deactivate": "Deactivate",
+      "healthProfile": "Health profile",
+      "backToStudents": "Back to students",
+      "downloadProfilePdf": "Download profile PDF"
     },
     "fields": {
       "category": "Category",
@@ -167,6 +217,16 @@
     "pincodeRequired": "Pincode is required",
     "aadhaar": "Aadhaar must be exactly 12 digits",
     "satsId": "SATS ID must be exactly 9 digits",
-    "reasonRequired": "Reason is required"
+    "reasonRequired": "Reason is required",
+    "admissionNumberRequired": "Admission number is required",
+    "rd": {
+      "casteRdRequired": "Valid Caste RD number required (e.g. RD1218...)",
+      "casteRdInvalid": "Valid Caste RD number required (e.g. RD1218...)",
+      "incomeRdRequired": "Valid Income RD number required",
+      "incomeRdInvalid": "Valid Income RD number required",
+      "scStDifferent": "SC/ST must have different Caste and Income RD numbers",
+      "obcIncomeMustMatch": "OBC Income RD must match your Caste RD",
+      "gmIncomeInvalid": "Invalid Income RD format"
+    }
   }
 }

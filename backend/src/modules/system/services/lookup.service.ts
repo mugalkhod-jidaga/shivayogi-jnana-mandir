@@ -69,6 +69,26 @@ export const lookupService = {
     return lookupRepository.listMedicalRecordTypes(tenantId, locale);
   },
 
+  listHealthSeverities(locale: SupportedLocale = 'en') {
+    return lookupRepository.listHealthSeverities(locale);
+  },
+
+  listHealthIssueTypes(tenantId: number, locale: SupportedLocale = 'en') {
+    return lookupRepository.listHealthIssueTypes(tenantId, locale);
+  },
+
+  listMedicineFoodTimings(locale: SupportedLocale = 'en') {
+    return lookupRepository.listMedicineFoodTimings(locale);
+  },
+
+  listMedicineDoseUnits(locale: SupportedLocale = 'en') {
+    return lookupRepository.listMedicineDoseUnits(locale);
+  },
+
+  listMedicineSchedulePresets(locale: SupportedLocale = 'en') {
+    return lookupRepository.listMedicineSchedulePresets(locale);
+  },
+
   createAdmissionCategory(tenantId: number, input: CreateLookupValueInput) {
     return lookupRepository.createAdmissionCategory(tenantId, input.value, input.labelKn);
   },

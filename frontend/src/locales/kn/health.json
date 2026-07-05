@@ -1,0 +1,159 @@
+{
+  "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+  "nav": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "recentVisits": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳು",
+    "reports": "ವರದಿಗಳು"
+  },
+  "record": {
+    "title": "ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "description": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಹುಡುಕಿ, ಇತಿಹಾಸ ನೋಡಿ, ಹೊಸ ಆರೋಗ್ಯ ಭೇಟಿ ದಾಖಲಿಸಿ.",
+    "studentSearch": "ಹೆಸರು ಅಥವಾ ಪ್ರವೇಶ ಸಂಖ್ಯೆಯಿಂದ ಹುಡುಕಿ",
+    "class": "ತರಗತಿ",
+    "visitDate": "ಭೇಟಿ ದಿನಾಂಕ",
+    "severity": "ತೀವ್ರತೆ",
+    "issueType": "ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ",
+    "customIssue": "ಇತರ ಸಮಸ್ಯೆ (ಐಚ್ಛಿಕ)",
+    "symptoms": "ಲಕ್ಷಣಗಳು / ವಿವರಣೆ",
+    "showVitals": "ವೈಟಲ್ಸ್ ತೋರಿಸಿ",
+    "hideVitals": "ವೈಟಲ್ಸ್ ಮರೆಮಾಡಿ",
+    "temperature": "ತಾಪಮಾನ",
+    "bloodPressure": "ರಕ್ತದೊತ್ತಡ",
+    "oxygenLevel": "ಆಮ್ಲಜನಕ ಮಟ್ಟ",
+    "treatedBy": "ಚಿಕಿತ್ಸೆ ನೀಡಿದವರು",
+    "treatedByPlaceholder": "ಸಿಬ್ಬಂದಿ ಹೆಸರು ಹುಡುಕಿ…",
+    "noStaffResults": "ಸಿಬ್ಬandi ಕಂಡುಬಂದಿಲ್ಲ",
+    "notes": "ಟಿಪ್ಪಣಿಗಳು",
+    "addMedicine": "ಮತ್ತೊಂದು ಔಷಧಿ ಸೇರಿಸಿ",
+    "removeMedicine": "ತೆಗೆದುಹಾಕಿ",
+    "medicineNumber": "ಔಷಧಿ {{number}}",
+    "medicineName": "ಔಷಧಿಯ ಹೆಸರು",
+    "medicinePlaceholder": "ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಪಟ್ಟಿಯಿಂದ ಆಯ್ಕೆ…",
+    "medicineSuggestionsFor": "ಸಲಹೆಗಳು: {{issues}}",
+    "catalogUseCount": "{{count}}× ಬಳಸಲಾಗಿದೆ",
+    "doseAmount": "ಡೋಸ್ ಪ್ರಮಾಣ",
+    "doseUnit": "ಡೋಸ್ ಘಟಕ",
+    "schedulePreset": "ವೇಳಾಪಟ್ಟಿ",
+    "foodTiming": "ಆಹಾರ ಸಮಯ",
+    "medicineNotes": "ಔಷಧಿ ಟಿಪ್ಪಣಿಗಳು",
+    "takePhoto": "ಫೋಟೋ ತೆಗೆ / ಆಯ್ಕೆ",
+    "photoCount": "{{count}} / {{max}} ಫೋಟೋಗಳು",
+    "saveVisit": "ಭೇಟಿ ಉಳಿಸಿ",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "successTitle": "ಭೇಟಿ ಉಳಿಸಲಾಗಿದೆ",
+    "successDescription": "ಆರೋಗ್ಯ ಭೇಟಿ ಯಶಸ್ವಿಯಾಗಿ ದಾಖಲಾಗಿದೆ.",
+    "recordAnother": "ಮತ್ತೊಂದು ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "viewRecent": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳನ್ನು ನೋಡಿ",
+    "noPriorVisits": "ಈ ವಿದ್ಯಾರ್ಥಿಗೆ ಹಿಂದಿನ ಭೇಟಿಗಳಿಲ್ಲ.",
+    "priorVisitsSummary": "ಹಿಂದೆ {{count}} ಬಾರಿ ಚಿಕಿತ್ಸೆ · ಕೊನೆಯ ಭೇಟಿ: {{date}} — {{issue}}",
+    "sections": {
+      "findStudent": "1. ವಿದ್ಯಾರ್ಥಿ ಹುಡುಕಿ",
+      "visitDetails": "2. ಭೇಟಿ ವಿವರಗಳು",
+      "treatment": "3. ಚಿಕಿತ್ಸೆ",
+      "photos": "4. ಫೋಟೋಗಳು (ಐಚ್ಛಿಕ)"
+    },
+    "schedule": {
+      "morning": "ಬೆಳಿಗ್ಗೆ",
+      "noon": "ಮಧ್ಯಾಹ್ನ",
+      "evening": "ಸಂಜೆ",
+      "night": "ರಾತ್ರಿ"
+    },
+    "errors": {
+      "studentRequired": "ಉಳಿಸುವ ಮೊದಲು ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+      "issueRequired": "ಕನಿಷ್ಠ ಒಂದು ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ.",
+      "symptomsRequired": "ಲಕ್ಷಣಗಳ ವಿವರಣೆ ಅಗತ್ಯ.",
+      "severityRequired": "ತೀವ್ರತೆ ಅಗತ್ಯ.",
+      "saveFailed": "ಭೇಟಿ ಉಳಿಸಲು ವಿಫಲ."
+    }
+  },
+  "recent": {
+    "title": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳು",
+    "description": "ಕೊನೆಯ 50 infirmary ಭೇಟಿಗಳು.",
+    "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "searchPlaceholder": "ಸಮಸ್ಯೆ ಅಥವಾ ಲಕ್ಷಣಗಳಿಂದ ಹುಡುಕಿ…",
+    "search": "ಹುಡುಕಿ",
+    "empty": "ಯಾವುದೇ ಭೇಟಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "photoCount": "{{count}} ಫೋಟೋ(ಗಳು)"
+  },
+  "dashboard": {
+    "title": "ಆರೋಗ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "description": "Infirmary ಅವಲೋಕನ — ಅಸ್ವಸ್ಥ ವಿದ್ಯಾರ್ಥಿಗಳು, ತುರ್ತು ಎಚ್ಚರಿಕೆಗಳು.",
+    "error": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಆಗಲಿಲ್ಲ.",
+    "urgentAlerts": "ತುರ್ತು ಎಚ್ಚರಿಕೆಗಳು (7 ದಿನ)",
+    "noUrgent": "ಕೊನೆಯ 7 ದಿನಗಳಲ್ಲಿ ತುರ್ತು ಭೇಟಿಗಳಿಲ್ಲ.",
+    "recentEntries": "ಇತ್ತೀಚಿನ ದಾಖಲೆಗಳು",
+    "noRecent": "ಈ ವಾರ ಯಾವುದೇ ಭೇಟಿಗಳಿಲ್ಲ.",
+    "kpis": {
+      "totalStudents": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "sickToday": "ಇಂದು ಅಸ್ವಸ್ಥ",
+      "urgentWeek": "ತುರ್ತು (7 ದಿನ)",
+      "visitsWeek": "ಈ ವಾರದ ಭೇಟಿಗಳು"
+    }
+  },
+  "profile": {
+    "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
+    "healthStatusLabel": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ",
+    "healthStatus": {
+      "healthy": "ಆರೋಗ್ಯವಾಗಿದೆ",
+      "sick": "ಅಸ್ವಸ್ಥ",
+      "recovering": "ಗುಣಮುಖವಾಗುತ್ತಿದೆ"
+    },
+    "bloodGroup": "ರಕ್ತ ಗುಂಪು",
+    "dob": "ಜನ್ಮ ದಿನಾಂಕ",
+    "gender": "ಲಿಂಗ",
+    "allergies": "ವೈದ್ಯಕೀಯ ಎಚ್ಚರಿಕೆ / ಅಲರ್ಜಿ",
+    "guardian": "ಪೋಷಕ",
+    "guardianPhone": "ಪೋಷಕರ ಫೋನ್",
+    "visitHistory": "ಭೇಟಿ ಇತಿಹಾಸ",
+    "noVisits": "ಇನ್ನೂ ಯಾವುದೇ infirmary ಭೇಟಿಗಳಿಲ್ಲ.",
+    "backToStudent": "ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗೆ ಹಿಂತಿರುಗಿ"
+  },
+  "visitDetail": {
+    "close": "ಮುಚ್ಚಿ",
+    "photos": "ಉಲ್ಲೇಖ ಫೋಟೋಗಳು",
+    "viewProfile": "ವಿದ್ಯಾರ್ಥಿ ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್ ನೋಡಿ",
+    "photoLightbox": "ಫೋಟೋ ಪೂರ್ವಾವಲೋಕನ"
+  },
+  "reports": {
+    "title": "ಆರೋಗ್ಯ ವರದಿಗಳು",
+    "description": "ಇನ್ಫರ್ಮರಿ ವಿಶ್ಲೇಷಣೆ — ಭೇಟಿ ಪ್ರವೃತ್ತಿ, ತೀವ್ರತೆ, ಸಾಮಾನ್ಯ ಸಮಸ್ಯೆಗಳು ಮತ್ತು ಔಷಧಿಗಳು (90 ದಿನ).",
+    "errorTitle": "ವರದಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+    "errorDescription": "ಬ್ಯಾಕೆಂಡ್ ಚಾಲನೆಯಲ್ಲಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ.",
+    "empty": "ಇನ್ನೂ ಭೇಟಿ ಡೇಟಾ ಇಲ್ಲ.",
+    "visitsLabel": "ಭೇಟಿಗಳು",
+    "kpis": {
+      "totalVisits": "ಒಟ್ಟು ಭೇಟಿಗಳು (90 ದಿನ)",
+      "totalVisitsHelp": "ವ್ಯಾಪ್ತಿಯಲ್ಲಿನ ಎಲ್ಲಾ infirmary ದಾಖಲೆಗಳು",
+      "visitsMonth": "ಈ ತಿಂಗಳ ಭೇಟಿಗಳು",
+      "visitsWeek": "ಈ ವಾರದ ಭೇಟಿಗಳು",
+      "uniqueStudents": "ಭೇಟಿ ಮಾಡಿದ ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "uniqueStudentsHelp": "ಭೇಟಿ ಹೊಂದಿರುವ ವಿಶಿಷ್ಟ ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "trend": {
+      "title": "ದೈನಂದಿನ ಭೇಟಿ ಪ್ರವೃತ್ತಿ",
+      "description": "ಕಳೆದ 30 ದಿನಗಳ infirmary ಭೇಟಿಗಳು."
+    },
+    "bySeverity": {
+      "title": "ತೀವ್ರತೆ ವಾರು ಭೇಟಿಗಳು",
+      "description": "ಸಾಮಾನ್ಯ, ಮಧ್ಯಮ ಮತ್ತು ತುರ್ತು ಪ್ರಕರಣಗಳು."
+    },
+    "healthStatus": {
+      "title": "ವಿದ್ಯಾರ್ಥಿ ಆರೋಗ್ಯ ಸ್ಥಿತಿ",
+      "description": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ಪ್ರಸ್ತುತ ಆರೋಗ್ಯ ಸ್ಥಿತಿ.",
+      "healthy": "ಆರೋಗ್ಯವಂತ",
+      "sick": "ಅನಾರೋಗ್ಯ",
+      "recovering": "ಗುಣಮುಖ"
+    },
+    "topIssues": {
+      "title": "ಅತ್ಯಧಿಕ ಸಮಸ್ಯೆ ಪ್ರಕಾರಗಳು",
+      "description": "infirmary ಭೇಟಿಗಳ ಅತ್ಯಂತ ಸಾಮಾನ್ಯ ಕಾರಣಗಳು."
+    },
+    "topMedicines": {
+      "title": "ಅತ್ಯಧಿಕ ನಿರ್ದೇಶಿತ ಔಷಧಿಗಳು",
+      "description": "ಭೇಟಿಗಳ ಸಮಯದಲ್ಲಿ ನೀಡಿದ ಔಷಧಿಗಳು.",
+      "columnMedicine": "ಔಷಧಿ",
+      "columnTimes": "ಬಾರಿ ನಿರ್ದೇಶಿಸಲಾಗಿದೆ"
+    }
+  }
+}

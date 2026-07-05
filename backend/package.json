@@ -14,6 +14,8 @@
     "test:documents": "ts-node --project tsconfig.scripts.json scripts/test-documents-api.ts",
     "test:migration": "ts-node --project tsconfig.scripts.json scripts/test-migration-dashboard.ts",
     "configure:r2-cors": "ts-node --project tsconfig.scripts.json scripts/configure-r2-cors.ts",
+    "purge:students": "ts-node --project tsconfig.scripts.json scripts/purge-all-students.ts",
+    "parse:hostel-docx": "ts-node --project tsconfig.scripts.json scripts/parse-hostel-admission-docx.ts",
     "admin:token": "node scripts/get-admin-token.js"
   },
   "keywords": [],

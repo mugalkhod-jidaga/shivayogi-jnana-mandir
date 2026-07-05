@@ -23,6 +23,7 @@ export function useStudentFormSchemas() {
         aadhaar: t('validation.aadhaar'),
         satsId: t('validation.satsId'),
         reasonRequired: t('validation.reasonRequired'),
+        admissionNumberRequired: t('validation.admissionNumberRequired'),
         dateParse: {
           required: t('validation.dobRequired'),
           invalidFormat: t('validation.invalidDateFormat'),
@@ -30,6 +31,15 @@ export function useStudentFormSchemas() {
           invalidMonth: t('validation.invalidMonth'),
           invalidDay: t('validation.invalidDay'),
           invalidDate: t('validation.invalidDateValue'),
+        },
+        rd: {
+          casteRdRequired: t('validation.rd.casteRdRequired'),
+          casteRdInvalid: t('validation.rd.casteRdInvalid'),
+          incomeRdRequired: t('validation.rd.incomeRdRequired'),
+          incomeRdInvalid: t('validation.rd.incomeRdInvalid'),
+          scStDifferent: t('validation.rd.scStDifferent'),
+          obcIncomeMustMatch: t('validation.rd.obcIncomeMustMatch'),
+          gmIncomeInvalid: t('validation.rd.gmIncomeInvalid'),
         },
       }),
     [t, i18n.language],

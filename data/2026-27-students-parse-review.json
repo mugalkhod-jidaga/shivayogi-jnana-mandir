@@ -1,0 +1,26 @@
+{
+  "source": "2026-27 ನೇ ಸಾಲಿನ ಹೊಸ ವಿದ್ಯಾರ್ಥಿಗಳ ವಿವರ.docx",
+  "total_students": 352,
+  "by_standard": {
+    "6": 138,
+    "7": 76,
+    "8": 68,
+    "9": 20,
+    "10": 3
+  },
+  "rows_with_warnings": 189,
+  "defaults": {
+    "state": "Karnataka",
+    "pincode": "585302",
+    "gender": "Male",
+    "mother_tongue": "Kannada",
+    "academic_year": "2026-27",
+    "admission_date": "01/06/2026"
+  },
+  "notes": [
+    "Admission numbers are globally sequential SJM00001.. across all standards (serial resets per class in source doc).",
+    "blood_group and admission_category are optional — leave blank when unknown.",
+    "caste, social_category, rd_number, rd_number_secondary, and sats_id are imported via bulk migration.",
+    "Father/mother split uses heuristics — check Review Needed sheet."
+  ]
+}

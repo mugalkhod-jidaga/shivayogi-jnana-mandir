@@ -187,3 +187,33 @@ lookupRoutes.get(
   extractTenantMiddleware,
   asyncHandler(lookupController.listMedicalRecordTypes),
 );
+
+lookupRoutes.get(
+  '/health-severities',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listHealthSeverities),
+);
+
+lookupRoutes.get(
+  '/health-issue-types',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listHealthIssueTypes),
+);
+
+lookupRoutes.get(
+  '/medicine-food-timings',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listMedicineFoodTimings),
+);
+
+lookupRoutes.get(
+  '/medicine-dose-units',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listMedicineDoseUnits),
+);
+
+lookupRoutes.get(
+  '/medicine-schedule-presets',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listMedicineSchedulePresets),
+);

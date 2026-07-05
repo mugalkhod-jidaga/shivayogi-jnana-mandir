@@ -54,3 +54,42 @@ export function parseDobToIso(input: string): string {
 
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
+
+const MIGRATION_DOB_FALLBACK = '2000-01-01';
+const MIGRATION_ADMISSION_FALLBACK = '2026-06-01';
+
+/** Lenient date parsing for bulk CSV import — fixes common typos, falls back instead of failing. */
+export function parseMigrationDate(
+  input: string | undefined,
+  fallback = MIGRATION_DOB_FALLBACK,
+): string {
+  const trimmed = (input ?? '').trim();
+  if (!trimmed) return fallback;
+
+  const candidates = [trimmed];
+
+  const ddmmSlashYyyy = trimmed.match(/^(\d{2})(\d{2})\/(\d{4})$/);
+  if (ddmmSlashYyyy) {
+    candidates.push(`${ddmmSlashYyyy[1]}/${ddmmSlashYyyy[2]}/${ddmmSlashYyyy[3]}`);
+  }
+
+  const ddMmExtraYyyy = trimmed.match(/^(\d{1,2})\/(\d{2})\d(\d{4})$/);
+  if (ddMmExtraYyyy) {
+    candidates.push(`${ddMmExtraYyyy[1]}/${ddMmExtraYyyy[2]}/${ddMmExtraYyyy[4]}`);
+  }
+
+  const ddMmmSlashYyyy = trimmed.match(/^(\d{2})\/(\d{2})\d\/(\d{4})$/);
+  if (ddMmmSlashYyyy) {
+    candidates.push(`${ddMmmSlashYyyy[1]}/${ddMmmSlashYyyy[2]}/${ddMmmSlashYyyy[3]}`);
+  }
+
+  for (const candidate of candidates) {
+    try {
+      return parseDobToIso(candidate);
+    } catch {
+      /* try next candidate */
+    }
+  }
+
+  return fallback;
+}

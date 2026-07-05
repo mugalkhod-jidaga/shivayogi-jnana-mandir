@@ -31,7 +31,7 @@ export async function getUploadUrl(
   tenantId: number,
   studentId: string,
   filename: string,
-  kind: 'documents' | 'avatar',
+  kind: 'documents' | 'avatar' | 'health-visits',
   contentType?: string,
 ) {
   const key = `tenant_${tenantId}/student_${studentId}/${kind}/${randomUUID()}_${filename}`;
@@ -48,4 +48,17 @@ export async function getDownloadUrl(fileKey: string) {
   const command = new GetObjectCommand({ Bucket: getBucketName(), Key: fileKey });
   const downloadUrl = await getSignedUrl(getR2Client(), command, { expiresIn: 3600 });
   return { downloadUrl };
+}
+
+export async function getObjectBuffer(fileKey: string): Promise<Buffer | null> {
+  try {
+    const response = await getR2Client().send(
+      new GetObjectCommand({ Bucket: getBucketName(), Key: fileKey }),
+    );
+    if (!response.Body) return null;
+    const bytes = await response.Body.transformToByteArray();
+    return Buffer.from(bytes);
+  } catch {
+    return null;
+  }
 }

@@ -21,8 +21,8 @@ function buildQueryString(filters: StudentListFilters) {
   if (filters.standardId) params.set('standardId', String(filters.standardId));
   if (filters.sectionId) params.set('sectionId', String(filters.sectionId));
   if (filters.academicYearId) params.set('academicYearId', String(filters.academicYearId));
-  if (filters.admissionCategoryId) {
-    params.set('admissionCategoryId', String(filters.admissionCategoryId));
+  if (filters.socialCategoryId) {
+    params.set('socialCategoryId', String(filters.socialCategoryId));
   }
 
   return params.toString();

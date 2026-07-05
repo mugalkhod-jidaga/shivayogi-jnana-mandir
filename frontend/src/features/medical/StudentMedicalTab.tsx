@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,6 +51,13 @@ export function StudentMedicalTab({ studentId }: Props) {
 
   return (
     <div className="space-y-4">
+      <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm">
+        {t('healthProfileHint')}{' '}
+        <Link to={`/health/students/${studentId}`} className="font-medium text-primary hover:underline">
+          {t('healthProfileLink')}
+        </Link>
+      </p>
+
       <div className="flex justify-end">
         <Button type="button" onClick={() => setShowForm((v) => !v)}>
           {showForm ? t('actions.cancel') : t('actions.addRecord')}

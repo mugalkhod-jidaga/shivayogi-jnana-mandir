@@ -11,11 +11,19 @@ import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
 import { HostelPage } from '@/features/hostel/HostelPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
+import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
+import { HealthLayout } from '@/features/health/HealthLayout';
+import { HealthReportsPage } from '@/features/health/HealthReportsPage';
+import { RecordVisitPage } from '@/features/health/RecordVisitPage';
+import { RecentVisitsPage } from '@/features/health/RecentVisitsPage';
+import { StudentHealthProfilePage } from '@/features/health/StudentHealthProfilePage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
 import { StudentFormPage } from '@/features/students/StudentFormPage';
 import { StudentListPage } from '@/features/students/StudentListPage';
+import { StudentReportsPage } from '@/features/students/StudentReportsPage';
+import { StudentsLayout } from '@/features/students/StudentsLayout';
 import { PermissionRoute } from '@/routes/PermissionRoute';
 import { ProtectedRoute, PublicOnlyRoute } from '@/routes/ProtectedRoute';
 
@@ -47,6 +55,17 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/students"
+            element={
+              <PermissionRoute permission="students:read">
+                <StudentsLayout />
+              </PermissionRoute>
+            }
+          >
+            <Route index element={<StudentListPage />} />
+            <Route path="reports" element={<StudentReportsPage />} />
+          </Route>
+          <Route
             path="/students/:id/edit"
             element={
               <PermissionRoute permission="students:edit">
@@ -63,14 +82,6 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="/students"
-            element={
-              <PermissionRoute permission="students:read">
-                <StudentListPage />
-              </PermissionRoute>
-            }
-          />
-          <Route
             path="/remarks"
             element={
               <PermissionRoute permission="remarks:read">
@@ -78,6 +89,38 @@ export function AppRoutes() {
               </PermissionRoute>
             }
           />
+          <Route
+            path="/health/students/:studentId"
+            element={
+              <PermissionRoute permission="medical:read">
+                <StudentHealthProfilePage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/health/dashboard"
+            element={<Navigate to="/health" replace />}
+          />
+          <Route
+            path="/health"
+            element={
+              <PermissionRoute permission="medical:read">
+                <HealthLayout />
+              </PermissionRoute>
+            }
+          >
+            <Route index element={<HealthDashboardPage />} />
+            <Route
+              path="record-visit"
+              element={
+                <PermissionRoute permission="medical:create">
+                  <RecordVisitPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="recent" element={<RecentVisitsPage />} />
+            <Route path="reports" element={<HealthReportsPage />} />
+          </Route>
           <Route
             path="/medical-records"
             element={

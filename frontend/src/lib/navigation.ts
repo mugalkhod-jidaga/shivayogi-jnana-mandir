@@ -1,15 +1,4 @@
-import {
-  BedDouble,
-  FileText,
-  HeartPulse,
-  LayoutDashboard,
-  List,
-  MessageSquare,
-  ScrollText,
-  Upload,
-  UserCog,
-  Users,
-} from 'lucide-react';
+import { Activity, BedDouble, FileText, LayoutDashboard, List, MessageSquare, ScrollText, Upload, UserCog, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export type NavItem = {
@@ -24,7 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.students', href: '/students', permission: 'students:read', icon: Users },
   { labelKey: 'nav.remarks', href: '/remarks', permission: 'remarks:read', icon: MessageSquare },
   { labelKey: 'nav.hostel', href: '/hostel', permission: 'hostel:read', icon: BedDouble },
-  { labelKey: 'nav.medical', href: '/medical-records', permission: 'medical:read', icon: HeartPulse },
+  { labelKey: 'nav.health', href: '/health', permission: 'medical:read', icon: Activity },
   { labelKey: 'nav.documents', href: '/documents', permission: 'documents:view', icon: FileText },
   { labelKey: 'nav.import', href: '/import', permission: 'students:create', icon: Upload },
   { labelKey: 'nav.staff', href: '/staff', permission: 'system:manage_roles', icon: UserCog },

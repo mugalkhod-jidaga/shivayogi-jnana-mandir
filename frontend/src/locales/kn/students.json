@@ -1,4 +1,8 @@
 {
+  "nav": {
+    "directory": "ಪಟ್ಟಿ",
+    "reports": "ವರದಿಗಳು"
+  },
   "list": {
     "title": "ವಿದ್ಯಾರ್ಥಿಗಳು",
     "description": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ, ಫಿಲ್ಟರ್ ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ.",
@@ -14,7 +18,47 @@
       "standard": "ತರಗತಿ",
       "rollNumber": "ರೋಲ್ #",
       "admissionDate": "ಪ್ರವೇಶ ದಿನಾಂಕ",
-      "status": "ಸ್ಥಿತಿ"
+      "status": "ಸ್ಥಿತಿ",
+      "socialCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ"
+    },
+    "allSocialCategories": "ಎಲ್ಲಾ ಸಾಮಾಜಿಕ ವರ್ಗಗಳು"
+  },
+  "reports": {
+    "title": "ವಿದ್ಯಾರ್ಥಿ ವರದಿಗಳು",
+    "description": "ದಾಖಲಾತಿ ವಿಶ್ಲೇಷಣೆ — ತರಗತಿ, ಸಾಮಾಜಿಕ ವರ್ಗ ಮತ್ತು ಜನಸಂಖ್ಯಾ ವಿವರ.",
+    "errorTitle": "ವರದಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+    "errorDescription": "ಬ್ಯಾಕೆಂಡ್ ಚಾಲನೆಯಲ್ಲಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "columnShare": "ಪಾಲು",
+    "kpis": {
+      "activeStudents": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "totalEnrolled": "ಒಟ್ಟು {{count}} ದಾಖಲಾಗಿದೆ",
+      "admissionsYear": "ಈ ವರ್ಷದ ಪ್ರವೇಶ",
+      "standards": "ತರಗತಿಗಳು",
+      "standardsHelp": "ಸಕ್ರಿಯ ದಾಖಲಾತಿ ಹೊಂದಿರುವ ತರಗತಿಗಳು",
+      "socialCategories": "ಸಾಮಾಜಿಕ ವರ್ಗಗಳು",
+      "socialCategoriesHelp": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ವರ್ಗಗಳು"
+    },
+    "byStandard": {
+      "title": "ತರಗತಿ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ದಾಖಲಾತಿ — ಪಟ್ಟಿ ಫಿಲ್ಟರ್ ಮಾಡಲು ಸಾಲನ್ನು ಒತ್ತಿ.",
+      "empty": "ಇನ್ನೂ ದಾಖಲಾತಿ ಡೇಟಾ ಇಲ್ಲ.",
+      "columnStandard": "ತರಗತಿ",
+      "columnStudents": "ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "bySocialCategory": {
+      "title": "ಸಾಮಾಜಿಕ ವರ್ಗ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ಮೀಸಲಾತಿ ವರ್ಗ ವಿಭಜನೆ.",
+      "empty": "ಇನ್ನೂ ಸಾಮಾಜಿಕ ವರ್ಗ ಡೇಟಾ ಇಲ್ಲ.",
+      "columnCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ",
+      "columnStudents": "ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "byGender": {
+      "title": "ಲಿಂಗ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ಲಿಂಗ ವಿತರಣೆ."
+    },
+    "byStatus": {
+      "title": "ಸ್ಥಿತಿ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ, ಪದವೀಧರ, ನಿಲ್ಲಿಸಿದ — ಆ ಪಟ್ಟಿ ನೋಡಲು ಚಿಪ್ ಒತ್ತಿ."
     }
   },
   "form": {
@@ -24,7 +68,7 @@
     "editDescription": "{{admissionNumber}} ಗಾಗಿ ದಾಖಲೆ ನವೀಕರಿಸಿ",
     "loadingStudent": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
     "nextAdmissionNumber": "ಪ್ರವೇಶ ಸಂಖ್ಯೆ",
-    "nextAdmissionHelp": "ಉಳಿಸಿದಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಗದಿಯಾಗುತ್ತದೆ (SJM ಸ್ವರೂಪ).",
+    "nextAdmissionHelp": "ಕೈಯಾರೆ ನಮೂದಿಸಿ ಅಥವಾ ಸೂಚಿಸಿದ SJM ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ. ನಿಮ್ಮ ಶಾಲೆಯಲ್ಲಿ ಅನನ್ಯವಾಗಿರಬೇಕು.",
     "admissionNumberLoading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
     "sections": {
       "basic": "ಮೂಲ ಮಾಹಿತಿ",
@@ -36,7 +80,8 @@
     "hints": {
       "emergency": "ಕುಟುಂಬದ ಪ್ರಾಥಮಿಕ ಸಂಪರ್ಕದ ಹೊರತು ಪ್ರತ್ಯೇಕ ತುರ್ತು ಸಂಪರ್ಕ.",
       "social": "ಸಂವೇದನಾಶೀಲ ಮಾಹಿತಿ — ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ.",
-      "family": "ಸಂವೇದನಾಶೀಲ ಕುಟುಂಬ ಮತ್ತು ಆದಾಯ ವಿವರ — ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ."
+      "family": "ಸಂವೇದನಾಶೀಲ ಕುಟುಂಬ ಮತ್ತು ಆದಾಯ ವಿವರ — ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ.",
+      "obcIncomeRdSync": "OBC ವರ್ಗಗಳಿಗೆ, ಆದಾಯ RD ಸಂಖ್ಯೆ ಜಾತಿ RD ಸಂಖ್ಯೆಯೊಂದಿಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ."
     },
     "fields": {
       "firstName": "ಮೊದಲ ಹೆಸರು",
@@ -67,6 +112,8 @@
       "socialCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ",
       "caste": "ಜಾತಿ",
       "subCaste": "ಉಪಜಾತಿ",
+      "casteRdNumber": "ಜಾತಿ RD ಸಂಖ್ಯೆ",
+      "incomeRdNumber": "ಆದಾಯ RD ಸಂಖ್ಯೆ",
       "rdNumber": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ",
       "rdNumberSecondary": "ಆರ್‌ಡಿ ಸಂಖ್ಯೆ (ದ್ವಿತೀಯ)",
       "fatherName": "ತಂದೆಯ ಹೆಸರು",
@@ -107,7 +154,10 @@
     },
     "actions": {
       "edit": "ಸಂಪಾದಿಸಿ",
-      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+      "healthProfile": "ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್",
+      "backToStudents": "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+      "downloadProfilePdf": "ಪ್ರೊಫೈಲ್ PDF ಡೌನ್‌ಲೋಡ್"
     },
     "fields": {
       "category": "ವರ್ಗ",
@@ -167,6 +217,16 @@
     "pincodeRequired": "ಪಿನ್ ಕೋಡ್ ಅಗತ್ಯ",
     "aadhaar": "ಆಧಾರ್ ನಿಖರವಾಗಿ 12 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
     "satsId": "SATS ಐಡಿ ನಿಖರವಾಗಿ 9 ಅಂಕೆಗಳಾಗಿರಬೇಕು",
-    "reasonRequired": "ಕಾರಣ ಅಗತ್ಯ"
+    "reasonRequired": "ಕಾರಣ ಅಗತ್ಯ",
+    "admissionNumberRequired": "ಪ್ರವೇಶ ಸಂಖ್ಯೆ ಅಗತ್ಯ",
+    "rd": {
+      "casteRdRequired": "ಮಾನ್ಯ ಜಾತಿ RD ಸಂಖ್ಯೆ ಅಗತ್ಯ (ಉದಾ. RD1218...)",
+      "casteRdInvalid": "ಮಾನ್ಯ ಜಾತಿ RD ಸಂಖ್ಯೆ ಅಗತ್ಯ (ಉದಾ. RD1218...)",
+      "incomeRdRequired": "ಮಾನ್ಯ ಆದಾಯ RD ಸಂಖ್ಯೆ ಅಗತ್ಯ",
+      "incomeRdInvalid": "ಮಾನ್ಯ ಆದಾಯ RD ಸಂಖ್ಯೆ ಅಗತ್ಯ",
+      "scStDifferent": "SC/ST ಗಾಗಿ ಜಾತಿ ಮತ್ತು ಆದಾಯ RD ಸಂಖ್ಯೆಗಳು ಬೇರೆಯಾಗಿರಬೇಕು",
+      "obcIncomeMustMatch": "OBC ಆದಾಯ RD ನಿಮ್ಮ ಜಾತಿ RD ಗೆ ಹೊಂದಬೇಕು",
+      "gmIncomeInvalid": "ಅಮಾನ್ಯ ಆದಾಯ RD ಸ್ವರೂಪ"
+    }
   }
 }

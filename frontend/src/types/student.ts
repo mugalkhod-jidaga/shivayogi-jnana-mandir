@@ -47,6 +47,7 @@ export type StudentSummary = {
   photoUrl: string | null;
   bloodGroup: LookupRef;
   admissionCategory: LookupRef;
+  socialCategory?: LookupRef;
   motherTongue: LookupRef;
   admissionDate: string;
   aadhaarNumber: string | null;
@@ -57,6 +58,8 @@ export type StudentSummary = {
   status: StudentStatus;
   statusReason: string | null;
   statusChangedAt: string | null;
+  healthStatus?: string;
+  medicalAlerts?: string | null;
 };
 
 export type FamilyDetails = {
@@ -158,5 +161,5 @@ export type StudentListFilters = {
   standardId?: number;
   sectionId?: number;
   academicYearId?: number;
-  admissionCategoryId?: number;
+  socialCategoryId?: number;
 };

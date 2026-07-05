@@ -87,6 +87,7 @@ function serializeEmergencyContact(contact: EmergencyContactRow) {
 function serializeStudent(student: StudentRow, permissions: string[], includeFamily = true) {
   const canViewSensitive = permissions.includes('students:view_sensitive_data');
   const enrollment = unwrapEnrollment(student);
+  const social = unwrapSocial(student);
 
   const base = {
     id: student.id,
@@ -98,6 +99,7 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     photoUrl: student.photo_url,
     bloodGroup: student.blood_group ?? null,
     admissionCategory: student.admission_category ?? null,
+    socialCategory: social?.social_category ?? null,
     motherTongue: student.mother_tongue ?? null,
     admissionDate: student.admission_date,
     aadhaarNumber: maskAadhaar(student.aadhaar_number, canViewSensitive),
@@ -108,6 +110,8 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     status: student.status,
     statusReason: student.status_reason,
     statusChangedAt: student.status_changed_at,
+    healthStatus: student.health_status ?? 'healthy',
+    medicalAlerts: student.medical_alerts,
   };
 
   if (!includeFamily || !canViewSensitive) {
@@ -115,11 +119,11 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
   }
 
   const family = unwrapFamily(student);
-  const social = unwrapSocial(student);
+  const socialFull = unwrapSocial(student);
   return {
     ...base,
     familyDetails: family ? serializeFamily(family) : null,
-    socialDetails: social ? serializeSocial(social) : null,
+    socialDetails: socialFull ? serializeSocial(socialFull) : null,
   };
 }
 
@@ -396,5 +400,185 @@ export const studentService = {
     if (!student.photo_url) throw new AppError(404, 'No avatar uploaded');
 
     return getDownloadUrl(student.photo_url);
+  },
+
+  async getReports(tenantId: number, userId: string) {
+    const assignedStandardIds = await resolveStandardScope(userId);
+
+    const [
+      totalStudentsRes,
+      activeStudentsRes,
+      currentYearRes,
+      standardsRes,
+      socialCategoriesRes,
+      enrollmentsRes,
+      socialDetailsRes,
+      genderRes,
+      statusRes,
+    ] = await Promise.all([
+      supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', tenantId)
+        .is('deleted_at', null),
+      supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .is('deleted_at', null),
+      supabase
+        .from('lookup_academic_years')
+        .select('id, label, start_date')
+        .eq('tenant_id', tenantId)
+        .eq('is_current', true)
+        .eq('is_active', true)
+        .maybeSingle(),
+      supabase
+        .from('lookup_academic_standards')
+        .select('id, value, sort_order')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true)
+        .neq('value', 'Unassigned')
+        .order('sort_order'),
+      supabase
+        .from('lookup_social_categories')
+        .select('id, value')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true)
+        .order('value'),
+      supabase
+        .from('student_enrollments')
+        .select('standard_id, students!inner(tenant_id, status)')
+        .eq('students.tenant_id', tenantId)
+        .eq('students.status', 'Active')
+        .eq('is_current', true)
+        .is('deleted_at', null),
+      supabase
+        .from('student_social_details')
+        .select('social_category_id, students!inner(tenant_id, status)')
+        .eq('students.tenant_id', tenantId)
+        .eq('students.status', 'Active')
+        .is('students.deleted_at', null),
+      supabase
+        .from('students')
+        .select('gender')
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .is('deleted_at', null),
+      supabase
+        .from('students')
+        .select('status')
+        .eq('tenant_id', tenantId)
+        .is('deleted_at', null),
+    ]);
+
+    for (const res of [
+      totalStudentsRes,
+      activeStudentsRes,
+      standardsRes,
+      socialCategoriesRes,
+      enrollmentsRes,
+      socialDetailsRes,
+      genderRes,
+      statusRes,
+    ]) {
+      if (res.error) throw new AppError(500, res.error.message);
+    }
+
+    const allowedStandardIds =
+      assignedStandardIds && assignedStandardIds.length > 0
+        ? new Set(assignedStandardIds)
+        : null;
+
+    const standardCounts = new Map<number, number>();
+    for (const row of enrollmentsRes.data ?? []) {
+      const standardId = row.standard_id as number;
+      if (allowedStandardIds && !allowedStandardIds.has(standardId)) continue;
+      standardCounts.set(standardId, (standardCounts.get(standardId) ?? 0) + 1);
+    }
+
+    const studentsByStandard = (standardsRes.data ?? [])
+      .filter((standard) => !allowedStandardIds || allowedStandardIds.has(standard.id))
+      .map((standard) => ({
+        standardId: standard.id,
+        label: standard.value,
+        count: standardCounts.get(standard.id) ?? 0,
+      }));
+
+    const socialCategoryCounts = new Map<number, number>();
+    let unassignedSocialCategory = 0;
+    for (const row of socialDetailsRes.data ?? []) {
+      const categoryId = row.social_category_id as number | null;
+      if (categoryId == null) {
+        unassignedSocialCategory += 1;
+        continue;
+      }
+      socialCategoryCounts.set(categoryId, (socialCategoryCounts.get(categoryId) ?? 0) + 1);
+    }
+
+    const studentsBySocialCategory = (socialCategoriesRes.data ?? []).map((category) => ({
+      socialCategoryId: category.id,
+      label: category.value,
+      count: socialCategoryCounts.get(category.id) ?? 0,
+    }));
+
+    if (unassignedSocialCategory > 0) {
+      studentsBySocialCategory.push({
+        socialCategoryId: 0,
+        label: 'Unassigned',
+        count: unassignedSocialCategory,
+      });
+    }
+
+    const genderCounts = new Map<string, number>();
+    for (const row of genderRes.data ?? []) {
+      const gender = row.gender as string;
+      genderCounts.set(gender, (genderCounts.get(gender) ?? 0) + 1);
+    }
+
+    const studentsByGender = ['Male', 'Female', 'Other'].map((gender) => ({
+      gender,
+      count: genderCounts.get(gender) ?? 0,
+    }));
+
+    const statusCounts = new Map<string, number>();
+    for (const row of statusRes.data ?? []) {
+      const studentStatus = row.status as string;
+      statusCounts.set(studentStatus, (statusCounts.get(studentStatus) ?? 0) + 1);
+    }
+
+    const studentsByStatus = ['Active', 'Alumni', 'Discontinued'].map((studentStatus) => ({
+      status: studentStatus,
+      count: statusCounts.get(studentStatus) ?? 0,
+    }));
+
+    let admissionsThisAcademicYear = 0;
+    if (currentYearRes.data) {
+      const yearStart = currentYearRes.data.start_date as string;
+      const { count, error } = await supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', tenantId)
+        .eq('status', 'Active')
+        .gte('admission_date', yearStart)
+        .is('deleted_at', null);
+
+      if (error) throw new AppError(500, error.message);
+      admissionsThisAcademicYear = count ?? 0;
+    }
+
+    const scopedActiveStudents = studentsByStandard.reduce((sum, row) => sum + row.count, 0);
+
+    return {
+      totalStudents: totalStudentsRes.count ?? 0,
+      activeStudents: allowedStandardIds ? scopedActiveStudents : (activeStudentsRes.count ?? 0),
+      admissionsThisAcademicYear,
+      currentAcademicYear: currentYearRes.data?.label ?? null,
+      studentsByStandard,
+      studentsBySocialCategory,
+      studentsByGender,
+      studentsByStatus,
+    };
   },
 };

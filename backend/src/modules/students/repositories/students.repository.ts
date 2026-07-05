@@ -4,9 +4,11 @@ import { AppError } from '../../../utils/AppError';
 import { auditLogService } from '../../system/services/auditLog.service';
 import type {
   AcademicPlacementInput,
+  UpdateAcademicPlacementInput,
   EmergencyContactInput,
   FamilyDetailsInput,
   SocialDetailsInput,
+  UpdateSocialDetailsInput,
   StudentListQuery,
 } from '../schemas/student.schemas';
 
@@ -55,6 +57,7 @@ export interface StudentRow {
   status: string;
   status_reason: string | null;
   status_changed_at: string | null;
+  health_status?: string | null;
   blood_group?: { id: number; value: string } | null;
   admission_category?: { id: number; value: string } | null;
   mother_tongue?: { id: number; value: string } | null;
@@ -178,14 +181,19 @@ function unwrapEnrollment(row: StudentRow): EnrollmentRow | null {
   return enrollments.find((e) => e.is_current) ?? enrollments[0] ?? null;
 }
 
-function listSelect(useInnerEnrollment: boolean) {
-  const join = useInnerEnrollment ? 'student_enrollments!inner' : 'student_enrollments!left';
+function listSelect(useInnerEnrollment: boolean, useInnerSocial: boolean) {
+  const enrollmentJoin = useInnerEnrollment ? 'student_enrollments!inner' : 'student_enrollments!left';
+  const socialJoin = useInnerSocial ? 'student_social_details!inner' : 'student_social_details!left';
   return `
     *,
     blood_group:lookup_blood_groups(id, value),
     admission_category:lookup_admission_categories(id, value),
     mother_tongue:lookup_languages(id, value),
-    current_enrollment:${join}(
+    social_details:${socialJoin}(
+      social_category_id,
+      social_category:lookup_social_categories(id, value)
+    ),
+    current_enrollment:${enrollmentJoin}(
       ${ENROLLMENT_SELECT}
     )
   `;
@@ -197,7 +205,7 @@ export class StudentsRepository extends BaseRepository {
   }
 
   async list(tenantId: number, query: StudentListQuery, assignedStandardIds?: number[]) {
-    const { page, limit, search, status, standardId, sectionId, academicYearId, admissionCategoryId } =
+    const { page, limit, search, status, standardId, sectionId, academicYearId, socialCategoryId } =
       query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
@@ -205,10 +213,11 @@ export class StudentsRepository extends BaseRepository {
     const needsEnrollmentJoin = Boolean(
       standardId || sectionId || academicYearId || (assignedStandardIds && assignedStandardIds.length > 0),
     );
+    const needsSocialJoin = Boolean(socialCategoryId);
 
     let dbQuery = supabase
       .from('students')
-      .select(listSelect(needsEnrollmentJoin), { count: 'exact' })
+      .select(listSelect(needsEnrollmentJoin, needsSocialJoin), { count: 'exact' })
       .eq('tenant_id', tenantId)
       .is('deleted_at', null);
 
@@ -225,7 +234,9 @@ export class StudentsRepository extends BaseRepository {
     }
 
     if (status) dbQuery = dbQuery.eq('status', status);
-    if (admissionCategoryId) dbQuery = dbQuery.eq('admission_category_id', admissionCategoryId);
+    if (socialCategoryId) {
+      dbQuery = dbQuery.eq('social_details.social_category_id', socialCategoryId);
+    }
     if (standardId) dbQuery = dbQuery.eq('current_enrollment.standard_id', standardId);
     if (sectionId) dbQuery = dbQuery.eq('current_enrollment.section_id', sectionId);
     if (academicYearId) dbQuery = dbQuery.eq('current_enrollment.academic_year_id', academicYearId);
@@ -372,20 +383,80 @@ export class StudentsRepository extends BaseRepository {
     return full;
   }
 
-  async updateEnrollment(studentId: string, changes: Partial<AcademicPlacementInput>, admissionDate?: string) {
-    const enrollment = await supabase
+  async updateEnrollment(
+    studentId: string,
+    changes: UpdateAcademicPlacementInput,
+    admissionDate?: string,
+  ) {
+    const now = new Date().toISOString();
+
+    const { data: current, error: currentError } = await supabase
       .from('student_enrollments')
       .select('id')
       .eq('student_id', studentId)
       .eq('is_current', true)
       .is('deleted_at', null)
-      .single();
+      .maybeSingle();
 
-    if (enrollment.error || !enrollment.data) {
-      throw new AppError(404, 'Current enrollment not found');
+    if (currentError) throw new AppError(500, currentError.message);
+
+    let enrollmentId = current?.id;
+
+    if (!enrollmentId) {
+      const { data: latest, error: latestError } = await supabase
+        .from('student_enrollments')
+        .select('id')
+        .eq('student_id', studentId)
+        .is('deleted_at', null)
+        .order('enrolled_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestError) throw new AppError(500, latestError.message);
+
+      if (latest) {
+        enrollmentId = latest.id;
+        await supabase
+          .from('student_enrollments')
+          .update({ is_current: false, updated_at: now })
+          .eq('student_id', studentId)
+          .is('deleted_at', null);
+
+        const { error: promoteError } = await supabase
+          .from('student_enrollments')
+          .update({ is_current: true, updated_at: now })
+          .eq('id', enrollmentId);
+
+        if (promoteError) throw new AppError(500, promoteError.message);
+      }
     }
 
-    const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (!enrollmentId) {
+      if (!changes.academicYearId || !changes.standardId || changes.rollNumber === undefined) {
+        throw new AppError(
+          400,
+          'Academic year, standard, and roll number are required to create enrollment',
+        );
+      }
+
+      const { error: insertError } = await supabase.from('student_enrollments').insert({
+        student_id: studentId,
+        academic_year_id: changes.academicYearId,
+        standard_id: changes.standardId,
+        section_id: changes.sectionId ?? null,
+        roll_number: changes.rollNumber,
+        previous_school: changes.previousSchool ?? null,
+        previous_school_address: changes.previousSchoolAddress ?? null,
+        last_class_studied: changes.lastClassStudied ?? null,
+        is_current: true,
+        enrolled_at: changes.enrolledAt ?? admissionDate ?? now.slice(0, 10),
+      });
+
+      if (insertError) throw new AppError(500, insertError.message);
+      return;
+    }
+
+    const dbChanges: Record<string, unknown> = { updated_at: now };
     if (changes.academicYearId !== undefined) dbChanges.academic_year_id = changes.academicYearId;
     if (changes.standardId !== undefined) dbChanges.standard_id = changes.standardId;
     if (changes.sectionId !== undefined) dbChanges.section_id = changes.sectionId;
@@ -401,12 +472,12 @@ export class StudentsRepository extends BaseRepository {
     const { error } = await supabase
       .from('student_enrollments')
       .update(dbChanges)
-      .eq('id', enrollment.data.id);
+      .eq('id', enrollmentId);
 
     if (error) throw new AppError(500, error.message);
   }
 
-  async updateSocialDetails(studentId: string, social: Partial<SocialDetailsInput>) {
+  async updateSocialDetails(studentId: string, social: UpdateSocialDetailsInput) {
     const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (social.religionId !== undefined) dbChanges.religion_id = social.religionId;
     if (social.socialCategoryId !== undefined) dbChanges.social_category_id = social.socialCategoryId;

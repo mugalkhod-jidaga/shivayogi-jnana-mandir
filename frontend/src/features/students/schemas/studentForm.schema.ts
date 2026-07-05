@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { parseDobToIso, type DateParseMessages } from '@/lib/date';
 import { normalizeIndianPhone } from '@/lib/phone';
+import {
+  validateKarnatakaRdNumbers,
+  type RdValidationMessages,
+} from '@/features/students/schemas/karnatakaRd.validation';
 
 const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
@@ -21,7 +25,9 @@ export type StudentFormValidationMessages = {
   aadhaar: string;
   satsId: string;
   reasonRequired: string;
+  admissionNumberRequired: string;
   dateParse: DateParseMessages;
+  rd: RdValidationMessages;
 };
 
 const DEFAULT_VALIDATION: StudentFormValidationMessages = {
@@ -40,6 +46,7 @@ const DEFAULT_VALIDATION: StudentFormValidationMessages = {
   aadhaar: 'Aadhaar must be exactly 12 digits',
   satsId: 'SATS ID must be exactly 9 digits',
   reasonRequired: 'Reason is required',
+  admissionNumberRequired: 'Admission number is required',
   dateParse: {
     required: 'Date of birth is required',
     invalidFormat: 'Use DD/MM/YYYY (e.g. 15/05/2010)',
@@ -47,6 +54,15 @@ const DEFAULT_VALIDATION: StudentFormValidationMessages = {
     invalidMonth: 'Enter a valid month',
     invalidDay: 'Enter a valid day',
     invalidDate: 'Enter a valid date',
+  },
+  rd: {
+    casteRdRequired: 'Valid Caste RD number required (e.g. RD1218...)',
+    casteRdInvalid: 'Valid Caste RD number required (e.g. RD1218...)',
+    incomeRdRequired: 'Valid Income RD number required',
+    incomeRdInvalid: 'Valid Income RD number required',
+    scStDifferent: 'SC/ST must have different Caste and Income RD numbers',
+    obcIncomeMustMatch: 'OBC Income RD must match your Caste RD',
+    gmIncomeInvalid: 'Invalid Income RD format',
   },
 };
 
@@ -102,41 +118,104 @@ export function buildStudentFormSchemas(msg: StudentFormValidationMessages = DEF
     lastClassStudied: z.string().trim().max(100).optional(),
   });
 
+  const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+
   const socialDetailsFormSchema = z.object({
     caste: z.string().trim().max(100).optional(),
     subCaste: z.string().trim().max(100).optional(),
-    rdNumber: z.string().trim().max(50).optional(),
-    rdNumberSecondary: z.string().trim().max(50).optional(),
+    rdNumber: z.string().trim().max(15).optional().or(z.literal('')),
+    rdNumberSecondary: z.string().trim().max(15).optional().or(z.literal('')),
   });
 
-  const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+  function applyRdValidation(
+    data: {
+      socialCategoryCode?: string;
+      socialDetails?: z.infer<typeof socialDetailsFormSchema>;
+    },
+    ctx: z.RefinementCtx,
+  ) {
+    if (!data.socialDetails || !data.socialCategoryCode) return;
 
-  const createStudentFormSchema = z.object({
-    firstName: z.string().trim().min(1, msg.firstNameRequired).max(100),
-    lastName: z.string().trim().max(100).optional(),
-    dob: dateFieldSchema,
-    gender: genderEnum,
-    admissionDate: dateFieldSchema,
-    aadhaarNumber: z
-      .string()
-      .trim()
-      .regex(/^\d{12}$/, msg.aadhaar)
-      .optional()
-      .or(z.literal('')),
-    satsId: z
-      .string()
-      .trim()
-      .regex(/^\d{9}$/, msg.satsId)
-      .optional()
-      .or(z.literal('')),
-    satsTransferStatus: satsTransferStatusEnum.optional(),
-    academicPlacement: academicPlacementFormSchema,
-    emergencyContacts: z.array(emergencyContactFormSchema).min(1),
-    socialDetails: socialDetailsFormSchema.optional(),
-    familyDetails: familyDetailsFormSchema,
-  });
+    const rdErrors = validateKarnatakaRdNumbers(
+      data.socialCategoryCode,
+      data.socialDetails.rdNumber,
+      data.socialDetails.rdNumberSecondary,
+      msg.rd,
+    );
 
-  const updateStudentFormSchema = createStudentFormSchema;
+    if (rdErrors.rdNumber) {
+      ctx.addIssue({
+        code: 'custom',
+        message: rdErrors.rdNumber,
+        path: ['socialDetails', 'rdNumber'],
+      });
+    }
+    if (rdErrors.rdNumberSecondary) {
+      ctx.addIssue({
+        code: 'custom',
+        message: rdErrors.rdNumberSecondary,
+        path: ['socialDetails', 'rdNumberSecondary'],
+      });
+    }
+  }
+
+  const createStudentFormSchema = z
+    .object({
+      admissionNumber: z.string().trim().min(1, msg.admissionNumberRequired).max(100),
+      socialCategoryCode: z.string().optional(),
+      firstName: z.string().trim().min(1, msg.firstNameRequired).max(100),
+      lastName: z.string().trim().max(100).optional(),
+      dob: dateFieldSchema,
+      gender: genderEnum,
+      admissionDate: dateFieldSchema,
+      aadhaarNumber: z
+        .string()
+        .trim()
+        .regex(/^\d{12}$/, msg.aadhaar)
+        .optional()
+        .or(z.literal('')),
+      satsId: z
+        .string()
+        .trim()
+        .regex(/^\d{9}$/, msg.satsId)
+        .optional()
+        .or(z.literal('')),
+      satsTransferStatus: satsTransferStatusEnum.optional(),
+      academicPlacement: academicPlacementFormSchema,
+      emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+      socialDetails: socialDetailsFormSchema.optional(),
+      familyDetails: familyDetailsFormSchema,
+    })
+    .superRefine(applyRdValidation);
+
+  const updateStudentFormSchema = z
+    .object({
+      admissionNumber: z.string().trim().max(100).optional(),
+      socialCategoryCode: z.string().optional(),
+      firstName: z.string().trim().min(1, msg.firstNameRequired).max(100),
+      lastName: z.string().trim().max(100).optional(),
+      dob: dateFieldSchema,
+      gender: genderEnum,
+      admissionDate: dateFieldSchema,
+      aadhaarNumber: z
+        .string()
+        .trim()
+        .regex(/^\d{12}$/, msg.aadhaar)
+        .optional()
+        .or(z.literal('')),
+      satsId: z
+        .string()
+        .trim()
+        .regex(/^\d{9}$/, msg.satsId)
+        .optional()
+        .or(z.literal('')),
+      satsTransferStatus: satsTransferStatusEnum.optional(),
+      academicPlacement: academicPlacementFormSchema,
+      emergencyContacts: z.array(emergencyContactFormSchema).min(1),
+      socialDetails: socialDetailsFormSchema.optional(),
+      familyDetails: familyDetailsFormSchema,
+    })
+    .superRefine(applyRdValidation);
 
   const deactivateStudentFormSchema = z.object({
     status: z.enum(['Alumni', 'Discontinued']),
@@ -189,6 +268,7 @@ export function buildCreateStudentPayload(
   lookupIds: LookupIds,
 ) {
   return {
+    admissionNumber: values.admissionNumber.trim(),
     firstName: values.firstName,
     lastName: values.lastName || undefined,
     dob: values.dob,

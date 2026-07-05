@@ -1,7 +1,7 @@
-import { Pencil, Download } from 'lucide-react';
+import { ArrowLeft, HeartPulse, Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
@@ -12,7 +12,6 @@ import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
 import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
-import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStudent } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
@@ -36,7 +35,10 @@ export function StudentDetailPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
   const { id } = useParams();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const backToStudents =
+    (location.state as { from?: string } | null)?.from ?? '/students';
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
   const tabParam = searchParams.get('tab');
@@ -99,16 +101,23 @@ export function StudentDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
+        <Link to={backToStudents}>
+          <ArrowLeft className="size-4" />
+          {t('detail.actions.backToStudents')}
+        </Link>
+      </Button>
+
       <PageHeader
         title={displayName}
         description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <StudentInitialsAvatar
+          {/* <StudentInitialsAvatar
             firstName={student.firstName}
             lastName={student.lastName}
-            size="lg"
-          />
+            size="sm"
+          /> */}
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={student.status} />
             <RequirePermission permission="students:edit">
@@ -116,6 +125,14 @@ export function StudentDetailPage() {
                 <Link to={`/students/${student.id}/edit`}>
                   <Pencil className="size-4" />
                   {t('detail.actions.edit')}
+                </Link>
+              </Button>
+            </RequirePermission>
+            <RequirePermission permission="medical:read">
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/health/students/${student.id}`}>
+                  <HeartPulse className="size-4" />
+                  {t('detail.actions.healthProfile')}
                 </Link>
               </Button>
             </RequirePermission>
@@ -131,7 +148,7 @@ export function StudentDetailPage() {
                 }}
               >
                 <Download className="size-4" />
-                PDF
+                {t('detail.actions.downloadProfilePdf')}
               </Button>
             </RequirePermission>
             <RequirePermission permission="students:soft_delete">

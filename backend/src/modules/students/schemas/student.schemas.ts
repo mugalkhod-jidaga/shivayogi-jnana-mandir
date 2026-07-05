@@ -15,6 +15,15 @@ export const socialDetailsSchema = z.object({
   rdNumberSecondary: z.string().trim().max(50).optional(),
 });
 
+export const updateSocialDetailsSchema = z.object({
+  religionId: z.number().int().positive().nullable().optional(),
+  socialCategoryId: z.number().int().positive().nullable().optional(),
+  caste: z.string().trim().max(100).nullable().optional(),
+  subCaste: z.string().trim().max(100).nullable().optional(),
+  rdNumber: z.string().trim().max(50).nullable().optional(),
+  rdNumberSecondary: z.string().trim().max(50).nullable().optional(),
+});
+
 export const familyDetailsSchema = z.object({
   fatherName: z.string().trim().max(100).optional(),
   motherName: z.string().trim().max(100).optional(),
@@ -44,6 +53,18 @@ export const academicPlacementSchema = z.object({
   previousSchool: z.string().trim().max(255).optional(),
   previousSchoolAddress: z.string().trim().max(2000).optional(),
   lastClassStudied: z.string().trim().max(100).optional(),
+  enrolledAt: dateInputSchema.optional(),
+});
+
+/** PATCH allows null to clear optional enrollment fields (e.g. section). */
+export const updateAcademicPlacementSchema = z.object({
+  academicYearId: z.number().int().positive().optional(),
+  standardId: z.number().int().positive().optional(),
+  sectionId: z.number().int().positive().nullable().optional(),
+  rollNumber: z.string().trim().min(1).max(20).optional(),
+  previousSchool: z.string().trim().max(255).nullable().optional(),
+  previousSchoolAddress: z.string().trim().max(2000).nullable().optional(),
+  lastClassStudied: z.string().trim().max(100).nullable().optional(),
   enrolledAt: dateInputSchema.optional(),
 });
 
@@ -79,9 +100,9 @@ export const updateStudentSchema = z
     aadhaarNumber: aadhaarSchema.nullable().optional(),
     satsId: satsIdSchema.nullable().optional(),
     satsTransferStatus: satsTransferStatusEnum.optional(),
-    academicPlacement: academicPlacementSchema.partial().optional(),
+    academicPlacement: updateAcademicPlacementSchema.optional(),
     emergencyContacts: z.array(emergencyContactSchema).min(1).optional(),
-    socialDetails: socialDetailsSchema.partial().optional(),
+    socialDetails: updateSocialDetailsSchema.optional(),
     status: studentStatusEnum.optional(),
     statusReason: z.string().trim().max(500).optional(),
     familyDetails: familyDetailsSchema.partial().optional(),
@@ -103,7 +124,7 @@ export const studentListQuerySchema = z.object({
   standardId: z.coerce.number().int().positive().optional(),
   sectionId: z.coerce.number().int().positive().optional(),
   academicYearId: z.coerce.number().int().positive().optional(),
-  admissionCategoryId: z.coerce.number().int().positive().optional(),
+  socialCategoryId: z.coerce.number().int().positive().optional(),
 });
 
 export const avatarPresignSchema = z.object({
@@ -121,5 +142,7 @@ export type DeactivateStudentInput = z.infer<typeof deactivateStudentSchema>;
 export type FamilyDetailsInput = z.infer<typeof familyDetailsSchema>;
 export type EmergencyContactInput = z.infer<typeof emergencyContactSchema>;
 export type AcademicPlacementInput = z.infer<typeof academicPlacementSchema>;
+export type UpdateAcademicPlacementInput = z.infer<typeof updateAcademicPlacementSchema>;
 export type SocialDetailsInput = z.infer<typeof socialDetailsSchema>;
+export type UpdateSocialDetailsInput = z.infer<typeof updateSocialDetailsSchema>;
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
