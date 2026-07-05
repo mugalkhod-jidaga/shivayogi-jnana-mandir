@@ -107,7 +107,8 @@
     },
     "actions": {
       "edit": "ಸಂಪಾದಿಸಿ",
-      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+      "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+      "healthProfile": "ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್"
     },
     "fields": {
       "category": "ವರ್ಗ",

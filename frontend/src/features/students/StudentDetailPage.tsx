@@ -1,4 +1,4 @@
-import { Pencil, Download } from 'lucide-react';
+import { HeartPulse, Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
@@ -116,6 +116,14 @@ export function StudentDetailPage() {
                 <Link to={`/students/${student.id}/edit`}>
                   <Pencil className="size-4" />
                   {t('detail.actions.edit')}
+                </Link>
+              </Button>
+            </RequirePermission>
+            <RequirePermission permission="medical:read">
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/health/students/${student.id}`}>
+                  <HeartPulse className="size-4" />
+                  {t('detail.actions.healthProfile')}
                 </Link>
               </Button>
             </RequirePermission>

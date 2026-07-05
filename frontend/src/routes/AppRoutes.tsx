@@ -116,7 +116,7 @@ export function AppRoutes() {
           />
           <Route
             path="/health"
-            element={<Navigate to="/health/record-visit" replace />}
+            element={<Navigate to="/health/dashboard" replace />}
           />
           <Route
             path="/medical-records"

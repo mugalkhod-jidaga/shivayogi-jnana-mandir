@@ -107,7 +107,8 @@
     },
     "actions": {
       "edit": "Edit",
-      "deactivate": "Deactivate"
+      "deactivate": "Deactivate",
+      "healthProfile": "Health profile"
     },
     "fields": {
       "category": "Category",
