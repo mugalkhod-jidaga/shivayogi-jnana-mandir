@@ -11,6 +11,8 @@ import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
 import { HostelPage } from '@/features/hostel/HostelPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
+import { RecordVisitPage } from '@/features/health/RecordVisitPage';
+import { RecentVisitsPage } from '@/features/health/RecentVisitsPage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
@@ -77,6 +79,26 @@ export function AppRoutes() {
                 <RemarksPage />
               </PermissionRoute>
             }
+          />
+          <Route
+            path="/health/record-visit"
+            element={
+              <PermissionRoute permission="medical:create">
+                <RecordVisitPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/health/recent"
+            element={
+              <PermissionRoute permission="medical:read">
+                <RecentVisitsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/health"
+            element={<Navigate to="/health/record-visit" replace />}
           />
           <Route
             path="/medical-records"

@@ -1,0 +1,68 @@
+import type { Request, Response } from 'express';
+import { AppError } from '../../../utils/AppError';
+import type { CreateHealthVisitInput } from '../schemas/health.schemas';
+import {
+  healthVisitListQuerySchema,
+  recentVisitsQuerySchema,
+} from '../schemas/health.schemas';
+import { healthService } from '../services/health.service';
+
+function requireAuthContext(req: Request): { profileId: string; tenantId: number } {
+  if (!req.profileId || req.tenantId === undefined) {
+    throw new AppError(401, 'Not authenticated');
+  }
+  return { profileId: req.profileId, tenantId: req.tenantId };
+}
+
+function paramId(req: Request, key = 'id'): string {
+  const id = req.params[key];
+  if (typeof id !== 'string') throw new AppError(400, 'Invalid id');
+  return id;
+}
+
+export const healthController = {
+  async list(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const query = healthVisitListQuerySchema.parse(req.query);
+    const { data, meta } = await healthService.list(tenantId, query, profileId);
+    res.json({ success: true, data, meta });
+  },
+
+  async listRecent(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const query = recentVisitsQuerySchema.parse(req.query);
+    const data = await healthService.listRecent(tenantId, query, profileId);
+    res.json({ success: true, data });
+  },
+
+  async listForStudent(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const studentId = paramId(req, 'studentId');
+    const query = healthVisitListQuerySchema.parse(req.query);
+    const { data, meta } = await healthService.listForStudent(tenantId, studentId, query, profileId);
+    res.json({ success: true, data, meta });
+  },
+
+  async getStudentSummary(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const studentId = paramId(req, 'studentId');
+    const data = await healthService.getStudentSummary(studentId, tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
+  async getById(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.getById(paramId(req), tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
+  async createVisit(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await healthService.saveVisit(
+      tenantId,
+      req.body as CreateHealthVisitInput,
+      profileId,
+    );
+    res.status(201).json({ success: true, data });
+  },
+};

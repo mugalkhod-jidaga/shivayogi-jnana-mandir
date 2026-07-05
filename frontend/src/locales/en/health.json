@@ -1,0 +1,64 @@
+{
+  "loading": "Loading…",
+  "record": {
+    "title": "Record Visit",
+    "description": "Search for a student, review their history, and log a new infirmary visit.",
+    "studentSearch": "Search student by name or admission number",
+    "class": "Class",
+    "visitDate": "Visit date",
+    "severity": "Severity",
+    "issueType": "Type of issue",
+    "customIssue": "Other issue (optional)",
+    "symptoms": "Investigation / symptoms",
+    "showVitals": "Show optional vitals",
+    "hideVitals": "Hide vitals",
+    "temperature": "Temperature",
+    "bloodPressure": "Blood pressure",
+    "oxygenLevel": "Oxygen level",
+    "treatedBy": "Treated by",
+    "notes": "Visit notes",
+    "addMedicine": "Add another medicine",
+    "removeMedicine": "Remove",
+    "medicineNumber": "Medicine {{number}}",
+    "medicineName": "Medicine name",
+    "doseAmount": "Dose amount",
+    "doseUnit": "Dose unit",
+    "schedulePreset": "Schedule",
+    "foodTiming": "Food timing",
+    "medicineNotes": "Medicine notes",
+    "saveVisit": "Save visit",
+    "saving": "Saving…",
+    "successTitle": "Visit saved",
+    "successDescription": "The health visit has been recorded successfully.",
+    "recordAnother": "Record another visit",
+    "viewRecent": "View recent visits",
+    "noPriorVisits": "No prior infirmary visits for this student.",
+    "priorVisitsSummary": "Treated {{count}} time(s) before · Last visit: {{date}} — {{issue}}",
+    "sections": {
+      "findStudent": "1. Find student",
+      "visitDetails": "2. Visit details",
+      "treatment": "3. Treatment"
+    },
+    "schedule": {
+      "morning": "Morning",
+      "noon": "Noon",
+      "evening": "Evening",
+      "night": "Night"
+    },
+    "errors": {
+      "studentRequired": "Select a student before saving.",
+      "issueRequired": "Select or enter at least one issue type.",
+      "symptomsRequired": "Symptoms description is required.",
+      "severityRequired": "Severity is required.",
+      "saveFailed": "Failed to save visit."
+    }
+  },
+  "recent": {
+    "title": "Recent Visits",
+    "description": "Last 50 infirmary visits, newest first.",
+    "recordVisit": "Record visit",
+    "searchPlaceholder": "Search by issue or symptoms…",
+    "search": "Search",
+    "empty": "No visits found."
+  }
+}

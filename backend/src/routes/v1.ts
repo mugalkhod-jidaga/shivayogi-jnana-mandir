@@ -15,6 +15,7 @@ import {
 import { hostelRoutes } from '../modules/hostel/routes/hostel.routes';
 import { hostelAttendanceRoutes } from '../modules/hostel/routes/hostelAttendance.routes';
 import { medicalRoutes, studentMedicalRoutes } from '../modules/medical/routes/medical.routes';
+import { healthRoutes } from '../modules/health/routes/health.routes';
 
 export const v1Router = Router();
 
@@ -34,6 +35,7 @@ v1Router.use('/remarks', remarkRoutes);
 v1Router.use('/hostel', hostelRoutes);
 v1Router.use('/hostel-attendance', hostelAttendanceRoutes);
 v1Router.use('/medical-records', medicalRoutes);
+v1Router.use('/health', healthRoutes);
 v1Router.use('/exports', exportRoutes);
 v1Router.use('/migration', migrationRoutes);
 v1Router.use('/dashboard', dashboardRoutes);
