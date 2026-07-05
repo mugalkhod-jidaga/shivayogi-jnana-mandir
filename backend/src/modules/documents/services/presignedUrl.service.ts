@@ -49,3 +49,16 @@ export async function getDownloadUrl(fileKey: string) {
   const downloadUrl = await getSignedUrl(getR2Client(), command, { expiresIn: 3600 });
   return { downloadUrl };
 }
+
+export async function getObjectBuffer(fileKey: string): Promise<Buffer | null> {
+  try {
+    const response = await getR2Client().send(
+      new GetObjectCommand({ Bucket: getBucketName(), Key: fileKey }),
+    );
+    if (!response.Body) return null;
+    const bytes = await response.Body.transformToByteArray();
+    return Buffer.from(bytes);
+  } catch {
+    return null;
+  }
+}

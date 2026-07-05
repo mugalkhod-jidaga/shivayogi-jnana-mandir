@@ -1,4 +1,8 @@
 {
+  "nav": {
+    "directory": "ಪಟ್ಟಿ",
+    "reports": "ವರದಿಗಳು"
+  },
   "list": {
     "title": "ವಿದ್ಯಾರ್ಥಿಗಳು",
     "description": "ವಿದ್ಯಾರ್ಥಿ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ, ಫಿಲ್ಟರ್ ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ.",
@@ -14,7 +18,47 @@
       "standard": "ತರಗತಿ",
       "rollNumber": "ರೋಲ್ #",
       "admissionDate": "ಪ್ರವೇಶ ದಿನಾಂಕ",
-      "status": "ಸ್ಥಿತಿ"
+      "status": "ಸ್ಥಿತಿ",
+      "socialCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ"
+    },
+    "allSocialCategories": "ಎಲ್ಲಾ ಸಾಮಾಜಿಕ ವರ್ಗಗಳು"
+  },
+  "reports": {
+    "title": "ವಿದ್ಯಾರ್ಥಿ ವರದಿಗಳು",
+    "description": "ದಾಖಲಾತಿ ವಿಶ್ಲೇಷಣೆ — ತರಗತಿ, ಸಾಮಾಜಿಕ ವರ್ಗ ಮತ್ತು ಜನಸಂಖ್ಯಾ ವಿವರ.",
+    "errorTitle": "ವರದಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+    "errorDescription": "ಬ್ಯಾಕೆಂಡ್ ಚಾಲನೆಯಲ್ಲಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "columnShare": "ಪಾಲು",
+    "kpis": {
+      "activeStudents": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "totalEnrolled": "ಒಟ್ಟು {{count}} ದಾಖಲಾಗಿದೆ",
+      "admissionsYear": "ಈ ವರ್ಷದ ಪ್ರವೇಶ",
+      "standards": "ತರಗತಿಗಳು",
+      "standardsHelp": "ಸಕ್ರಿಯ ದಾಖಲಾತಿ ಹೊಂದಿರುವ ತರಗತಿಗಳು",
+      "socialCategories": "ಸಾಮಾಜಿಕ ವರ್ಗಗಳು",
+      "socialCategoriesHelp": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ವರ್ಗಗಳು"
+    },
+    "byStandard": {
+      "title": "ತರಗತಿ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ದಾಖಲಾತಿ — ಪಟ್ಟಿ ಫಿಲ್ಟರ್ ಮಾಡಲು ಸಾಲನ್ನು ಒತ್ತಿ.",
+      "empty": "ಇನ್ನೂ ದಾಖಲಾತಿ ಡೇಟಾ ಇಲ್ಲ.",
+      "columnStandard": "ತರಗತಿ",
+      "columnStudents": "ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "bySocialCategory": {
+      "title": "ಸಾಮಾಜಿಕ ವರ್ಗ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ಮೀಸಲಾತಿ ವರ್ಗ ವಿಭಜನೆ.",
+      "empty": "ಇನ್ನೂ ಸಾಮಾಜಿಕ ವರ್ಗ ಡೇಟಾ ಇಲ್ಲ.",
+      "columnCategory": "ಸಾಮಾಜಿಕ ವರ್ಗ",
+      "columnStudents": "ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "byGender": {
+      "title": "ಲಿಂಗ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳ ಲಿಂಗ ವಿತರಣೆ."
+    },
+    "byStatus": {
+      "title": "ಸ್ಥಿತಿ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಸಕ್ರಿಯ, ಪದವೀಧರ, ನಿಲ್ಲಿಸಿದ — ಆ ಪಟ್ಟಿ ನೋಡಲು ಚಿಪ್ ಒತ್ತಿ."
     }
   },
   "form": {
@@ -112,7 +156,8 @@
       "edit": "ಸಂಪಾದಿಸಿ",
       "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
       "healthProfile": "ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್",
-      "backToStudents": "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ"
+      "backToStudents": "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+      "downloadProfilePdf": "ಪ್ರೊಫೈಲ್ PDF ಡೌನ್‌ಲೋಡ್"
     },
     "fields": {
       "category": "ವರ್ಗ",

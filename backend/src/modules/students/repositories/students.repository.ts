@@ -181,14 +181,19 @@ function unwrapEnrollment(row: StudentRow): EnrollmentRow | null {
   return enrollments.find((e) => e.is_current) ?? enrollments[0] ?? null;
 }
 
-function listSelect(useInnerEnrollment: boolean) {
-  const join = useInnerEnrollment ? 'student_enrollments!inner' : 'student_enrollments!left';
+function listSelect(useInnerEnrollment: boolean, useInnerSocial: boolean) {
+  const enrollmentJoin = useInnerEnrollment ? 'student_enrollments!inner' : 'student_enrollments!left';
+  const socialJoin = useInnerSocial ? 'student_social_details!inner' : 'student_social_details!left';
   return `
     *,
     blood_group:lookup_blood_groups(id, value),
     admission_category:lookup_admission_categories(id, value),
     mother_tongue:lookup_languages(id, value),
-    current_enrollment:${join}(
+    social_details:${socialJoin}(
+      social_category_id,
+      social_category:lookup_social_categories(id, value)
+    ),
+    current_enrollment:${enrollmentJoin}(
       ${ENROLLMENT_SELECT}
     )
   `;
@@ -200,7 +205,7 @@ export class StudentsRepository extends BaseRepository {
   }
 
   async list(tenantId: number, query: StudentListQuery, assignedStandardIds?: number[]) {
-    const { page, limit, search, status, standardId, sectionId, academicYearId, admissionCategoryId } =
+    const { page, limit, search, status, standardId, sectionId, academicYearId, socialCategoryId } =
       query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
@@ -208,10 +213,11 @@ export class StudentsRepository extends BaseRepository {
     const needsEnrollmentJoin = Boolean(
       standardId || sectionId || academicYearId || (assignedStandardIds && assignedStandardIds.length > 0),
     );
+    const needsSocialJoin = Boolean(socialCategoryId);
 
     let dbQuery = supabase
       .from('students')
-      .select(listSelect(needsEnrollmentJoin), { count: 'exact' })
+      .select(listSelect(needsEnrollmentJoin, needsSocialJoin), { count: 'exact' })
       .eq('tenant_id', tenantId)
       .is('deleted_at', null);
 
@@ -228,7 +234,9 @@ export class StudentsRepository extends BaseRepository {
     }
 
     if (status) dbQuery = dbQuery.eq('status', status);
-    if (admissionCategoryId) dbQuery = dbQuery.eq('admission_category_id', admissionCategoryId);
+    if (socialCategoryId) {
+      dbQuery = dbQuery.eq('social_details.social_category_id', socialCategoryId);
+    }
     if (standardId) dbQuery = dbQuery.eq('current_enrollment.standard_id', standardId);
     if (sectionId) dbQuery = dbQuery.eq('current_enrollment.section_id', sectionId);
     if (academicYearId) dbQuery = dbQuery.eq('current_enrollment.academic_year_id', academicYearId);

@@ -1,4 +1,8 @@
 {
+  "nav": {
+    "directory": "Directory",
+    "reports": "Reports"
+  },
   "list": {
     "title": "Students",
     "description": "Search, filter, and manage student records.",
@@ -14,7 +18,47 @@
       "standard": "Standard",
       "rollNumber": "Roll #",
       "admissionDate": "Admission date",
-      "status": "Status"
+      "status": "Status",
+      "socialCategory": "Social category"
+    },
+    "allSocialCategories": "All social categories"
+  },
+  "reports": {
+    "title": "Student reports",
+    "description": "Enrollment analytics — standards, social categories, and demographics at a glance.",
+    "errorTitle": "Could not load reports",
+    "errorDescription": "Check that the backend is running and try again.",
+    "columnShare": "Share",
+    "kpis": {
+      "activeStudents": "Active students",
+      "totalEnrolled": "{{count}} total enrolled",
+      "admissionsYear": "Admissions this year",
+      "standards": "Standards represented",
+      "standardsHelp": "Classes with active enrollments",
+      "socialCategories": "Social categories",
+      "socialCategoriesHelp": "Categories with active students"
+    },
+    "byStandard": {
+      "title": "Students by standard",
+      "description": "Active enrollment across classes — click a row to filter the directory.",
+      "empty": "No enrollment data yet.",
+      "columnStandard": "Standard",
+      "columnStudents": "Students"
+    },
+    "bySocialCategory": {
+      "title": "Students by social category",
+      "description": "Reservation category breakdown for active students.",
+      "empty": "No social category data yet.",
+      "columnCategory": "Social category",
+      "columnStudents": "Students"
+    },
+    "byGender": {
+      "title": "Students by gender",
+      "description": "Gender distribution among active students."
+    },
+    "byStatus": {
+      "title": "Students by status",
+      "description": "Active, alumni, and discontinued — click a chip to view that list."
     }
   },
   "form": {
@@ -112,7 +156,8 @@
       "edit": "Edit",
       "deactivate": "Deactivate",
       "healthProfile": "Health profile",
-      "backToStudents": "Back to students"
+      "backToStudents": "Back to students",
+      "downloadProfilePdf": "Download profile PDF"
     },
     "fields": {
       "category": "Category",

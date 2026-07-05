@@ -115,7 +115,7 @@ export function SocialDetailsFields({
         <Label htmlFor="rdNumberSecondary">{t('form.fields.incomeRdNumber')}</Label>
         <Input
           id="rdNumberSecondary"
-          value={incomeRdValue}
+          value={incomeRdValue|| casteRdValue}
           onChange={handleIncomeRdChange}
           readOnly={isObc}
           placeholder="RD0000000000000"

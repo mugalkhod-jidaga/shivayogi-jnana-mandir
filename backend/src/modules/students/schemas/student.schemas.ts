@@ -124,7 +124,7 @@ export const studentListQuerySchema = z.object({
   standardId: z.coerce.number().int().positive().optional(),
   sectionId: z.coerce.number().int().positive().optional(),
   academicYearId: z.coerce.number().int().positive().optional(),
-  admissionCategoryId: z.coerce.number().int().positive().optional(),
+  socialCategoryId: z.coerce.number().int().positive().optional(),
 });
 
 export const avatarPresignSchema = z.object({

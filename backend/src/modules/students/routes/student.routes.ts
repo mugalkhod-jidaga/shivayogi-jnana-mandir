@@ -23,6 +23,13 @@ studentRoutes.get(
 );
 
 studentRoutes.get(
+  '/reports',
+  extractTenantMiddleware,
+  requirePermission('students:read'),
+  asyncHandler(studentController.getReports),
+);
+
+studentRoutes.get(
   '/',
   extractTenantMiddleware,
   requirePermission('students:read'),

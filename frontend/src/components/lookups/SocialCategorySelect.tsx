@@ -6,10 +6,12 @@ export function SocialCategorySelect({
   value,
   onChange,
   id,
+  placeholder,
 }: {
   value?: string;
   onChange: (value: string) => void;
   id?: string;
+  placeholder?: string;
 }) {
   const { socialCategories, isLoading } = useLookups();
   const { t } = useTranslation();
@@ -20,7 +22,7 @@ export function SocialCategorySelect({
       onChange={onChange}
       options={socialCategories}
       isLoading={isLoading}
-      placeholder={t('optional')}
+      placeholder={placeholder ?? t('optional')}
     />
   );
 }

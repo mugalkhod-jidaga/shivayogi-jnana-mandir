@@ -34,7 +34,7 @@ function downloadSkippedRowsCsv(rows: MigrationSkippedRow[]) {
         row.standard ?? '',
         row.reason,
       ]
-        .map(escape)
+        .map((v) => escape(String(v)))
         .join(','),
     ),
   ];

@@ -2,7 +2,7 @@ import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
+import { SocialCategorySelect } from '@/components/lookups/SocialCategorySelect';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { AcademicYearSelect } from '@/components/lookups/AcademicYearSelect';
 import { PageHeader } from '@/components/PageHeader';
@@ -32,13 +32,13 @@ export function StudentListPage() {
   const statusParam = (searchParams.get('status') as StudentStatus | null) ?? undefined;
   const standardIdParam = searchParams.get('standardId') ?? '';
   const academicYearIdParam = searchParams.get('academicYearId') ?? '';
-  const categoryIdParam = searchParams.get('admissionCategoryId') ?? '';
+  const socialCategoryIdParam = searchParams.get('socialCategoryId') ?? '';
 
   const [searchInput, setSearchInput] = useState(searchParam);
   const [statusFilter, setStatusFilter] = useState(statusParam ?? '');
   const [standardFilter, setStandardFilter] = useState(standardIdParam);
   const [academicYearFilter, setAcademicYearFilter] = useState(academicYearIdParam);
-  const [categoryFilter, setCategoryFilter] = useState(categoryIdParam);
+  const [socialCategoryFilter, setSocialCategoryFilter] = useState(socialCategoryIdParam);
   const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
@@ -46,8 +46,8 @@ export function StudentListPage() {
     setStatusFilter(statusParam ?? '');
     setStandardFilter(standardIdParam);
     setAcademicYearFilter(academicYearIdParam);
-    setCategoryFilter(categoryIdParam);
-  }, [searchParam, statusParam, standardIdParam, academicYearIdParam, categoryIdParam]);
+    setSocialCategoryFilter(socialCategoryIdParam);
+  }, [searchParam, statusParam, standardIdParam, academicYearIdParam, socialCategoryIdParam]);
 
   const { data, isLoading, isError } = useStudentsList({
     page: Number.isFinite(page) && page > 0 ? page : 1,
@@ -55,7 +55,7 @@ export function StudentListPage() {
     status: statusParam,
     standardId: standardIdParam ? Number(standardIdParam) : undefined,
     academicYearId: academicYearIdParam ? Number(academicYearIdParam) : undefined,
-    admissionCategoryId: categoryIdParam ? Number(categoryIdParam) : undefined,
+    socialCategoryId: socialCategoryIdParam ? Number(socialCategoryIdParam) : undefined,
   });
 
   const students = data?.data ?? [];
@@ -68,7 +68,7 @@ export function StudentListPage() {
     if (statusFilter) next.set('status', statusFilter);
     if (standardFilter) next.set('standardId', standardFilter);
     if (academicYearFilter) next.set('academicYearId', academicYearFilter);
-    if (categoryFilter) next.set('admissionCategoryId', categoryFilter);
+    if (socialCategoryFilter) next.set('socialCategoryId', socialCategoryFilter);
     next.set('page', '1');
     setSearchParams(next);
   };
@@ -96,7 +96,7 @@ export function StudentListPage() {
                     status: statusParam,
                     standardId: standardIdParam || undefined,
                     academicYearId: academicYearIdParam || undefined,
-                    admissionCategoryId: categoryIdParam || undefined,
+                    socialCategoryId: socialCategoryIdParam || undefined,
                   })
                   .finally(() => setPdfLoading(false));
               }}
@@ -145,7 +145,11 @@ export function StudentListPage() {
           </Select>
           <AcademicStandardSelect value={standardFilter} onChange={setStandardFilter} />
           <AcademicYearSelect value={academicYearFilter} onChange={setAcademicYearFilter} />
-          <AdmissionCategorySelect value={categoryFilter} onChange={setCategoryFilter} />
+          <SocialCategorySelect
+            value={socialCategoryFilter}
+            onChange={setSocialCategoryFilter}
+            placeholder={t('list.allSocialCategories')}
+          />
         </div>
       </form>
 
@@ -159,6 +163,7 @@ export function StudentListPage() {
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionNumber')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.name')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.standard')}</th>
+              <th className="px-4 py-3 font-medium">{t('list.columns.socialCategory')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.admissionDate')}</th>
               <th className="px-4 py-3 font-medium">{t('list.columns.status')}</th>
             </tr>
@@ -166,7 +171,7 @@ export function StudentListPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.loading')}
                 </td>
               </tr>
@@ -174,7 +179,7 @@ export function StudentListPage() {
 
             {!isLoading && students.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   {t('list.noResults')}
                 </td>
               </tr>
@@ -199,6 +204,7 @@ export function StudentListPage() {
                 <td className="px-4 py-3 font-mono text-xs">{student.admissionNumber}</td>
                 <td className="px-4 py-3">{formatName(student.firstName, student.lastName)}</td>
                 <td className="px-4 py-3">{student.currentEnrollment?.standard?.value ?? '—'}</td>
+                <td className="px-4 py-3">{student.socialCategory?.value ?? '—'}</td>
                 <td className="px-4 py-3">{formatDobDisplay(student.admissionDate)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={student.status} />

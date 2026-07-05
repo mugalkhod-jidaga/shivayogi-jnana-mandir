@@ -41,6 +41,12 @@ export const studentController = {
     res.json({ success: true, data, meta });
   },
 
+  async getReports(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await studentService.getReports(tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
   async getById(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const permissions = await getPermissions(profileId);

@@ -114,11 +114,11 @@ export function StudentDetailPage() {
         description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <StudentInitialsAvatar
+          {/* <StudentInitialsAvatar
             firstName={student.firstName}
             lastName={student.lastName}
-            size="lg"
-          />
+            size="sm"
+          /> */}
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={student.status} />
             <RequirePermission permission="students:edit">
@@ -149,7 +149,7 @@ export function StudentDetailPage() {
                 }}
               >
                 <Download className="size-4" />
-                PDF
+                {t('detail.actions.downloadProfilePdf')}
               </Button>
             </RequirePermission>
             <RequirePermission permission="students:soft_delete">
