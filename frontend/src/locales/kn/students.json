@@ -111,7 +111,8 @@
     "actions": {
       "edit": "ಸಂಪಾದಿಸಿ",
       "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
-      "healthProfile": "ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್"
+      "healthProfile": "ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್",
+      "backToStudents": "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ"
     },
     "fields": {
       "category": "ವರ್ಗ",

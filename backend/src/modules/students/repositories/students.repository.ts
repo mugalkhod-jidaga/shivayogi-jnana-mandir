@@ -8,6 +8,7 @@ import type {
   EmergencyContactInput,
   FamilyDetailsInput,
   SocialDetailsInput,
+  UpdateSocialDetailsInput,
   StudentListQuery,
 } from '../schemas/student.schemas';
 
@@ -412,7 +413,7 @@ export class StudentsRepository extends BaseRepository {
     if (error) throw new AppError(500, error.message);
   }
 
-  async updateSocialDetails(studentId: string, social: Partial<SocialDetailsInput>) {
+  async updateSocialDetails(studentId: string, social: UpdateSocialDetailsInput) {
     const dbChanges: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (social.religionId !== undefined) dbChanges.religion_id = social.religionId;
     if (social.socialCategoryId !== undefined) dbChanges.social_category_id = social.socialCategoryId;

@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
@@ -44,6 +45,13 @@ export function StudentHealthProfilePage() {
 
   return (
     <div className="space-y-6">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
+        <Link to={`/students/${studentId}`}>
+          <ArrowLeft className="size-4" />
+          {t('profile.backToStudent')}
+        </Link>
+      </Button>
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title={name}

@@ -111,7 +111,8 @@
     "actions": {
       "edit": "Edit",
       "deactivate": "Deactivate",
-      "healthProfile": "Health profile"
+      "healthProfile": "Health profile",
+      "backToStudents": "Back to students"
     },
     "fields": {
       "category": "Category",

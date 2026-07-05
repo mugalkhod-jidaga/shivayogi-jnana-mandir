@@ -100,7 +100,8 @@
     "guardian": "Guardian",
     "guardianPhone": "Guardian phone",
     "visitHistory": "Visit history",
-    "noVisits": "No infirmary visits recorded yet."
+    "noVisits": "No infirmary visits recorded yet.",
+    "backToStudent": "Back to student profile"
   },
   "visitDetail": {
     "close": "Close",

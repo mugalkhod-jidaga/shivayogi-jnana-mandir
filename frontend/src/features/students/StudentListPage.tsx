@@ -1,7 +1,7 @@
 import { Plus, Search, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AdmissionCategorySelect } from '@/components/lookups/AdmissionCategorySelect';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { AcademicYearSelect } from '@/components/lookups/AcademicYearSelect';
@@ -25,6 +25,7 @@ export function StudentListPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -183,7 +184,11 @@ export function StudentListPage() {
               <tr
                 key={student.id}
                 className="cursor-pointer border-t transition-colors hover:bg-muted/50"
-                onClick={() => navigate(`/students/${student.id}`)}
+                onClick={() =>
+                  navigate(`/students/${student.id}`, {
+                    state: { from: `${location.pathname}${location.search}` },
+                  })
+                }
               >
                 <td className="px-4 py-3">
                   <StudentInitialsAvatar

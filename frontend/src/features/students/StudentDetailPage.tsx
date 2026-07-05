@@ -1,7 +1,7 @@
-import { HeartPulse, Pencil, Download } from 'lucide-react';
+import { ArrowLeft, HeartPulse, Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
@@ -36,7 +36,10 @@ export function StudentDetailPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
   const { id } = useParams();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const backToStudents =
+    (location.state as { from?: string } | null)?.from ?? '/students';
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
   const tabParam = searchParams.get('tab');
@@ -99,6 +102,13 @@ export function StudentDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
+        <Link to={backToStudents}>
+          <ArrowLeft className="size-4" />
+          {t('detail.actions.backToStudents')}
+        </Link>
+      </Button>
+
       <PageHeader
         title={displayName}
         description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
