@@ -16,14 +16,22 @@ const DOCX = path.join(
 );
 const OUT_XLSX = path.join(__dirname, '../../data/2026-27-students-import.xlsx');
 const OUT_CSV = path.join(__dirname, '../../data/2026-27-students-migration.csv');
+const OUT_MIGRATION_CSV = path.join(__dirname, '../../data/2026-27-students-migration-ready.csv');
 const OUT_REVIEW = path.join(__dirname, '../../data/2026-27-students-parse-review.json');
+
+const MIGRATION_ONLY_HEADERS = [
+  'admission_number', 'first_name', 'last_name', 'dob', 'gender', 'blood_group',
+  'admission_category', 'admission_date', 'mother_tongue', 'aadhaar_number', 'sats_id',
+  'academic_year', 'standard', 'section', 'roll_number', 'previous_school', 'last_class_studied',
+  'emergency_contact_name', 'emergency_contact_relationship', 'emergency_contact_phone',
+  'father_name', 'mother_name', 'primary_contact', 'village_town', 'taluk_mandal', 'district',
+  'state', 'pincode', 'caste', 'social_category', 'rd_number', 'rd_number_secondary',
+] as const;
 
 const ACADEMIC_YEAR = '2026-27';
 const ADMISSION_DATE = '01/06/2026';
 const DEFAULT_STATE = 'Karnataka';
 const DEFAULT_PINCODE = '585302';
-const DEFAULT_BLOOD_GROUP = 'O+';
-const DEFAULT_ADMISSION_CATEGORY = 'BPL';
 const DEFAULT_MOTHER_TONGUE = 'Kannada';
 const DEFAULT_GENDER = 'Male';
 
@@ -61,6 +69,7 @@ interface MigrationRow {
   admission_date: string;
   mother_tongue: string;
   aadhaar_number: string;
+  sats_id: string;
   academic_year: string;
   standard: string;
   section: string;
@@ -76,12 +85,12 @@ interface MigrationRow {
   village_town: string;
   taluk_mandal: string;
   district: string;
+  state: string;
   pincode: string;
   caste: string;
   social_category: string;
   rd_number: string;
   rd_number_secondary: string;
-  sats_id: string;
   parse_warnings: string;
 }
 
@@ -144,8 +153,15 @@ function parseCasteCategory(cell: string): { caste: string; category: string } {
   return { caste: cell.trim(), category: normalizeCategory(cell) };
 }
 
-const MOTHER_SUFFIXES =
-  /(ಲಕ್ಷ್ಮ[ೀಿ]?|ಕವಿತಾ|ರಾಧಾ|ನಿಲ್ಲ?[ಮ]?|ಗಂಗ?[ಮ]?|ಪ್ರಿಯ?[ಾ]?|ಧಾನ?[ಮ]?|ಶ್ರ?[ೀಿ]?|ರೇ?[ಣ]?|ರಾಜ?[ೇ]?|ಅಂ?[ಬ]?|ಚ?[ಾ]?|ಸ?[ಂ]?|ಮ?[ಹ]?|ಸ?[ು]?|ಕ?[ಾ]?|ಶ?[ರ]?|ನ?[ಾ]?|ಸ?[ವ]?|ಗ?[ು]?|ರ?[ು]?|ಮ?[ೀ]?|ಬ?[ಾ]?|ದ?[ೇ]?|ಹ?[ೇ]?|ಸ?[ೀ]?|ಪ?[ಾ]?|ಯ?[ಾ]?|ಕ?[ಸ]?|ಅ?[ಶ]?|ಇ?[ಟ]?|ಬ?[ಾ]?|ಸ?[ು]?|ರ?[ೇ]?|ಪ?[ಿ]?|ವ?[ಿ]?|ಶ?[ಿ]?|ಮ?[ಾ]?|ಕ?[ಾ]?|ತ?[ಾ]?|ಬ?[ಾ]?|ಗ?[ಾ]?|ದ?[ೇ]?|ವ?[ಿ]?|ಶ?[ಿ]?|ಮ?[ಾ]?|ಕ?[ಾ]?)$/;
+const MOTHER_NAME_ENDINGS = [
+  'ಲಕ್ಷ್ಮೀ', 'ಕವಿತಾ', 'ರಾಧಾ', 'ನಿಲ್ಲಮ್ಮ', 'ಗಂಗಮ್ಮ', 'ಪ್ರಿಯಾಂಕ', 'ಧಾನಮ್ಮಾ', 'ಶ್ರೀದೇವಿ',
+  'ರೇಣುಕಾ', 'ರಾಜೇಶ್ರೀ', 'ಸಂಗೀತಾ', 'ಅಂಬಿಕಾ', 'ಚಂದ್ರakala', 'ಆಶಾ', 'ಗುರುದೇವಿ', 'ಮಹಾದೇವಿ',
+  'ಸವಿತಾ', 'ಸುನೀತಾ', 'ಶರಣಮ್ಮ', 'ರತ್ನಮ್ಮ', 'ನಾಗಮ್ಮ', 'ಲತಾ', 'ಸುರೇಖಾ', 'ಭಾಗ್ಯಶ್ರೀ',
+  'ವಿದ್ಯಾಶ್ರೀ', 'ನಿರ್ಮಲಾ', 'ಕಾವೇರಿ', 'ರুক್ಮೀಣಿ', 'ಶಿವಮ್ಮಾ', 'ಮೀನಾಕ್ಷಿ', 'ಹೇಮಾವತಿ',
+  'ಯಲ್ಲವ್ವ', 'ಸಿದ್ದಮ್ಮ', 'ಗೋಳಯಲ್ಲವ್ವ', 'ಕಸ್ತೂರಿಬಾಯಿ', 'ಇಟ್ಟಾಬಾಯಿ', 'ಕೊಡಿಸರುಬಾಯಿ',
+  'ಪ್ರೇಮಿಲಾ', 'ಭುವನೇಶ್ವರಿ', 'ಪ್ರೇಮಲಾ', 'ಶಿವನಂದಾ', 'ನವರರೂಪಾ', 'ಮಲ್ಲವ್ವ', 'ದೇವಮ್ಮ',
+  'ರಂಗಮ್ಮ', 'ಕಾಂಚನಾ', 'ಗುuruಬಾಯi', 'ಮೋಹಿನi', 'ನಾಗರತ್ನ', 'ಸುವರ್ಣಾ', 'ಮಹೇಶ್ವರi', 'ಸುಧಾರಾಣi', 'ಶೃತi',
+].sort((a, b) => b.length - a.length);
 
 function splitParentNames(raw: string): { father: string; mother: string; warning?: string } {
   const text = raw.replace(/\s+/g, ' ').trim();
@@ -156,29 +172,31 @@ function splitParentNames(raw: string): { father: string; mother: string; warnin
     return { father: f ?? '', mother: m ?? '' };
   }
 
-  const spaceParts = text.split(' ');
-  if (spaceParts.length >= 3) {
-    const mother = spaceParts[spaceParts.length - 1];
-    const father = spaceParts.slice(0, -1).join(' ');
-    if (mother.length >= 2 && father.length >= 2) {
+  const joined = text.replace(/\s+/g, '');
+  for (const ending of MOTHER_NAME_ENDINGS) {
+    if (joined.endsWith(ending) && joined.length > ending.length + 2) {
+      const mother = ending;
+      const father = text.slice(0, text.length - ending.length).trim();
+      return { father: father || joined.slice(0, -ending.length), mother };
+    }
+  }
+
+  const parts = text.split(' ');
+  if (parts.length >= 2) {
+    const mother = parts[parts.length - 1];
+    const father = parts.slice(0, -1).join(' ');
+    if (mother.length >= 3 && mother.length <= 20 && father.length >= 3) {
       return { father, mother };
     }
   }
 
-  for (let i = Math.max(4, text.length - 12); i < text.length - 2; i++) {
-    const mother = text.slice(i).trim();
-    const father = text.slice(0, i).trim();
-    if (mother.length >= 3 && father.length >= 3 && MOTHER_SUFFIXES.test(mother)) {
-      return { father, mother };
-    }
-  }
-
-  const mid = Math.floor(text.length * 0.55);
-  for (let i = mid; i < text.length - 2; i++) {
-    const mother = text.slice(i).trim();
-    const father = text.slice(0, i).trim();
-    if (mother.length >= 3 && father.length >= 4) {
-      return { father, mother, warning: 'Parent names split heuristically — please verify' };
+  for (let len = 8; len >= 4; len--) {
+    if (text.length > len + 3) {
+      const mother = text.slice(-len);
+      const father = text.slice(0, -len);
+      if (/[\u0C80-\u0CFF]/.test(mother)) {
+        return { father, mother, warning: 'Parent names split by length — please verify' };
+      }
     }
   }
 
@@ -236,18 +254,17 @@ function parseAddress(raw: string): {
   warning?: string;
 } {
   const text = raw.replace(/\s+/g, ' ').trim();
-  const village =
-    text.match(/ಮ[uu]?[\s:]*([^ತ]+?)(?=ತಾ|$)/i)?.[1]?.trim() ??
-    text.match(/ಮ[\s:]*([^,]+)/)?.[1]?.trim() ??
-    '';
-  const taluk =
-    text.match(/ತಾ[\s:]*([^ಜ]+?)(?=ಜಿ|$)/i)?.[1]?.trim() ?? '';
-  const district = text.match(/ಜಿ[\s:]*(.+)$/i)?.[1]?.trim() ?? '';
-
-  if (!village || !taluk || !district) {
-    return { village, taluk, district, warning: `Address parse incomplete: ${raw}` };
+  const m = text.match(
+    /ಮ\s*[ುu]?\s*:\s*(.+?)\s*ತ\s*[ಾa]?\s*:\s*(.+?)\s*ಜ\s*[ಿi]?\s*:\s*(.+)$/i,
+  );
+  if (m) {
+    return {
+      village: m[1].replace(/\s+/g, ' ').trim(),
+      taluk: m[2].replace(/\s+/g, ' ').trim(),
+      district: m[3].replace(/\s+/g, ' ').trim(),
+    };
   }
-  return { village, taluk, district };
+  return { village: '', taluk: '', district: '', warning: `Address parse incomplete: ${raw}` };
 }
 
 function admissionNumber(globalIndex: number): string {
@@ -316,11 +333,12 @@ function toMigrationRow(row: ParsedRow): MigrationRow {
     last_name: last,
     dob: row.dob,
     gender: DEFAULT_GENDER,
-    blood_group: DEFAULT_BLOOD_GROUP,
-    admission_category: DEFAULT_ADMISSION_CATEGORY,
+    blood_group: '',
+    admission_category: '',
     admission_date: ADMISSION_DATE,
     mother_tongue: DEFAULT_MOTHER_TONGUE,
     aadhaar_number: row.aadhaar_number.replace(/\s+/g, ''),
+    sats_id: row.sats_id,
     academic_year: ACADEMIC_YEAR,
     standard: row.standard,
     section: '',
@@ -336,12 +354,12 @@ function toMigrationRow(row: ParsedRow): MigrationRow {
     village_town: row.village_town,
     taluk_mandal: row.taluk_mandal,
     district: row.district,
+    state: row.state,
     pincode: DEFAULT_PINCODE,
     caste: row.caste,
     social_category: row.social_category,
     rd_number: row.rd_number,
     rd_number_secondary: row.rd_number_secondary,
-    sats_id: row.sats_id,
     parse_warnings: row.warnings.join('; '),
   };
 }
@@ -358,6 +376,7 @@ function main(): void {
 
   const tables = parseDocxTables(xml);
   const parsed: ParsedRow[] = [];
+  const rawSourceRows: Record<string, string>[] = [];
   let globalIndex = 0;
 
   const tableStandards = ['6', '7', '8', '9', '10'];
@@ -367,12 +386,26 @@ function main(): void {
       if (row.length < 8 || !row[0]?.match(/^\d+$/)) continue;
       globalIndex += 1;
       parsed.push(parseRow(row, tableIndex, globalIndex));
+      rawSourceRows.push({
+        standard_group: tableStandards[tableIndex] ?? String(tableIndex + 1),
+        col_1_serial: row[0] ?? '',
+        col_2_student_name: row[1] ?? '',
+        col_3_parents: row[2] ?? '',
+        col_4_dob: row[3] ?? '',
+        col_5_standard: row[4] ?? '',
+        col_6_caste_category: row[5] ?? '',
+        col_7_rd_numbers: row[6] ?? '',
+        col_8_aadhaar: row[7] ?? '',
+        col_9_phone: row[8] ?? '',
+        col_10_address: row[9] ?? '',
+      });
     }
   });
 
   const migrationRows = parsed.map(toMigrationRow);
 
   const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rawSourceRows), 'Raw Source');
   const fullSheet = XLSX.utils.json_to_sheet(migrationRows);
   XLSX.utils.book_append_sheet(wb, fullSheet, 'Import Data');
 
@@ -380,14 +413,24 @@ function main(): void {
     const rows = migrationRows.filter((r) => r.standard === std);
     return { std, count: rows.length, tableIndex: i };
   });
+  const warnRows = migrationRows.filter((r) => r.parse_warnings);
   const summary = [
-    ['Sheet', 'Students', 'Standard'],
-    ...byStandard.map((b) => [`Table ${b.tableIndex + 1}`, b.count, b.std]),
-    ['Total', parsed.length, ''],
+    ['Field', 'Value'],
+    ['Total students', String(parsed.length)],
+    ['Academic year', ACADEMIC_YEAR],
+    ['Admission date (default)', ADMISSION_DATE],
+    ['State (default)', DEFAULT_STATE],
+    ['Pincode (default)', DEFAULT_PINCODE],
+    ['Gender (default)', DEFAULT_GENDER],
+    ['Mother tongue (default)', DEFAULT_MOTHER_TONGUE],
+    ['Admission number format', 'SJM00001 global sequence'],
+    ['Rows needing review', String(warnRows.length)],
+    [],
+    ['Standard', 'Count'],
+    ...byStandard.map((b) => [b.std, String(b.count)]),
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
 
-  const warnRows = migrationRows.filter((r) => r.parse_warnings);
   if (warnRows.length > 0) {
     XLSX.utils.book_append_sheet(
       wb,
@@ -419,6 +462,17 @@ function main(): void {
   ];
   fs.writeFileSync(OUT_CSV, csvLines.join('\n'), 'utf8');
 
+  const migrationReadyLines = [
+    [...MIGRATION_ONLY_HEADERS].join(','),
+    ...migrationRows.map((row) =>
+      MIGRATION_ONLY_HEADERS.map((h) => {
+        const v = String(row[h] ?? '');
+        return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
+      }).join(','),
+    ),
+  ];
+  fs.writeFileSync(OUT_MIGRATION_CSV, migrationReadyLines.join('\n'), 'utf8');
+
   const review = {
     source: path.basename(DOCX),
     total_students: parsed.length,
@@ -427,15 +481,15 @@ function main(): void {
     defaults: {
       state: DEFAULT_STATE,
       pincode: DEFAULT_PINCODE,
-      blood_group: DEFAULT_BLOOD_GROUP,
-      admission_category: DEFAULT_ADMISSION_CATEGORY,
       gender: DEFAULT_GENDER,
+      mother_tongue: DEFAULT_MOTHER_TONGUE,
       academic_year: ACADEMIC_YEAR,
       admission_date: ADMISSION_DATE,
     },
     notes: [
       'Admission numbers are globally sequential SJM00001.. across all standards (serial resets per class in source doc).',
-      'Migration CSV includes caste/social_category/rd/sats columns for review; bulk import RPC does not persist those yet.',
+      'blood_group and admission_category are optional — leave blank when unknown.',
+      'caste, social_category, rd_number, rd_number_secondary, and sats_id are imported via bulk migration.',
       'Father/mother split uses heuristics — check Review Needed sheet.',
     ],
   };
@@ -444,6 +498,7 @@ function main(): void {
   console.log(JSON.stringify(review, null, 2));
   console.log(`\nWrote ${OUT_XLSX}`);
   console.log(`Wrote ${OUT_CSV}`);
+  console.log(`Wrote ${OUT_MIGRATION_CSV}`);
 }
 
 main();

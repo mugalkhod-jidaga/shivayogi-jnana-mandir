@@ -5,8 +5,13 @@ export type MigrationPreviewRow = {
   last_name?: string;
   dob: string;
   gender?: string;
-  blood_group_id: number;
-  admission_category_id: number;
+  blood_group_id?: number;
+  admission_category_id?: number;
+  sats_id?: string;
+  social_category_id?: number;
+  caste?: string;
+  rd_number?: string;
+  rd_number_secondary?: string;
   father_name?: string;
   mother_name?: string;
   parent_status?: string;
@@ -14,6 +19,7 @@ export type MigrationPreviewRow = {
   village_town: string;
   taluk_mandal: string;
   district: string;
+  state?: string;
   pincode: string;
 };
 

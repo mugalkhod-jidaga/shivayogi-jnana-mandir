@@ -12,8 +12,10 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 8. `008_remarks_hostel_medical.sql` — student remarks, hostel blocks/rooms/allocations, hostel attendance, basic medical records, PDF export permission
 9. `009_health_visits.sql` — infirmary health visits, visit medicines, health lookups, student `health_status`
 10. `010_health_phase2.sql` — medicine catalog, visit photo attachments, catalog seed
+11. `011_karnataka_social_categories.sql` — Karnataka social category codes (sc, st, cat_*)
+12. `012_bulk_import_social.sql` — optional blood/admission category; SATS + social details in bulk import
 
-Apply migrations through `010` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+Apply migrations through `012` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 
 After migrations, insert the Phase 1 tenant (Section 5.4):
 

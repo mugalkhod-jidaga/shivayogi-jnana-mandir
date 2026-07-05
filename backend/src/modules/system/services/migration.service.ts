@@ -12,6 +12,7 @@ interface LookupMaps {
   standards: Map<string, number>;
   sections: Map<string, number>;
   languages: Map<string, number>;
+  socialCategories: Map<string, number>;
 }
 
 interface ParseErrorRow {
@@ -30,7 +31,8 @@ export interface MigrationParseResult {
 }
 
 async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
-  const [bloodRes, categoryRes, yearRes, standardRes, sectionRes, languageRes] = await Promise.all([
+  const [bloodRes, categoryRes, yearRes, standardRes, sectionRes, languageRes, socialRes] =
+    await Promise.all([
     supabase.from('lookup_blood_groups').select('id, value').eq('is_active', true),
     supabase
       .from('lookup_admission_categories')
@@ -57,6 +59,11 @@ async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
       .select('id, value')
       .eq('tenant_id', tenantId)
       .eq('is_active', true),
+    supabase
+      .from('lookup_social_categories')
+      .select('id, value')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true),
   ]);
 
   if (bloodRes.error) throw new AppError(500, bloodRes.error.message);
@@ -65,6 +72,7 @@ async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
   if (standardRes.error) throw new AppError(500, standardRes.error.message);
   if (sectionRes.error) throw new AppError(500, sectionRes.error.message);
   if (languageRes.error) throw new AppError(500, languageRes.error.message);
+  if (socialRes.error) throw new AppError(500, socialRes.error.message);
 
   const toMap = (rows: { id: number; value?: string; label?: string }[], key: 'value' | 'label') =>
     new Map(rows.map((row) => [(key === 'label' ? row.label! : row.value!).toLowerCase(), row.id]));
@@ -76,6 +84,7 @@ async function loadLookupMaps(tenantId: number): Promise<LookupMaps> {
     standards: toMap(standardRes.data ?? [], 'value'),
     sections: toMap(sectionRes.data ?? [], 'value'),
     languages: toMap(languageRes.data ?? [], 'value'),
+    socialCategories: toMap(socialRes.data ?? [], 'value'),
   };
 }
 
@@ -120,14 +129,20 @@ function mapRow(
     return { ok: false, error: 'Invalid phone number in primary or emergency contact' };
   }
 
-  const bloodGroupId = maps.bloodGroups.get(row.blood_group.toLowerCase());
-  if (!bloodGroupId) {
-    return { ok: false, error: `Invalid blood group: ${row.blood_group}` };
+  let bloodGroupId: number | undefined;
+  if (row.blood_group) {
+    bloodGroupId = maps.bloodGroups.get(row.blood_group.toLowerCase());
+    if (!bloodGroupId) {
+      return { ok: false, error: `Invalid blood group: ${row.blood_group}` };
+    }
   }
 
-  const admissionCategoryId = maps.admissionCategories.get(row.admission_category.toLowerCase());
-  if (!admissionCategoryId) {
-    return { ok: false, error: `Invalid admission category: ${row.admission_category}` };
+  let admissionCategoryId: number | undefined;
+  if (row.admission_category) {
+    admissionCategoryId = maps.admissionCategories.get(row.admission_category.toLowerCase());
+    if (!admissionCategoryId) {
+      return { ok: false, error: `Invalid admission category: ${row.admission_category}` };
+    }
   }
 
   const academicYearId = maps.academicYears.get(row.academic_year.toLowerCase());
@@ -156,6 +171,14 @@ function mapRow(
     }
   }
 
+  let socialCategoryId: number | undefined;
+  if (row.social_category) {
+    socialCategoryId = maps.socialCategories.get(row.social_category.toLowerCase());
+    if (!socialCategoryId) {
+      return { ok: false, error: `Invalid social category: ${row.social_category}` };
+    }
+  }
+
   return {
     ok: true,
     value: {
@@ -170,6 +193,7 @@ function mapRow(
       admission_date: row.admission_date,
       mother_tongue_id: motherTongueId,
       aadhaar_number: row.aadhaar_number,
+      sats_id: row.sats_id,
       academic_year_id: academicYearId,
       standard_id: standardId,
       section_id: sectionId,
@@ -186,7 +210,12 @@ function mapRow(
       village_town: row.village_town,
       taluk_mandal: row.taluk_mandal,
       district: row.district,
+      state: row.state ?? 'Karnataka',
       pincode: row.pincode,
+      social_category_id: socialCategoryId,
+      caste: row.caste,
+      rd_number: row.rd_number,
+      rd_number_secondary: row.rd_number_secondary,
     },
   };
 }
