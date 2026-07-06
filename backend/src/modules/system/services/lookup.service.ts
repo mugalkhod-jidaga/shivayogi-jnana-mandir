@@ -21,12 +21,12 @@ export const lookupService = {
     return lookupRepository.listBloodGroups();
   },
 
-  listAdmissionCategories(tenantId: number, locale: SupportedLocale = 'en') {
-    return lookupRepository.listAdmissionCategories(tenantId, locale);
+  listAdmissionCategories(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    return lookupRepository.listAdmissionCategories(tenantId, locale, includeInactive);
   },
 
-  listDocumentTypes(tenantId: number, locale: SupportedLocale = 'en') {
-    return lookupRepository.listDocumentTypes(tenantId, locale);
+  listDocumentTypes(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    return lookupRepository.listDocumentTypes(tenantId, locale, includeInactive);
   },
 
   listReligions(tenantId: number, locale: SupportedLocale = 'en') {
@@ -37,20 +37,20 @@ export const lookupService = {
     return lookupRepository.listSocialCategories(tenantId, locale);
   },
 
-  listAcademicStandards(tenantId: number, locale: SupportedLocale = 'en') {
-    return lookupRepository.listAcademicStandards(tenantId, locale);
+  listAcademicStandards(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    return lookupRepository.listAcademicStandards(tenantId, locale, includeInactive);
   },
 
-  listSections(tenantId: number, locale: SupportedLocale = 'en') {
-    return lookupRepository.listSections(tenantId, locale);
+  listSections(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    return lookupRepository.listSections(tenantId, locale, includeInactive);
   },
 
   listAcademicYears(tenantId: number) {
     return lookupRepository.listAcademicYears(tenantId);
   },
 
-  listLanguages(tenantId: number, locale: SupportedLocale = 'en') {
-    return lookupRepository.listLanguages(tenantId, locale);
+  listLanguages(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    return lookupRepository.listLanguages(tenantId, locale, includeInactive);
   },
 
   listRemarkTypes(tenantId: number, locale: SupportedLocale = 'en') {

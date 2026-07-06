@@ -43,7 +43,7 @@
     "add": "Add",
     "adding": "Adding…",
     "edit": "Edit",
-    "noValues": "No active values yet.",
+    "noValues": "No values yet.",
     "columns": {
       "name": "Name",
       "nameKn": "Kannada label",
@@ -51,7 +51,9 @@
       "actions": "Actions"
     },
     "active": "Active",
+    "inactive": "Inactive",
     "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
     "deactivating": "Deactivating…"
   },
   "addDialog": {

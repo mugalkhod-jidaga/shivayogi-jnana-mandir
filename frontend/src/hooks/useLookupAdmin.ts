@@ -10,13 +10,21 @@ export type LookupResource =
   | 'sections'
   | 'languages';
 
-const resourceKeys: Record<LookupResource, readonly ['lookups', string]> = {
+const resourceKeys: Record<LookupResource, readonly string[]> = {
   'admission-categories': lookupKeys.admissionCategories,
   'document-types': lookupKeys.documentTypes,
   'academic-standards': lookupKeys.academicStandards,
   sections: lookupKeys.sections,
   languages: lookupKeys.languages,
 };
+
+function invalidateLookupQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  resource: LookupResource,
+) {
+  void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
+  void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+}
 
 export type CreateLookupPayload = {
   value: string;
@@ -36,8 +44,22 @@ export function useCreateLookupValue(resource: LookupResource) {
       });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
-      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+      invalidateLookupQueries(queryClient, resource);
+    },
+  });
+}
+
+export function useSetLookupActive(resource: LookupResource) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      apiFetch<TenantLookupOption>(`/lookups/${resource}/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive }),
+      }),
+    onSuccess: () => {
+      invalidateLookupQueries(queryClient, resource);
     },
   });
 }
@@ -52,8 +74,7 @@ export function useDeactivateLookupValue(resource: LookupResource) {
         body: JSON.stringify({ isActive: false }),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
-      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+      invalidateLookupQueries(queryClient, resource);
     },
   });
 }
@@ -68,8 +89,7 @@ export function useUpdateLookupLabels(resource: LookupResource) {
         body: JSON.stringify({ labelKn: labelKn.trim() || null }),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: resourceKeys[resource] });
-      void queryClient.invalidateQueries({ queryKey: lookupKeys.all });
+      invalidateLookupQueries(queryClient, resource);
     },
   });
 }
