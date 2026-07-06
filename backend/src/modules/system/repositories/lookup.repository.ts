@@ -122,25 +122,37 @@ class LookupRepository {
     return (data ?? []).map(serializeBloodGroup);
   }
 
-  async listAdmissionCategories(tenantId: number, locale: SupportedLocale = 'en') {
-    const { data, error } = await supabase
+  async listAdmissionCategories(
+    tenantId: number,
+    locale: SupportedLocale = 'en',
+    includeInactive = false,
+  ) {
+    let query = supabase
       .from('lookup_admission_categories')
       .select('id, tenant_id, value, labels, is_active')
-      .eq('tenant_id', tenantId)
-      .eq('is_active', true)
-      .order('value');
+      .eq('tenant_id', tenantId);
+
+    if (!includeInactive) query = query.eq('is_active', true);
+
+    const { data, error } = await query.order('value');
 
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
   }
 
-  async listDocumentTypes(tenantId: number, locale: SupportedLocale = 'en') {
-    const { data, error } = await supabase
+  async listDocumentTypes(
+    tenantId: number,
+    locale: SupportedLocale = 'en',
+    includeInactive = false,
+  ) {
+    let query = supabase
       .from('lookup_document_types')
       .select('id, tenant_id, value, labels, is_active')
-      .eq('tenant_id', tenantId)
-      .eq('is_active', true)
-      .order('value');
+      .eq('tenant_id', tenantId);
+
+    if (!includeInactive) query = query.eq('is_active', true);
+
+    const { data, error } = await query.order('value');
 
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
@@ -274,26 +286,33 @@ class LookupRepository {
     return serializeTenantLookup(data);
   }
 
-  async listAcademicStandards(tenantId: number, locale: SupportedLocale = 'en') {
-    const { data, error } = await supabase
+  async listAcademicStandards(
+    tenantId: number,
+    locale: SupportedLocale = 'en',
+    includeInactive = false,
+  ) {
+    let query = supabase
       .from('lookup_academic_standards')
       .select('id, tenant_id, value, labels, sort_order, is_active')
-      .eq('tenant_id', tenantId)
-      .eq('is_active', true)
-      .order('sort_order')
-      .order('value');
+      .eq('tenant_id', tenantId);
+
+    if (!includeInactive) query = query.eq('is_active', true);
+
+    const { data, error } = await query.order('sort_order').order('value');
 
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeAcademicStandard(row as AcademicStandardRow, locale));
   }
 
-  async listSections(tenantId: number, locale: SupportedLocale = 'en') {
-    const { data, error } = await supabase
+  async listSections(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    let query = supabase
       .from('lookup_sections')
       .select('id, tenant_id, value, labels, is_active')
-      .eq('tenant_id', tenantId)
-      .eq('is_active', true)
-      .order('value');
+      .eq('tenant_id', tenantId);
+
+    if (!includeInactive) query = query.eq('is_active', true);
+
+    const { data, error } = await query.order('value');
 
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));
@@ -311,13 +330,15 @@ class LookupRepository {
     return (data ?? []).map((row) => serializeAcademicYear(row as AcademicYearRow));
   }
 
-  async listLanguages(tenantId: number, locale: SupportedLocale = 'en') {
-    const { data, error } = await supabase
+  async listLanguages(tenantId: number, locale: SupportedLocale = 'en', includeInactive = false) {
+    let query = supabase
       .from('lookup_languages')
       .select('id, tenant_id, value, labels, is_active')
-      .eq('tenant_id', tenantId)
-      .eq('is_active', true)
-      .order('value');
+      .eq('tenant_id', tenantId);
+
+    if (!includeInactive) query = query.eq('is_active', true);
+
+    const { data, error } = await query.order('value');
 
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeTenantLookup(row as TenantLookupRow, locale));

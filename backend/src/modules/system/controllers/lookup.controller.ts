@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
+import { permissionService } from '../../auth/services/permission.service';
 import type {
   CreateAcademicStandardInput,
   CreateAcademicYearInput,
@@ -7,6 +8,7 @@ import type {
   UpdateAcademicYearInput,
   UpdateLookupValueInput,
 } from '../schemas/lookup.schemas';
+import { lookupListQuerySchema } from '../schemas/lookup.schemas';
 import { lookupService } from '../services/lookup.service';
 
 function requireAuthContext(req: Request): { tenantId: number } {
@@ -25,6 +27,13 @@ function paramLookupId(req: Request): number {
   return id;
 }
 
+async function resolveIncludeInactive(req: Request): Promise<boolean> {
+  const parsed = lookupListQuerySchema.safeParse(req.query);
+  const requested = parsed.success && parsed.data.includeInactive === true;
+  if (!requested || !req.profileId) return false;
+  return permissionService.checkUserPermission(req.profileId, 'system:manage_lookups');
+}
+
 export const lookupController = {
   async listBloodGroups(req: Request, res: Response): Promise<void> {
     requireAuthContext(req);
@@ -35,14 +44,16 @@ export const lookupController = {
   async listAdmissionCategories(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);
-    const data = await lookupService.listAdmissionCategories(tenantId, locale);
+    const includeInactive = await resolveIncludeInactive(req);
+    const data = await lookupService.listAdmissionCategories(tenantId, locale, includeInactive);
     res.json({ success: true, data });
   },
 
   async listDocumentTypes(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);
-    const data = await lookupService.listDocumentTypes(tenantId, locale);
+    const includeInactive = await resolveIncludeInactive(req);
+    const data = await lookupService.listDocumentTypes(tenantId, locale, includeInactive);
     res.json({ success: true, data });
   },
 
@@ -63,14 +74,16 @@ export const lookupController = {
   async listAcademicStandards(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);
-    const data = await lookupService.listAcademicStandards(tenantId, locale);
+    const includeInactive = await resolveIncludeInactive(req);
+    const data = await lookupService.listAcademicStandards(tenantId, locale, includeInactive);
     res.json({ success: true, data });
   },
 
   async listSections(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);
-    const data = await lookupService.listSections(tenantId, locale);
+    const includeInactive = await resolveIncludeInactive(req);
+    const data = await lookupService.listSections(tenantId, locale, includeInactive);
     res.json({ success: true, data });
   },
 
@@ -83,7 +96,8 @@ export const lookupController = {
   async listLanguages(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);
-    const data = await lookupService.listLanguages(tenantId, locale);
+    const includeInactive = await resolveIncludeInactive(req);
+    const data = await lookupService.listLanguages(tenantId, locale, includeInactive);
     res.json({ success: true, data });
   },
 

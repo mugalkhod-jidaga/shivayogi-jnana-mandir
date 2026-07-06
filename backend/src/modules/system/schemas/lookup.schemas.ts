@@ -17,6 +17,15 @@ export const updateLookupValueSchema = z
     { message: 'At least one field must be provided' },
   );
 
+export const lookupListQuerySchema = z.object({
+  includeInactive: z
+    .enum(['true', 'false', '1', '0'])
+    .optional()
+    .transform((v) => v === 'true' || v === '1'),
+});
+
+export type LookupListQuery = z.infer<typeof lookupListQuerySchema>;
+
 export type CreateLookupValueInput = z.infer<typeof createLookupValueSchema>;
 export type UpdateLookupValueInput = z.infer<typeof updateLookupValueSchema>;
 export type CreateAcademicStandardInput = z.infer<typeof createAcademicStandardSchema>;

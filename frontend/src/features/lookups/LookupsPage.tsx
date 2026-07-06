@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
-import { useLookups } from '@/hooks/useLookups';
+import { useLookupAdminLists } from '@/hooks/useLookupAdminLists';
 import { cn } from '@/lib/utils';
 
 type TabKey =
@@ -23,7 +23,7 @@ export function LookupsPage() {
     languages,
     isLoading,
     isError,
-  } = useLookups();
+  } = useLookupAdminLists();
   const [tab, setTab] = useState<TabKey>('standards');
 
   const tabs: { key: TabKey; label: string }[] = [
