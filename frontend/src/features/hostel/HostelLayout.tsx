@@ -4,7 +4,8 @@ import { PageHeader } from '@/components/PageHeader';
 import { cn } from '@/lib/utils';
 
 const TABS = [
-  { to: '/hostel', end: true, labelKey: 'tabs.overview' },
+  { to: '/hostel', end: true, labelKey: 'tabs.roster' },
+  { to: '/hostel/overview', end: false, labelKey: 'tabs.overview' },
   { to: '/hostel/setup', end: false, labelKey: 'tabs.setup' },
   { to: '/hostel/allocations', end: false, labelKey: 'tabs.allocations' },
   { to: '/hostel/attendance', end: false, labelKey: 'tabs.attendance' },

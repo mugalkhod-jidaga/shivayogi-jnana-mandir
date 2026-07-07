@@ -10,8 +10,10 @@ import { HostelAllocationsPage } from '@/features/hostel/HostelAllocationsPage';
 import { HostelAttendanceMarkPage } from '@/features/hostel/HostelAttendanceMarkPage';
 import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
 import { HostelLayout } from '@/features/hostel/HostelLayout';
+import { HostelHomePage } from '@/features/hostel/HostelHomePage';
 import { HostelOverviewPage } from '@/features/hostel/HostelOverviewPage';
-import { HostelReportsPage } from '@/features/hostel/HostelReportsPage';
+import { HostelReportAnalyticsPage } from '@/features/hostel/HostelReportsPage';
+import { HostelReportsLayout } from '@/features/hostel/HostelReportsLayout';
 import { HostelSetupPage } from '@/features/hostel/HostelSetupPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
@@ -141,7 +143,8 @@ export function AppRoutes() {
               </PermissionRoute>
             }
           >
-            <Route index element={<HostelOverviewPage />} />
+            <Route index element={<HostelHomePage />} />
+            <Route path="overview" element={<HostelOverviewPage />} />
             <Route path="setup" element={<HostelSetupPage />} />
             <Route path="allocations" element={<HostelAllocationsPage />} />
             <Route
@@ -160,7 +163,9 @@ export function AppRoutes() {
                 </PermissionRoute>
               }
             />
-            <Route path="reports" element={<HostelReportsPage />} />
+            <Route path="reports" element={<HostelReportsLayout />}>
+              <Route index element={<HostelReportAnalyticsPage />} />
+            </Route>
           </Route>
           <Route
             path="/documents"

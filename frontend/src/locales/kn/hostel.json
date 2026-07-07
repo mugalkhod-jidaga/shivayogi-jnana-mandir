@@ -2,6 +2,7 @@
   "title": "ವಸತಿ ನಿಲಯ",
   "description": "ವಸತಿ ನಿಲಯ ಬ್ಲಾಕ್‌ಗಳು, ಕೊಠಡಿಗಳು, ಹಾಸಿಗೆಗಳು, ಹಂಚಿಕೆ, ಹಾಜರಾತಿ ಮತ್ತು ವರದಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ.",
   "tabs": {
+    "roster": "Student list",
     "overview": "ಅವಲೋಕನ",
     "setup": "ಸೆಟಪ್",
     "allocations": "ಹಂಚಿಕೆ",
@@ -25,6 +26,19 @@
       "occupied": "occupied",
       "vacant": "ಖಾಲಿ",
       "unallocated": "ಹಂಚಿಕೆಯಾಗದ ವಿದ್ಯಾರ್ಥಿಗಳು"
+    }
+  },
+  "roster": {
+    "noSession": "ಈ ದಿನಾಂಕಕ್ಕೆ ಹಾಜರಾತಿ ಸೆಷನ್ ಇಲ್ಲ. ಮೊದಲು ಹಾಜರಾತಿ ದಾಖಲಿಸಿ.",
+    "search": "Search",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ admission number…",
+    "showing": "{{total}} ರಲ್ಲಿ {{count}} students",
+    "empty": "ಪ್ರಸ್ತುತ filters ಗೆ students ಇಲ್ಲ.",
+    "filters": {
+      "all": "All"
+    },
+    "columns": {
+      "admission": "Admission #"
     }
   },
   "blocks": {
@@ -126,8 +140,10 @@
       "noBlocks": "ಇನ್ನೂ blocks configure ಆಗಿಲ್ಲ."
     },
     "details": {
-      "occupancyTable": "Occupancy details",
-      "dailyLists": "ವಿದ್ಯಾರ್ಥಿ ಪಟ್ಟಿಗಳು"
+      "occupancyTable": "Occupancy details"
+    },
+    "filters": {
+      "blockActive": "ಒಂದು block ಗೆ filter ಮಾಡಲಾಗಿದೆ"
     }
   }
 }

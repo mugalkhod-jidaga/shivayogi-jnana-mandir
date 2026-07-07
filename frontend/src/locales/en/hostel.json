@@ -2,6 +2,7 @@
   "title": "Hostel",
   "description": "Manage hostel blocks, rooms, beds, allocations, attendance, and reports.",
   "tabs": {
+    "roster": "Student list",
     "overview": "Overview",
     "setup": "Setup",
     "allocations": "Allocations",
@@ -25,6 +26,19 @@
       "occupied": "Occupied",
       "vacant": "Vacant",
       "unallocated": "Unallocated students"
+    }
+  },
+  "roster": {
+    "noSession": "No attendance session for this date. Record attendance first.",
+    "search": "Search",
+    "searchPlaceholder": "Name or admission number…",
+    "showing": "Showing {{count}} of {{total}} students",
+    "empty": "No students match the current filters.",
+    "filters": {
+      "all": "All"
+    },
+    "columns": {
+      "admission": "Admission #"
     }
   },
   "blocks": {
@@ -126,8 +140,10 @@
       "noBlocks": "No blocks configured yet."
     },
     "details": {
-      "occupancyTable": "Occupancy details",
-      "dailyLists": "Student lists"
+      "occupancyTable": "Occupancy details"
+    },
+    "filters": {
+      "blockActive": "Filtered to one block"
     }
   }
 }

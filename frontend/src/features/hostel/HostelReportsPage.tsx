@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { BedDouble, PieChartIcon, TrendingUp, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,13 +16,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useHostelDateFilters } from '@/features/hostel/components/HostelDateBlockFilters';
 import { KpiCard } from '@/features/dashboard/components/KpiCard';
 import {
   useHostelAttendanceTrend,
-  useHostelBlocks,
   useHostelDailyReport,
   useHostelOccupancyReport,
 } from '@/hooks/useHostel';
@@ -79,25 +76,13 @@ function DonutCenter({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formatName(firstName: string, lastName: string | null) {
-  return [firstName, lastName].filter(Boolean).join(' ');
-}
-
-export function HostelReportsPage() {
+export function HostelReportAnalyticsPage() {
   const { t } = useTranslation('hostel');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [blockId, setBlockId] = useState('');
-  const [appliedDate, setAppliedDate] = useState(date);
-  const [appliedBlockId, setAppliedBlockId] = useState('');
+  const { date, blockFilter } = useHostelDateFilters();
 
-  const blockFilter = appliedBlockId ? Number(appliedBlockId) : undefined;
-
-  const { data: blocksData } = useHostelBlocks();
-  const blocks = blocksData?.data ?? [];
-
-  const { data: daily, isLoading: dailyLoading } = useHostelDailyReport(appliedDate, blockFilter);
+  const { data: daily, isLoading: dailyLoading } = useHostelDailyReport(date, blockFilter);
   const { data: occupancy, isLoading: occLoading } = useHostelOccupancyReport(blockFilter);
-  const { data: trend, isLoading: trendLoading } = useHostelAttendanceTrend(appliedDate, blockFilter);
+  const { data: trend, isLoading: trendLoading } = useHostelAttendanceTrend(date, blockFilter);
 
   const isLoading = dailyLoading || occLoading || trendLoading;
 
@@ -176,36 +161,6 @@ export function HostelReportsPage() {
 
   return (
     <div className="space-y-8">
-      <form
-        className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4 shadow-sm"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setAppliedDate(date);
-          setAppliedBlockId(blockId);
-        }}
-      >
-        <div>
-          <Label>{t('reports.date')}</Label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </div>
-        <div>
-          <Label>{t('reports.block')}</Label>
-          <select
-            className="flex h-10 min-w-[160px] rounded-md border bg-background px-3 text-sm"
-            value={blockId}
-            onChange={(e) => setBlockId(e.target.value)}
-          >
-            <option value="">{t('attendance.allBlocks')}</option>
-            {blocks.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Button type="submit">{t('reports.apply')}</Button>
-      </form>
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           title={t('reports.kpis.occupancyRate')}
@@ -285,7 +240,7 @@ export function HostelReportsPage() {
             <h2 className="text-lg font-semibold">{t('reports.charts.attendanceSplit')}</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t('reports.charts.attendanceSplitHelp', { date: formatDobDisplay(appliedDate) })}
+            {t('reports.charts.attendanceSplitHelp', { date: formatDobDisplay(date) })}
           </p>
           {!isLoading && !daily?.hasSession && (
             <p className="mt-6 text-sm text-muted-foreground">{t('reports.noSession')}</p>
@@ -413,89 +368,6 @@ export function HostelReportsPage() {
           </div>
         </section>
       )}
-
-      {daily?.hasSession && (
-        <section className="space-y-4">
-          <h2 className="font-medium">{t('reports.details.dailyLists')}</h2>
-          <p className="text-sm text-muted-foreground">
-            {t('reports.dailySummary', {
-              present: daily.totals.present,
-              absent: daily.totals.absent,
-              notMarked: daily.totals.notMarked,
-              roster: daily.totals.roster,
-            })}
-          </p>
-          {daily.present.length > 0 && (
-            <ReportTable title={t('reports.present')} rows={daily.present} t={t} variant="present" />
-          )}
-          {daily.absent.length > 0 && (
-            <ReportTable title={t('reports.absent')} rows={daily.absent} t={t} variant="absent" />
-          )}
-          {daily.notMarked.length > 0 && (
-            <ReportTable title={t('reports.notMarked')} rows={daily.notMarked} t={t} variant="neutral" />
-          )}
-        </section>
-      )}
-    </div>
-  );
-}
-
-function ReportTable({
-  title,
-  rows,
-  t,
-  variant,
-}: {
-  title: string;
-  rows: Array<{
-    admissionNumber: string;
-    firstName: string;
-    lastName: string | null;
-    blockName: string;
-    roomNumber: string;
-    bedSlot: number | null;
-    status: string | null;
-  }>;
-  t: (key: string, opts?: Record<string, unknown>) => string;
-  variant: 'present' | 'absent' | 'neutral';
-}) {
-  const borderClass =
-    variant === 'present'
-      ? 'border-l-4 border-l-emerald-500'
-      : variant === 'absent'
-        ? 'border-l-4 border-l-red-500'
-        : 'border-l-4 border-l-slate-400';
-
-  return (
-    <div className={`space-y-2 rounded-lg border bg-card p-4 ${borderClass}`}>
-      <h3 className="text-sm font-medium">{title}</h3>
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left">
-            <tr>
-              <th className="px-3 py-2">{t('attendance.columns.student')}</th>
-              <th className="px-3 py-2">{t('allocations.columns.bed')}</th>
-              <th className="px-3 py-2">{t('attendance.columns.room')}</th>
-              <th className="px-3 py-2">{t('attendance.columns.status')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.admissionNumber} className="border-t">
-                <td className="px-3 py-2">
-                  {formatName(row.firstName, row.lastName)}
-                  <div className="text-xs text-muted-foreground">{row.admissionNumber}</div>
-                </td>
-                <td className="px-3 py-2 font-mono text-xs">{row.admissionNumber}</td>
-                <td className="px-3 py-2">
-                  {row.blockName} / {row.roomNumber}
-                </td>
-                <td className="px-3 py-2">{row.status ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
