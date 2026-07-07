@@ -5,12 +5,15 @@ import type {
   CreateBlockInput,
   CreateRoomInput,
   EndAllocationInput,
+  TransferAllocationInput,
   UpdateBlockInput,
   UpdateRoomInput,
 } from '../schemas/hostel.schemas';
 import {
   allocationListQuerySchema,
   blockListQuerySchema,
+  dailyReportQuerySchema,
+  occupancyReportQuerySchema,
   roomListQuerySchema,
 } from '../schemas/hostel.schemas';
 import { hostelService } from '../services/hostel.service';
@@ -36,6 +39,12 @@ function paramInt(req: Request, key: string): number {
 }
 
 export const hostelController = {
+  async getOverview(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await hostelService.getOverview(tenantId);
+    res.json({ success: true, data });
+  },
+
   async listBlocks(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const query = blockListQuerySchema.parse(req.query);
@@ -100,6 +109,22 @@ export const hostelController = {
     res.json({ success: true, data: { id: paramInt(req, 'id') } });
   },
 
+  async listBedsByRoom(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await hostelService.listBedsByRoom(tenantId, paramInt(req, 'roomId'));
+    res.json({ success: true, data });
+  },
+
+  async listVacantBeds(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const blockId = req.query.blockId ? Number(req.query.blockId) : undefined;
+    const data = await hostelService.listVacantBeds(
+      tenantId,
+      blockId && Number.isInteger(blockId) ? blockId : undefined,
+    );
+    res.json({ success: true, data });
+  },
+
   async listAllocations(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const query = allocationListQuerySchema.parse(req.query);
@@ -117,6 +142,16 @@ export const hostelController = {
     res.status(201).json({ success: true, data });
   },
 
+  async transferAllocation(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const data = await hostelService.transferAllocation(
+      tenantId,
+      req.body as TransferAllocationInput,
+      profileId,
+    );
+    res.json({ success: true, data });
+  },
+
   async endAllocation(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const data = await hostelService.endAllocation(
@@ -132,5 +167,19 @@ export const hostelController = {
     const { profileId, tenantId } = requireAuthContext(req);
     await hostelService.deleteAllocation(paramId(req), tenantId, profileId);
     res.json({ success: true, data: { id: paramId(req) } });
+  },
+
+  async getDailyReport(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = dailyReportQuerySchema.parse(req.query);
+    const data = await hostelService.getDailyReport(tenantId, query);
+    res.json({ success: true, data });
+  },
+
+  async getOccupancyReport(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = occupancyReportQuerySchema.parse(req.query);
+    const data = await hostelService.getOccupancyReport(tenantId, query);
+    res.json({ success: true, data });
   },
 };

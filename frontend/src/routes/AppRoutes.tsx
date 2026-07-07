@@ -6,9 +6,13 @@ import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { DocumentQueuePage } from '@/features/documents/DocumentQueuePage';
 import { ImportPage } from '@/features/import/ImportPage';
+import { HostelAllocationsPage } from '@/features/hostel/HostelAllocationsPage';
 import { HostelAttendanceMarkPage } from '@/features/hostel/HostelAttendanceMarkPage';
 import { HostelAttendancePage } from '@/features/hostel/HostelAttendancePage';
-import { HostelPage } from '@/features/hostel/HostelPage';
+import { HostelLayout } from '@/features/hostel/HostelLayout';
+import { HostelOverviewPage } from '@/features/hostel/HostelOverviewPage';
+import { HostelReportsPage } from '@/features/hostel/HostelReportsPage';
+import { HostelSetupPage } from '@/features/hostel/HostelSetupPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
 import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
@@ -130,29 +134,34 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="/hostel/attendance/:sessionId"
-            element={
-              <PermissionRoute permission="hostel_attendance:record">
-                <HostelAttendanceMarkPage />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/hostel/attendance"
-            element={
-              <PermissionRoute permission="hostel_attendance:read">
-                <HostelAttendancePage />
-              </PermissionRoute>
-            }
-          />
-          <Route
             path="/hostel"
             element={
               <PermissionRoute permission="hostel:read">
-                <HostelPage />
+                <HostelLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<HostelOverviewPage />} />
+            <Route path="setup" element={<HostelSetupPage />} />
+            <Route path="allocations" element={<HostelAllocationsPage />} />
+            <Route
+              path="attendance"
+              element={
+                <PermissionRoute permission="hostel_attendance:read">
+                  <HostelAttendancePage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="attendance/:sessionId"
+              element={
+                <PermissionRoute permission="hostel_attendance:record">
+                  <HostelAttendanceMarkPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="reports" element={<HostelReportsPage />} />
+          </Route>
           <Route
             path="/documents"
             element={

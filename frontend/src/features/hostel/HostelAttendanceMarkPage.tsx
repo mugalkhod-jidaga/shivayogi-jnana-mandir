@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { Navigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import {
   useHostelAttendanceRecords,
+  useHostelAttendanceSession,
   useRoomAllocations,
   useUpsertAttendanceRecords,
 } from '@/hooks/useHostel';
@@ -20,8 +20,15 @@ export function HostelAttendanceMarkPage() {
   const { t } = useTranslation('hostel');
   const { sessionId } = useParams();
   const { hostelAttendanceStatuses } = usePhase2Lookups();
-  const { data: allocationsData } = useRoomAllocations({ activeOnly: true, page: 1 });
-  const allocations = allocationsData?.data ?? [];
+  const { data: session } = useHostelAttendanceSession(sessionId);
+  const blockId = session?.blockId ?? undefined;
+  const { data: allocationsData } = useRoomAllocations({
+    activeOnly: true,
+    page: 1,
+    limit: 500,
+    blockId,
+  });
+  const allocations = useMemo(() => allocationsData?.data ?? [], [allocationsData?.data]);
   const { data: existingRecords } = useHostelAttendanceRecords(sessionId);
   const upsert = useUpsertAttendanceRecords(sessionId ?? '');
 
@@ -50,56 +57,70 @@ export function HostelAttendanceMarkPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('attendance.markTitle')} description={t('attendance.markDescription')}>
-        <Button asChild variant="outline">
-          <Link to="/hostel/attendance">{t('actions.backToAttendance')}</Link>
-        </Button>
-      </PageHeader>
+      {session && (
+        <p className="text-sm text-muted-foreground">
+          {session.attendanceDate} · {session.block?.name ?? t('attendance.allBlocks')}
+        </p>
+      )}
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left">
-            <tr>
-              <th className="px-4 py-3">{t('attendance.columns.student')}</th>
-              <th className="px-4 py-3">{t('attendance.columns.room')}</th>
-              <th className="px-4 py-3">{t('attendance.columns.status')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allocations.map((alloc) => (
-              <tr key={alloc.id} className="border-t">
-                <td className="px-4 py-3">
-                  {formatName(alloc.student.firstName, alloc.student.lastName)}
-                  <div className="text-xs text-muted-foreground">{alloc.student.admissionNumber}</div>
-                </td>
-                <td className="px-4 py-3">
-                  {alloc.room.block.name} / {alloc.room.roomNumber}
-                </td>
-                <td className="px-4 py-3">
-                  <Label className="sr-only">{t('attendance.columns.status')}</Label>
-                  <Select
-                    value={String(statusByStudent[alloc.studentId] ?? defaultStatusId ?? '')}
-                    onChange={(e) =>
-                      setStatusByStudent((prev) => ({
-                        ...prev,
-                        [alloc.studentId]: Number(e.target.value),
-                      }))
-                    }
-                  >
-                    {hostelAttendanceStatuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.value}
-                      </option>
-                    ))}
-                  </Select>
-                </td>
+      {allocations.length === 0 && (
+        <p className="text-sm text-muted-foreground">{t('attendance.emptyRoster')}</p>
+      )}
+
+      {allocations.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="px-4 py-3">{t('attendance.columns.student')}</th>
+                <th className="px-4 py-3">{t('attendance.columns.bed')}</th>
+                <th className="px-4 py-3">{t('attendance.columns.room')}</th>
+                <th className="px-4 py-3">{t('attendance.columns.status')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {allocations.map((alloc) => (
+                <tr key={alloc.id} className="border-t">
+                  <td className="px-4 py-3">
+                    {formatName(alloc.student.firstName, alloc.student.lastName)}
+                    <div className="text-xs text-muted-foreground">{alloc.student.admissionNumber}</div>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    {alloc.bed?.bedLabel ?? alloc.student.admissionNumber}
+                  </td>
+                  <td className="px-4 py-3">
+                    {alloc.room.block.name} / {alloc.room.roomNumber}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Label className="sr-only">{t('attendance.columns.status')}</Label>
+                    <Select
+                      value={String(statusByStudent[alloc.studentId] ?? defaultStatusId ?? '')}
+                      onChange={(e) =>
+                        setStatusByStudent((prev) => ({
+                          ...prev,
+                          [alloc.studentId]: Number(e.target.value),
+                        }))
+                      }
+                    >
+                      {hostelAttendanceStatuses.map((status) => (
+                        <option key={status.id} value={status.id}>
+                          {status.value}
+                        </option>
+                      ))}
+                    </Select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <Button type="button" onClick={() => void handleSave()} disabled={upsert.isPending}>
+      <Button
+        type="button"
+        onClick={() => void handleSave()}
+        disabled={upsert.isPending || allocations.length === 0}
+      >
         {t('attendance.save')}
       </Button>
     </div>

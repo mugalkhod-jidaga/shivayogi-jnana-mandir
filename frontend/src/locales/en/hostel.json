@@ -1,10 +1,31 @@
 {
   "title": "Hostel",
-  "description": "Manage hostel blocks, rooms, and student room allocations.",
+  "description": "Manage hostel blocks, rooms, beds, allocations, attendance, and reports.",
+  "tabs": {
+    "overview": "Overview",
+    "setup": "Setup",
+    "allocations": "Allocations",
+    "attendance": "Attendance",
+    "reports": "Reports"
+  },
   "actions": {
     "attendance": "Hostel attendance",
     "backToHostel": "Back to hostel",
     "backToAttendance": "Back to sessions"
+  },
+  "overview": {
+    "unallocatedWarning": "{{count}} active student(s) have no bed assigned.",
+    "andMore": "…and {{count}} more",
+    "assignBeds": "Assign beds",
+    "todayAttendance": "Today's attendance",
+    "noSessionToday": "No attendance session recorded for today yet.",
+    "goAttendance": "Go to attendance",
+    "kpis": {
+      "totalBeds": "Total beds",
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "unallocated": "Unallocated students"
+    }
   },
   "blocks": {
     "title": "Blocks",
@@ -17,15 +38,28 @@
     "capacity": "Capacity {{count}}",
     "selectBlock": "Select or create a block to manage rooms."
   },
+  "beds": {
+    "title": "Beds",
+    "description": "Beds are created automatically from room capacity. Occupied beds show the student's admission number.",
+    "slot": "Slot {{number}}",
+    "vacant": "Vacant"
+  },
   "allocations": {
     "title": "Active allocations",
+    "assignTitle": "Assign bed",
+    "transferTitle": "Transfer student",
+    "transferDescription": "Releases the current bed and assigns the selected vacant bed in one step.",
     "student": "Student",
-    "room": "Room",
-    "selectRoom": "Select room",
+    "bed": "Bed",
+    "newBed": "New bed",
+    "selectBed": "Select bed",
     "from": "From date",
-    "assign": "Assign room",
+    "transferDate": "Transfer date",
+    "assign": "Assign bed",
+    "transfer": "Transfer",
     "columns": {
       "student": "Student",
+      "bed": "Bed #",
       "block": "Block",
       "room": "Room",
       "from": "From"
@@ -35,18 +69,38 @@
     "title": "Hostel attendance",
     "description": "Record daily residential attendance (not school attendance).",
     "date": "Date",
+    "block": "Block",
     "notes": "Session notes",
     "createSession": "Create session",
     "loading": "Loading sessions…",
     "allBlocks": "All blocks",
     "mark": "Mark attendance",
     "markTitle": "Mark attendance",
-    "markDescription": "Set status for each allocated hostel student.",
+    "markDescription": "Set status for each allocated hostel student in this session's roster.",
     "save": "Save attendance",
+    "emptyRoster": "No students in the roster for this session's block filter.",
     "columns": {
       "student": "Student",
+      "bed": "Bed #",
       "room": "Room",
       "status": "Status"
     }
+  },
+  "reports": {
+    "date": "Date",
+    "block": "Block",
+    "apply": "Apply filters",
+    "loading": "Loading report…",
+    "occupancyTitle": "Bed occupancy",
+    "occupancySummary": "{{occupied}} of {{total}} beds occupied ({{vacant}} vacant)",
+    "totalBeds": "Total beds",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "dailyTitle": "Daily attendance",
+    "dailySummary": "Present: {{present}} · Absent: {{absent}} · Not marked: {{notMarked}} · Roster: {{roster}}",
+    "noSession": "No attendance session for this date.",
+    "present": "Present",
+    "absent": "Absent",
+    "notMarked": "Not marked"
   }
 }

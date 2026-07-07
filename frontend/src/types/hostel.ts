@@ -18,10 +18,27 @@ export type HostelRoom = {
   updatedAt: string;
 };
 
+export type HostelBed = {
+  id: number;
+  roomId: number;
+  slotNumber: number;
+  isActive: boolean;
+  isOccupied: boolean;
+  bedLabel: string | null;
+  room?: {
+    id: number;
+    roomNumber: string;
+    block: { id: number; name: string };
+  };
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type RoomAllocation = {
   id: string;
   studentId: string;
   roomId: number;
+  bedId: number | null;
   allocatedFrom: string;
   allocatedTo: string | null;
   notes: string | null;
@@ -33,11 +50,69 @@ export type RoomAllocation = {
     lastName: string | null;
     admissionNumber: string;
   };
+  bed: {
+    id: number;
+    slotNumber: number;
+    bedLabel: string;
+  } | null;
   room: {
     id: number;
     roomNumber: string;
     block: { id: number; name: string };
   };
+};
+
+export type HostelOverview = {
+  occupancy: { totalBeds: number; occupiedBeds: number; vacantBeds: number };
+  unallocatedStudents: {
+    count: number;
+    students: Array<{
+      id: string;
+      firstName: string;
+      lastName: string | null;
+      admissionNumber: string;
+    }>;
+  };
+  todayAttendance: {
+    date: string;
+    hasSession: boolean;
+    present: number;
+    absent: number;
+    notMarked: number;
+  };
+};
+
+export type HostelDailyReportRow = {
+  studentId: string;
+  firstName: string;
+  lastName: string | null;
+  admissionNumber: string;
+  blockName: string;
+  roomNumber: string;
+  bedSlot: number | null;
+  status: string | null;
+  countsAsPresent: boolean | null;
+};
+
+export type HostelDailyReport = {
+  date: string;
+  blockId: number | null;
+  hasSession: boolean;
+  totals: { roster: number; present: number; absent: number; notMarked: number };
+  present: HostelDailyReportRow[];
+  absent: HostelDailyReportRow[];
+  notMarked: HostelDailyReportRow[];
+};
+
+export type HostelOccupancyReport = {
+  summary: { totalBeds: number; occupiedBeds: number; vacantBeds: number };
+  blocks: Array<{
+    blockId: number;
+    blockName: string;
+    totalBeds: number;
+    occupiedBeds: number;
+    vacantBeds: number;
+  }>;
 };
 
 export type HostelAttendanceSession = {

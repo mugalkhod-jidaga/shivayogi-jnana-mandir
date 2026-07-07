@@ -1,38 +1,57 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCreateAttendanceSession, useHostelAttendanceSessions } from '@/hooks/useHostel';
+import {
+  useCreateAttendanceSession,
+  useHostelAttendanceSessions,
+  useHostelBlocks,
+} from '@/hooks/useHostel';
 
 export function HostelAttendancePage() {
   const { t } = useTranslation('hostel');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [blockId, setBlockId] = useState('');
   const [notes, setNotes] = useState('');
+  const { data: blocksData } = useHostelBlocks();
+  const blocks = blocksData?.data ?? [];
   const { data, isLoading } = useHostelAttendanceSessions({ attendanceDate: date });
   const createSession = useCreateAttendanceSession();
   const sessions = data?.data ?? [];
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('attendance.title')} description={t('attendance.description')}>
-        <Button asChild variant="outline">
-          <Link to="/hostel">{t('actions.backToHostel')}</Link>
-        </Button>
-      </PageHeader>
-
       <form
-        className="grid gap-3 rounded-lg border p-4 md:grid-cols-4"
+        className="grid gap-3 rounded-lg border p-4 md:grid-cols-5"
         onSubmit={(e) => {
           e.preventDefault();
-          void createSession.mutateAsync({ attendanceDate: date, notes: notes || undefined });
+          void createSession.mutateAsync({
+            attendanceDate: date,
+            blockId: blockId ? Number(blockId) : undefined,
+            notes: notes || undefined,
+          });
         }}
       >
         <div>
           <Label>{t('attendance.date')}</Label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        <div>
+          <Label>{t('attendance.block')}</Label>
+          <select
+            className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
+            value={blockId}
+            onChange={(e) => setBlockId(e.target.value)}
+          >
+            <option value="">{t('attendance.allBlocks')}</option>
+            {blocks.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="md:col-span-2">
           <Label>{t('attendance.notes')}</Label>

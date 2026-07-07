@@ -23,9 +23,25 @@ export const updateRoomSchema = createRoomSchema
 
 export const createAllocationSchema = z.object({
   studentId: z.string().uuid(),
-  roomId: z.coerce.number().int().positive(),
+  bedId: z.coerce.number().int().positive(),
   allocatedFrom: dateInputSchema,
   notes: z.string().trim().max(1000).optional(),
+});
+
+export const transferAllocationSchema = z.object({
+  studentId: z.string().uuid(),
+  bedId: z.coerce.number().int().positive(),
+  transferDate: dateInputSchema,
+  notes: z.string().trim().max(1000).optional(),
+});
+
+export const dailyReportQuerySchema = z.object({
+  date: dateInputSchema,
+  blockId: z.coerce.number().int().positive().optional(),
+});
+
+export const occupancyReportQuerySchema = z.object({
+  blockId: z.coerce.number().int().positive().optional(),
 });
 
 export const endAllocationSchema = z.object({
@@ -52,4 +68,7 @@ export type UpdateBlockInput = z.infer<typeof updateBlockSchema>;
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 export type CreateAllocationInput = z.infer<typeof createAllocationSchema>;
+export type TransferAllocationInput = z.infer<typeof transferAllocationSchema>;
 export type EndAllocationInput = z.infer<typeof endAllocationSchema>;
+export type DailyReportQuery = z.infer<typeof dailyReportQuerySchema>;
+export type OccupancyReportQuery = z.infer<typeof occupancyReportQuerySchema>;
