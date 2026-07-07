@@ -6,6 +6,7 @@ import type {
   HostelBed,
   HostelBlock,
   HostelDailyReport,
+  HostelAttendanceTrend,
   HostelOccupancyReport,
   HostelOverview,
   HostelRoom,
@@ -24,6 +25,8 @@ export const hostelKeys = {
     [...hostelKeys.all, 'reports', 'daily', date, blockId ?? 'all'] as const,
   occupancyReport: (blockId?: number) =>
     [...hostelKeys.all, 'reports', 'occupancy', blockId ?? 'all'] as const,
+  attendanceTrend: (endDate: string, blockId?: number) =>
+    [...hostelKeys.all, 'reports', 'trend', endDate, blockId ?? 'all'] as const,
   attendance: ['hostel-attendance'] as const,
   sessions: (params: Record<string, unknown>) => [...hostelKeys.attendance, 'sessions', params] as const,
   sessionRecords: (sessionId: string) => [...hostelKeys.attendance, 'records', sessionId] as const,
@@ -106,6 +109,16 @@ export function useHostelOccupancyReport(blockId?: number) {
   return useQuery({
     queryKey: hostelKeys.occupancyReport(blockId),
     queryFn: () => apiFetch<HostelOccupancyReport>(`/hostel/reports/occupancy${params}`),
+  });
+}
+
+export function useHostelAttendanceTrend(endDate: string, blockId?: number) {
+  const params = new URLSearchParams({ endDate, days: '7' });
+  if (blockId) params.set('blockId', String(blockId));
+  return useQuery({
+    queryKey: hostelKeys.attendanceTrend(endDate, blockId),
+    queryFn: () => apiFetch<HostelAttendanceTrend>(`/hostel/reports/attendance-trend?${params}`),
+    enabled: Boolean(endDate),
   });
 }
 

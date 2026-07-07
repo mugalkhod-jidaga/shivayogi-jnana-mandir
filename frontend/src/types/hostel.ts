@@ -115,6 +115,20 @@ export type HostelOccupancyReport = {
   }>;
 };
 
+export type HostelAttendanceTrend = {
+  endDate: string;
+  days: number;
+  blockId: number | null;
+  points: Array<{
+    date: string;
+    hasSession: boolean;
+    present: number;
+    absent: number;
+    notMarked: number;
+    roster: number;
+  }>;
+};
+
 export type HostelAttendanceSession = {
   id: string;
   attendanceDate: string;

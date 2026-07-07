@@ -38,6 +38,13 @@ hostelRoutes.get(
 );
 
 hostelRoutes.get(
+  '/reports/attendance-trend',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:read'),
+  asyncHandler(hostelController.getAttendanceTrend),
+);
+
+hostelRoutes.get(
   '/beds/vacant',
   extractTenantMiddleware,
   requirePermission('hostel:read'),

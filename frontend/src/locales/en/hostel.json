@@ -101,6 +101,33 @@
     "noSession": "No attendance session for this date.",
     "present": "Present",
     "absent": "Absent",
-    "notMarked": "Not marked"
+    "notMarked": "Not marked",
+    "kpis": {
+      "occupancyRate": "Occupancy rate",
+      "occupancyRateHelp": "{{occupied}} of {{total}} beds filled",
+      "vacantBeds": "Vacant beds",
+      "presentToday": "Present today",
+      "presentTodayHelp": "{{rate}}% of roster",
+      "absentToday": "Absent today",
+      "rosterHelp": "Roster: {{count}} students"
+    },
+    "charts": {
+      "occupancySplit": "Bed utilization",
+      "occupancySplitHelp": "Share of occupied vs vacant beds across the hostel.",
+      "attendanceSplit": "Today's attendance",
+      "attendanceSplitHelp": "Breakdown for {{date}}.",
+      "blockOccupancy": "Occupancy by block",
+      "blockOccupancyHelp": "Stacked view of filled and empty beds per block.",
+      "trendTitle": "7-day attendance trend",
+      "trendHelp": "Present and absent counts over the last 7 days ending on the selected date.",
+      "beds": "beds",
+      "students": "students",
+      "noBeds": "No beds configured yet.",
+      "noBlocks": "No blocks configured yet."
+    },
+    "details": {
+      "occupancyTable": "Occupancy details",
+      "dailyLists": "Student lists"
+    }
   }
 }

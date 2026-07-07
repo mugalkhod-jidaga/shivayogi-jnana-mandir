@@ -14,6 +14,7 @@ import {
   blockListQuerySchema,
   dailyReportQuerySchema,
   occupancyReportQuerySchema,
+  attendanceTrendQuerySchema,
   roomListQuerySchema,
 } from '../schemas/hostel.schemas';
 import { hostelService } from '../services/hostel.service';
@@ -180,6 +181,13 @@ export const hostelController = {
     const { tenantId } = requireAuthContext(req);
     const query = occupancyReportQuerySchema.parse(req.query);
     const data = await hostelService.getOccupancyReport(tenantId, query);
+    res.json({ success: true, data });
+  },
+
+  async getAttendanceTrend(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = attendanceTrendQuerySchema.parse(req.query);
+    const data = await hostelService.getAttendanceTrend(tenantId, query);
     res.json({ success: true, data });
   },
 };

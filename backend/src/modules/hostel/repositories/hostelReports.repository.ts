@@ -14,7 +14,42 @@ type DailyRecordRow = {
   };
 };
 
+function dateRange(endDate: string, days: number): string[] {
+  const end = new Date(`${endDate}T12:00:00`);
+  const dates: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(end);
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
 class HostelReportsRepository {
+  async getAttendanceTrend(tenantId: number, endDate: string, days: number, blockId?: number) {
+    const dates = dateRange(endDate, days);
+    const points = await Promise.all(
+      dates.map(async (date) => {
+        const report = await this.getDailyReport(tenantId, date, blockId);
+        return {
+          date,
+          hasSession: report.hasSession,
+          present: report.totals.present,
+          absent: report.totals.absent,
+          notMarked: report.totals.notMarked,
+          roster: report.totals.roster,
+        };
+      }),
+    );
+
+    return {
+      endDate,
+      days,
+      blockId: blockId ?? null,
+      points,
+    };
+  }
+
   async getDailyReport(tenantId: number, date: string, blockId?: number) {
     let sessionQuery = supabase
       .from('hostel_attendance_sessions')

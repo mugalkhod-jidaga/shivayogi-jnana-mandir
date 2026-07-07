@@ -44,6 +44,12 @@ export const occupancyReportQuerySchema = z.object({
   blockId: z.coerce.number().int().positive().optional(),
 });
 
+export const attendanceTrendQuerySchema = z.object({
+  endDate: dateInputSchema,
+  days: z.coerce.number().int().min(3).max(30).default(7),
+  blockId: z.coerce.number().int().positive().optional(),
+});
+
 export const endAllocationSchema = z.object({
   allocatedTo: dateInputSchema,
   notes: z.string().trim().max(1000).optional(),
@@ -72,3 +78,4 @@ export type TransferAllocationInput = z.infer<typeof transferAllocationSchema>;
 export type EndAllocationInput = z.infer<typeof endAllocationSchema>;
 export type DailyReportQuery = z.infer<typeof dailyReportQuerySchema>;
 export type OccupancyReportQuery = z.infer<typeof occupancyReportQuerySchema>;
+export type AttendanceTrendQuery = z.infer<typeof attendanceTrendQuerySchema>;

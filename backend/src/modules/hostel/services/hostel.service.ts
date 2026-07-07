@@ -2,6 +2,7 @@ import { AppError } from '../../../utils/AppError';
 import { studentsRepository } from '../../students/repositories/students.repository';
 import type {
   AllocationListQuery,
+  AttendanceTrendQuery,
   BlockListQuery,
   CreateAllocationInput,
   CreateBlockInput,
@@ -190,6 +191,15 @@ export const hostelService = {
 
   getOccupancyReport(tenantId: number, query: OccupancyReportQuery) {
     return hostelReportsRepository.getOccupancyReport(tenantId, query.blockId);
+  },
+
+  getAttendanceTrend(tenantId: number, query: AttendanceTrendQuery) {
+    return hostelReportsRepository.getAttendanceTrend(
+      tenantId,
+      query.endDate,
+      query.days,
+      query.blockId,
+    );
   },
 
   listAllocationsForBlock(tenantId: number, blockId: number | null) {

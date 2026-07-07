@@ -94,13 +94,40 @@
     "occupancyTitle": "ಹಾಸಿಗೆ occupancy",
     "occupancySummary": "{{total}} ರಲ್ಲಿ {{occupied}} occupied ({{vacant}} vacant)",
     "totalBeds": "ಒಟ್ಟು ಹಾಸಿಗೆಗಳು",
-    "occupied": "occupied",
-    "vacant": "vacant",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
     "dailyTitle": "ದೈನಂದಿನ ಹಾಜರಾತಿ",
     "dailySummary": "Present: {{present}} · Absent: {{absent}} · Not marked: {{notMarked}} · Roster: {{roster}}",
     "noSession": "ಈ ದಿನಾಂಕಕ್ಕೆ ಹಾಜರಾತಿ ಸೆಷನ್ ಇಲ್ಲ.",
     "present": "Present",
     "absent": "Absent",
-    "notMarked": "Not marked"
+    "notMarked": "Not marked",
+    "kpis": {
+      "occupancyRate": "Occupancy rate",
+      "occupancyRateHelp": "{{total}} ರಲ್ಲಿ {{occupied}} filled",
+      "vacantBeds": "Vacant beds",
+      "presentToday": "ಇಂದು present",
+      "presentTodayHelp": "Roster ನ {{rate}}%",
+      "absentToday": "ಇಂದು absent",
+      "rosterHelp": "Roster: {{count}} ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "charts": {
+      "occupancySplit": "Bed utilization",
+      "occupancySplitHelp": "Occupied vs vacant ಹಾಸಿಗೆಗಳ ಪಾಲು.",
+      "attendanceSplit": "ಇಂದಿನ ಹಾಜರಾತಿ",
+      "attendanceSplitHelp": "{{date}} ಗಾಗಿ breakdown.",
+      "blockOccupancy": "Block-wise occupancy",
+      "blockOccupancyHelp": "ಪ್ರತಿ block ಗೆ filled ಮತ್ತು empty ಹಾಸಿಗೆಗಳ view.",
+      "trendTitle": "7-ದಿನ ಹಾಜರಾತಿ trend",
+      "trendHelp": "ಆಯ್ಕೆಮಾಡಿದ ದಿನಾಂಕದಿಂದ ಕಳೆದ 7 ದಿನಗಳ present ಮತ್ತು absent.",
+      "beds": "ಹಾಸಿಗೆಗಳು",
+      "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "noBeds": "ಇನ್ನೂ ಹಾಸಿಗೆಗಳು configure ಆಗಿಲ್ಲ.",
+      "noBlocks": "ಇನ್ನೂ blocks configure ಆಗಿಲ್ಲ."
+    },
+    "details": {
+      "occupancyTable": "Occupancy details",
+      "dailyLists": "ವಿದ್ಯಾರ್ಥಿ ಪಟ್ಟಿಗಳು"
+    }
   }
 }
