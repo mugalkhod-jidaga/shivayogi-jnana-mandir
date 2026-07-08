@@ -13,11 +13,12 @@ export function useHostelDateFilters() {
   const date = searchParams.get('date') ?? today;
   const blockId = searchParams.get('blockId') ?? '';
   const status = searchParams.get('status') ?? 'all';
+  const sessionPeriod = (searchParams.get('sessionPeriod') as 'morning' | 'evening' | null) ?? 'morning';
   const search = searchParams.get('search') ?? '';
 
   const blockFilter = blockId ? Number(blockId) : undefined;
 
-  const setFilters = (next: Partial<{ date: string; blockId: string; status: string; search: string }>) => {
+  const setFilters = (next: Partial<{ date: string; blockId: string; status: string; search: string; sessionPeriod: string }>) => {
     const params = new URLSearchParams(searchParams);
     for (const [key, value] of Object.entries(next)) {
       if (value === '' || value === undefined) params.delete(key);
@@ -26,7 +27,7 @@ export function useHostelDateFilters() {
     setSearchParams(params, { replace: true });
   };
 
-  return { date, blockId, status, search, blockFilter, setFilters, today };
+  return { date, blockId, status, search, sessionPeriod, blockFilter, setFilters, today };
 }
 
 type HostelDateBlockFiltersProps = {

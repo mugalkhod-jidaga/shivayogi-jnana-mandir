@@ -38,6 +38,7 @@ export const transferAllocationSchema = z.object({
 export const dailyReportQuerySchema = z.object({
   date: dateInputSchema,
   blockId: z.coerce.number().int().positive().optional(),
+  sessionPeriod: z.enum(['morning', 'evening']).optional(),
 });
 
 export const occupancyReportQuerySchema = z.object({

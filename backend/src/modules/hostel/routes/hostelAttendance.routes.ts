@@ -7,6 +7,7 @@ import { hostelAttendanceController } from '../controllers/hostelAttendance.cont
 import {
   bulkAttendanceRecordSchema,
   createSessionSchema,
+  ensureSessionSchema,
   updateSessionSchema,
 } from '../schemas/hostelAttendance.schemas';
 
@@ -25,6 +26,21 @@ hostelAttendanceRoutes.post(
   requirePermission('hostel_attendance:record'),
   validateZod(createSessionSchema),
   asyncHandler(hostelAttendanceController.createSession),
+);
+
+hostelAttendanceRoutes.post(
+  '/sessions/ensure',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:record'),
+  validateZod(ensureSessionSchema),
+  asyncHandler(hostelAttendanceController.ensureSession),
+);
+
+hostelAttendanceRoutes.get(
+  '/daily-board',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:read'),
+  asyncHandler(hostelAttendanceController.getDailyBoard),
 );
 
 hostelAttendanceRoutes.get(

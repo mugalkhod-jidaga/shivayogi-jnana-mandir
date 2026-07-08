@@ -90,6 +90,7 @@ export type HostelDailyReportRow = {
   blockName: string;
   roomNumber: string;
   bedSlot: number | null;
+  isAssigned?: boolean;
   status: string | null;
   countsAsPresent: boolean | null;
 };
@@ -97,6 +98,7 @@ export type HostelDailyReportRow = {
 export type HostelDailyReport = {
   date: string;
   blockId: number | null;
+  sessionPeriod: 'morning' | 'evening' | null;
   hasSession: boolean;
   totals: { roster: number; present: number; absent: number; notMarked: number };
   present: HostelDailyReportRow[];
@@ -133,6 +135,7 @@ export type HostelAttendanceSession = {
   id: string;
   attendanceDate: string;
   blockId: number | null;
+  sessionPeriod: 'morning' | 'evening';
   block: { id: number; name: string } | null;
   notes: string | null;
   createdAt: string;
@@ -141,6 +144,35 @@ export type HostelAttendanceSession = {
     id: string;
     firstName: string;
     lastName: string | null;
+  };
+};
+
+export type HostelAttendanceRosterRow = {
+  studentId: string;
+  firstName: string;
+  lastName: string | null;
+  admissionNumber: string;
+  isAssigned: boolean;
+  blockName: string | null;
+  roomNumber: string | null;
+  bedSlot: number | null;
+  bedLabel: string | null;
+};
+
+export type HostelDailyBoardSlot = {
+  sessionId: string | null;
+  markedCount: number;
+  rosterCount: number;
+  hasSession: boolean;
+};
+
+export type HostelDailyBoard = {
+  date: string;
+  blockId: number | null;
+  rosterCount: number;
+  slots: {
+    morning: HostelDailyBoardSlot;
+    evening: HostelDailyBoardSlot;
   };
 };
 

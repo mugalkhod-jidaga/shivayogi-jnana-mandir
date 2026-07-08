@@ -16,8 +16,9 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 12. `012_bulk_import_social.sql` — optional blood/admission category; SATS + social details in bulk import
 13. `013_medical_staff_role.sql` — Medical Staff role (infirmary-only: medical + student read)
 14. `014_hostel_beds.sql` — `hostel_beds` table, `room_allocations.bed_id`, backfill beds from room capacity
+15. `015_hostel_session_period.sql` — morning/evening session period on hostel attendance sessions
 
-Apply migrations through `014` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+Apply migrations through `015` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 
 After migrations, insert the Phase 1 tenant (Section 5.4):
 

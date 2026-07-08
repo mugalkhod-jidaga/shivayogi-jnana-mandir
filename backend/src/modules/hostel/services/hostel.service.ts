@@ -170,7 +170,7 @@ export const hostelService = {
     const occupancy = await hostelBedRepository.countOccupancy(tenantId);
     const unallocated = await hostelReportsRepository.countUnallocatedActiveStudents(tenantId);
     const today = new Date().toISOString().slice(0, 10);
-    const daily = await hostelReportsRepository.getDailyReport(tenantId, today);
+    const daily = await hostelReportsRepository.getDailyReport(tenantId, today, undefined, 'morning');
 
     return {
       occupancy,
@@ -186,7 +186,12 @@ export const hostelService = {
   },
 
   getDailyReport(tenantId: number, query: DailyReportQuery) {
-    return hostelReportsRepository.getDailyReport(tenantId, query.date, query.blockId);
+    return hostelReportsRepository.getDailyReport(
+      tenantId,
+      query.date,
+      query.blockId,
+      query.sessionPeriod,
+    );
   },
 
   getOccupancyReport(tenantId: number, query: OccupancyReportQuery) {

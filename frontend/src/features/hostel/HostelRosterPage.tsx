@@ -38,9 +38,9 @@ function countForFilter(roster: HostelDailyReportRow[], filterValue: string): nu
 
 export function HostelRosterPage() {
   const { t } = useTranslation('hostel');
-  const { date, blockFilter, status, search, setFilters } = useHostelDateFilters();
+  const { date, blockFilter, status, search, sessionPeriod, setFilters } = useHostelDateFilters();
   const { hostelAttendanceStatuses } = usePhase2Lookups();
-  const { data: daily, isLoading } = useHostelDailyReport(date, blockFilter);
+  const { data: daily, isLoading } = useHostelDailyReport(date, blockFilter, sessionPeriod);
 
   const roster = useMemo(() => (daily ? combineRoster(daily) : []), [daily]);
 
@@ -76,16 +76,34 @@ export function HostelRosterPage() {
     <div className="space-y-4">
       <HostelDateBlockFilters idPrefix="hostel-roster" />
 
+      <div className="flex flex-wrap gap-2">
+        {(['morning', 'evening'] as const).map((period) => (
+          <button
+            key={period}
+            type="button"
+            onClick={() => setFilters({ sessionPeriod: period })}
+            className={cn(
+              'rounded-full border px-3 py-1 text-sm transition-colors',
+              sessionPeriod === period
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground',
+            )}
+          >
+            {period === 'morning' ? t('attendance.morning') : t('attendance.evening')}
+          </button>
+        ))}
+      </div>
+
       {!daily?.hasSession && !isLoading && (
-        <div className="space-y-3 rounded-lg border border-dashed p-6 text-center">
-          <p className="text-sm text-muted-foreground">{t('roster.noSession')}</p>
-          <Link to="/hostel/attendance" className="text-sm text-primary underline underline-offset-2">
+        <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+          {t('roster.noSessionForPeriod')}{' '}
+          <Link to="/hostel/attendance" className="text-primary underline underline-offset-2">
             {t('overview.goAttendance')}
           </Link>
-        </div>
+        </p>
       )}
 
-      {(daily?.hasSession || isLoading) && (
+      {(daily || isLoading) && (
         <>
           <div className="flex flex-wrap gap-2">
             {statusFilters.map((f) => (
@@ -122,7 +140,7 @@ export function HostelRosterPage() {
 
           {isLoading && <p className="text-sm text-muted-foreground">{t('reports.loading')}</p>}
 
-          {!isLoading && daily?.hasSession && (
+          {!isLoading && roster.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {t('roster.showing', { count: filtered.length, total: roster.length })}
             </p>
@@ -151,14 +169,22 @@ export function HostelRosterPage() {
                         </Link>
                       </td>
                       <td className="px-3 py-2">{formatName(row.firstName, row.lastName)}</td>
-                      <td className="px-3 py-2">
+                  <td className="px-3 py-2">
+                    {row.isAssigned === false ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                        {t('attendance.unassigned')}
+                      </span>
+                    ) : (
+                      <>
                         {row.blockName} / {row.roomNumber}
                         {row.bedSlot != null && (
                           <span className="ml-1 text-xs text-muted-foreground">
                             ({t('beds.slot', { number: row.bedSlot })})
                           </span>
                         )}
-                      </td>
+                      </>
+                    )}
+                  </td>
                       <td className="px-3 py-2">
                         <span
                           className={cn(
@@ -176,7 +202,7 @@ export function HostelRosterPage() {
             </div>
           )}
 
-          {!isLoading && daily?.hasSession && filtered.length === 0 && (
+          {!isLoading && filtered.length === 0 && (
             <p className="text-sm text-muted-foreground">{t('roster.empty')}</p>
           )}
         </>

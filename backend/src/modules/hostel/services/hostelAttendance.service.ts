@@ -6,9 +6,17 @@ import { hostelAttendanceRepository } from '../repositories/hostelAttendance.rep
 import type {
   BulkAttendanceRecordInput,
   CreateSessionInput,
+  DailyBoardQuery,
+  EnsureSessionInput,
   SessionListQuery,
   UpdateSessionInput,
 } from '../schemas/hostelAttendance.schemas';
+import {
+  buildHostelAttendanceRoster,
+  countHostelAttendanceRoster,
+} from './hostelAttendanceRoster.service';
+
+const PERIODS = ['morning', 'evening'] as const;
 
 export const hostelAttendanceService = {
   listSessions(tenantId: number, query: SessionListQuery) {
@@ -22,9 +30,68 @@ export const hostelAttendanceService = {
     }
     return hostelAttendanceRepository.createSession(tenantId, userId, {
       attendance_date: input.attendanceDate,
+      session_period: input.sessionPeriod,
       block_id: input.blockId ?? null,
       notes: input.notes ?? null,
     });
+  },
+
+  async ensureSession(tenantId: number, input: EnsureSessionInput, userId: string) {
+    const blockId = input.blockId ?? null;
+    if (blockId) {
+      const block = await hostelRepository.findBlockById(blockId, tenantId);
+      if (!block) throw new AppError(400, 'Invalid block');
+    }
+
+    const existing = await hostelAttendanceRepository.findSessionByKey(
+      tenantId,
+      input.attendanceDate,
+      input.sessionPeriod,
+      blockId,
+    );
+    if (existing) return existing;
+
+    return hostelAttendanceRepository.createSession(tenantId, userId, {
+      attendance_date: input.attendanceDate,
+      session_period: input.sessionPeriod,
+      block_id: blockId,
+      notes: null,
+    });
+  },
+
+  async getDailyBoard(tenantId: number, query: DailyBoardQuery) {
+    const blockId = query.blockId ?? null;
+    const rosterCount = await countHostelAttendanceRoster(tenantId, blockId);
+
+    const slots: Record<
+      string,
+      {
+        sessionId: string | null;
+        markedCount: number;
+        rosterCount: number;
+        hasSession: boolean;
+      }
+    > = {};
+
+    for (const period of PERIODS) {
+      const session = await hostelAttendanceRepository.findSessionByKey(
+        tenantId,
+        query.date,
+        period,
+        blockId,
+      );
+      const markedCount = session
+        ? await hostelAttendanceRepository.countRecords(session.id, tenantId)
+        : 0;
+      slots[period] = {
+        sessionId: session?.id ?? null,
+        markedCount,
+        rosterCount,
+        hasSession: Boolean(session),
+      };
+    }
+
+    return { date: query.date, blockId, rosterCount, slots };
   },
 
   async getSession(id: string, tenantId: number) {
@@ -69,6 +136,6 @@ export const hostelAttendanceService = {
 
   async getSessionRoster(sessionId: string, tenantId: number) {
     const session = await this.getSession(sessionId, tenantId);
-    return hostelRepository.listAllocationsForBlock(tenantId, session.blockId);
+    return buildHostelAttendanceRoster(tenantId, session.blockId);
   },
 };

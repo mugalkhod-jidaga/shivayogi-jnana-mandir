@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
 import type {
   HostelAttendanceRecord,
+  HostelAttendanceRosterRow,
   HostelAttendanceSession,
   HostelBed,
   HostelBlock,
+  HostelDailyBoard,
   HostelDailyReport,
   HostelAttendanceTrend,
   HostelOccupancyReport,
@@ -21,8 +23,10 @@ export const hostelKeys = {
   beds: (roomId: number) => [...hostelKeys.all, 'beds', roomId] as const,
   vacantBeds: (blockId?: number) => [...hostelKeys.all, 'vacant-beds', blockId ?? 'all'] as const,
   allocations: (params: Record<string, unknown>) => [...hostelKeys.all, 'allocations', params] as const,
-  dailyReport: (date: string, blockId?: number) =>
-    [...hostelKeys.all, 'reports', 'daily', date, blockId ?? 'all'] as const,
+  dailyReport: (date: string, blockId?: number, sessionPeriod?: string) =>
+    [...hostelKeys.all, 'reports', 'daily', date, blockId ?? 'all', sessionPeriod ?? 'all'] as const,
+  dailyBoard: (date: string, blockId?: number) =>
+    [...hostelKeys.attendance, 'daily-board', date, blockId ?? 'all'] as const,
   occupancyReport: (blockId?: number) =>
     [...hostelKeys.all, 'reports', 'occupancy', blockId ?? 'all'] as const,
   attendanceTrend: (endDate: string, blockId?: number) =>
@@ -95,12 +99,27 @@ export function useRoomAllocations(
   });
 }
 
-export function useHostelDailyReport(date: string, blockId?: number) {
+export function useHostelDailyReport(
+  date: string,
+  blockId?: number,
+  sessionPeriod?: 'morning' | 'evening',
+) {
+  const params = new URLSearchParams({ date });
+  if (blockId) params.set('blockId', String(blockId));
+  if (sessionPeriod) params.set('sessionPeriod', sessionPeriod);
+  return useQuery({
+    queryKey: hostelKeys.dailyReport(date, blockId, sessionPeriod),
+    queryFn: () => apiFetch<HostelDailyReport>(`/hostel/reports/daily?${params}`),
+    enabled: Boolean(date),
+  });
+}
+
+export function useHostelDailyBoard(date: string, blockId?: number) {
   const params = new URLSearchParams({ date });
   if (blockId) params.set('blockId', String(blockId));
   return useQuery({
-    queryKey: hostelKeys.dailyReport(date, blockId),
-    queryFn: () => apiFetch<HostelDailyReport>(`/hostel/reports/daily?${params}`),
+    queryKey: hostelKeys.dailyBoard(date, blockId),
+    queryFn: () => apiFetch<HostelDailyBoard>(`/hostel-attendance/daily-board?${params}`),
     enabled: Boolean(date),
   });
 }
@@ -209,15 +228,40 @@ export function useHostelAttendanceRecords(sessionId: string | undefined) {
 export function useHostelSessionRoster(sessionId: string | undefined) {
   return useQuery({
     queryKey: hostelKeys.sessionRoster(sessionId ?? ''),
-    queryFn: () => apiFetch<RoomAllocation[]>(`/hostel-attendance/sessions/${sessionId}/roster`),
+    queryFn: () => apiFetch<HostelAttendanceRosterRow[]>(`/hostel-attendance/sessions/${sessionId}/roster`),
     enabled: Boolean(sessionId),
+  });
+}
+
+export function useEnsureAttendanceSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      attendanceDate: string;
+      sessionPeriod: 'morning' | 'evening';
+      blockId?: number;
+    }) =>
+      apiFetch<HostelAttendanceSession>('/hostel-attendance/sessions/ensure', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: hostelKeys.attendance });
+      void qc.invalidateQueries({ queryKey: hostelKeys.overview });
+      void qc.invalidateQueries({ queryKey: hostelKeys.all });
+    },
   });
 }
 
 export function useCreateAttendanceSession() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { attendanceDate: string; blockId?: number; notes?: string }) =>
+    mutationFn: (body: {
+      attendanceDate: string;
+      sessionPeriod?: 'morning' | 'evening';
+      blockId?: number;
+      notes?: string;
+    }) =>
       apiFetch<HostelAttendanceSession>('/hostel-attendance/sessions', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -240,6 +284,8 @@ export function useUpsertAttendanceRecords(sessionId: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: hostelKeys.sessionRecords(sessionId) });
       void qc.invalidateQueries({ queryKey: hostelKeys.overview });
+      void qc.invalidateQueries({ queryKey: hostelKeys.all });
+      void qc.invalidateQueries({ queryKey: hostelKeys.attendance });
     },
   });
 }

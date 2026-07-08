@@ -1,6 +1,8 @@
 import { supabase } from '../../../config/supabase';
 import { AppError } from '../../../utils/AppError';
 import { hostelBedRepository } from './hostelBed.repository';
+import { buildHostelAttendanceRoster } from '../services/hostelAttendanceRoster.service';
+import type { SessionPeriod } from '../schemas/hostelAttendance.schemas';
 
 type DailyRecordRow = {
   student_id: string;
@@ -50,62 +52,29 @@ class HostelReportsRepository {
     };
   }
 
-  async getDailyReport(tenantId: number, date: string, blockId?: number) {
+  async getDailyReport(
+    tenantId: number,
+    date: string,
+    blockId?: number,
+    sessionPeriod?: SessionPeriod,
+  ) {
     let sessionQuery = supabase
       .from('hostel_attendance_sessions')
-      .select('id, block_id')
+      .select('id, block_id, session_period')
       .eq('tenant_id', tenantId)
       .eq('attendance_date', date)
       .is('deleted_at', null);
 
     if (blockId) sessionQuery = sessionQuery.eq('block_id', blockId);
+    if (sessionPeriod) sessionQuery = sessionQuery.eq('session_period', sessionPeriod);
 
     const { data: sessions, error: sessionError } = await sessionQuery;
     if (sessionError) throw new AppError(500, sessionError.message);
 
     const sessionIds = (sessions ?? []).map((s) => s.id);
 
-    let rosterQuery = supabase
-      .from('room_allocations')
-      .select(
-        `
-        student_id,
-        students!inner ( id, first_name, last_name, admission_number ),
-        hostel_rooms!inner ( room_number, block_id, hostel_blocks!inner ( id, name ) ),
-        hostel_beds ( slot_number )
-      `,
-      )
-      .eq('tenant_id', tenantId)
-      .is('allocated_to', null)
-      .is('deleted_at', null);
-
-    if (blockId) {
-      const { data: rooms, error: roomsError } = await supabase
-        .from('hostel_rooms')
-        .select('id')
-        .eq('tenant_id', tenantId)
-        .eq('block_id', blockId)
-        .is('deleted_at', null);
-      if (roomsError) throw new AppError(500, roomsError.message);
-      const roomIds = (rooms ?? []).map((r) => r.id as number);
-      if (roomIds.length === 0) {
-        return {
-          date,
-          blockId: blockId ?? null,
-          hasSession: sessionIds.length > 0,
-          totals: { roster: 0, present: 0, absent: 0, notMarked: 0 },
-          present: [],
-          absent: [],
-          notMarked: [],
-        };
-      }
-      rosterQuery = rosterQuery.in('room_id', roomIds);
-    }
-
-    const { data: roster, error: rosterError } = await rosterQuery;
-    if (rosterError) throw new AppError(500, rosterError.message);
-
-    const rosterStudentIds = new Set((roster ?? []).map((r) => r.student_id as string));
+    const rosterRows = await buildHostelAttendanceRoster(tenantId, blockId ?? null);
+    const rosterStudentIds = new Set(rosterRows.map((r) => r.studentId));
 
     let records: DailyRecordRow[] = [];
     if (sessionIds.length > 0) {
@@ -134,31 +103,22 @@ class HostelReportsRepository {
       blockName: string;
       roomNumber: string;
       bedSlot: number | null;
+      isAssigned: boolean;
       status: string | null;
       countsAsPresent: boolean | null;
     };
 
     const rosterMap = new Map<string, StudentRow>();
-    for (const row of roster ?? []) {
-      const student = row.students as unknown as {
-        id: string;
-        first_name: string;
-        last_name: string | null;
-        admission_number: string;
-      };
-      const room = row.hostel_rooms as unknown as {
-        room_number: string;
-        hostel_blocks: { name: string };
-      };
-      const bed = row.hostel_beds as unknown as { slot_number: number } | null;
-      rosterMap.set(row.student_id as string, {
-        studentId: student.id,
-        firstName: student.first_name,
-        lastName: student.last_name,
-        admissionNumber: student.admission_number,
-        blockName: room.hostel_blocks.name,
-        roomNumber: room.room_number,
-        bedSlot: bed?.slot_number ?? null,
+    for (const row of rosterRows) {
+      rosterMap.set(row.studentId, {
+        studentId: row.studentId,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        admissionNumber: row.admissionNumber,
+        blockName: row.blockName ?? '—',
+        roomNumber: row.roomNumber ?? '—',
+        bedSlot: row.bedSlot,
+        isAssigned: row.isAssigned,
         status: null,
         countsAsPresent: null,
       });
@@ -181,6 +141,7 @@ class HostelReportsRepository {
     return {
       date,
       blockId: blockId ?? null,
+      sessionPeriod: sessionPeriod ?? null,
       hasSession: sessionIds.length > 0,
       totals: {
         roster: all.length,
