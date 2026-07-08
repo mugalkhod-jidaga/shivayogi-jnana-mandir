@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import {
   useHostelAttendanceRecords,
   useHostelAttendanceSession,
-  useRoomAllocations,
+  useHostelSessionRoster,
   useUpsertAttendanceRecords,
 } from '@/hooks/useHostel';
 import { usePhase2Lookups } from '@/hooks/usePhase2Lookups';
@@ -20,15 +20,9 @@ export function HostelAttendanceMarkPage() {
   const { t } = useTranslation('hostel');
   const { sessionId } = useParams();
   const { hostelAttendanceStatuses } = usePhase2Lookups();
-  const { data: session } = useHostelAttendanceSession(sessionId);
-  const blockId = session?.blockId ?? undefined;
-  const { data: allocationsData } = useRoomAllocations({
-    activeOnly: true,
-    page: 1,
-    limit: 500,
-    blockId,
-  });
-  const allocations = useMemo(() => allocationsData?.data ?? [], [allocationsData?.data]);
+  const { data: session, isLoading: sessionLoading } = useHostelAttendanceSession(sessionId);
+  const { data: roster, isLoading: rosterLoading } = useHostelSessionRoster(sessionId);
+  const allocations = useMemo(() => roster ?? [], [roster]);
   const { data: existingRecords } = useHostelAttendanceRecords(sessionId);
   const upsert = useUpsertAttendanceRecords(sessionId ?? '');
 
@@ -46,6 +40,7 @@ export function HostelAttendanceMarkPage() {
   if (!sessionId) return <Navigate to="/hostel/attendance" replace />;
 
   const defaultStatusId = hostelAttendanceStatuses[0]?.id;
+  const isLoading = sessionLoading || rosterLoading;
 
   const handleSave = async () => {
     const records = allocations.map((alloc) => ({
@@ -63,11 +58,19 @@ export function HostelAttendanceMarkPage() {
         </p>
       )}
 
-      {allocations.length === 0 && (
-        <p className="text-sm text-muted-foreground">{t('attendance.emptyRoster')}</p>
+      {isLoading && <p className="text-sm text-muted-foreground">{t('attendance.loadingRoster')}</p>}
+
+      {!isLoading && allocations.length === 0 && (
+        <div className="space-y-3 rounded-lg border border-dashed p-6 text-center">
+          <p className="text-sm text-muted-foreground">{t('attendance.emptyRoster')}</p>
+          <p className="text-sm text-muted-foreground">{t('attendance.emptyRosterHelp')}</p>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/hostel/allocations">{t('attendance.assignBeds')}</Link>
+          </Button>
+        </div>
       )}
 
-      {allocations.length > 0 && (
+      {!isLoading && allocations.length > 0 && (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left">
@@ -119,7 +122,7 @@ export function HostelAttendanceMarkPage() {
       <Button
         type="button"
         onClick={() => void handleSave()}
-        disabled={upsert.isPending || allocations.length === 0}
+        disabled={upsert.isPending || isLoading || allocations.length === 0}
       >
         {t('attendance.save')}
       </Button>

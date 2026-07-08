@@ -59,6 +59,18 @@
     "byStatus": {
       "title": "ಸ್ಥಿತಿ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
       "description": "ಸಕ್ರಿಯ, ಪದವೀಧರ, ನಿಲ್ಲಿಸಿದ — ಆ ಪಟ್ಟಿ ನೋಡಲು ಚಿಪ್ ಒತ್ತಿ."
+    },
+    "byLocation": {
+      "title": "ಸ್ಥಳ ವಾರು ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "description": "ಕುಟುಂಬ ವಿಳಾಸದ ಆಧಾರದ ಮೇಲೆ (free text). district/taluk/village lookups ಬಂದ ನಂತರ drill-down ಸುಧಾರಿಸುತ್ತದೆ.",
+      "byDistrict": "ಜಿಲ್ಲೆ ವಾರು",
+      "byTaluk": "Top taluks / mandals",
+      "topVillages": "Top villages / towns",
+      "topVillagesHelp": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿ count ಪ್ರಕಾರ top 15.",
+      "districtTable": "ಎಲ್ಲಾ ಜಿಲ್ಲೆಗಳು",
+      "columnPlace": "ಗ್ರಾಮ / ಪಟ್ಟಣ",
+      "columnDistrict": "ಜಿಲ್ಲೆ",
+      "empty": "ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಇನ್ನೂ address data ಇಲ್ಲ."
     }
   },
   "form": {

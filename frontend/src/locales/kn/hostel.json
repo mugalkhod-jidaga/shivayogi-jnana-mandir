@@ -92,7 +92,10 @@
     "markTitle": "ಹಾಜರಾತಿ ಗುರುತಿಸಿ",
     "markDescription": "ಈ ಸೆಷನ್‌ನ roster ಗೆ ಸೇರಿದ ಪ್ರತಿ ವಸತಿ ವಿದ್ಯಾರ್ಥಿಗೆ ಸ್ಥಿತಿಯನ್ನು ಹೊಂದಿಸಿ.",
     "save": "ಹಾಜರಾತಿ ಉಳಿಸಿ",
-    "emptyRoster": "ಈ ಸೆಷನ್‌ನ ಬ್ಲಾಕ್ filter ಗೆ roster ನಲ್ಲಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಲ್ಲ.",
+    "emptyRoster": "ಈ ಸೆಷನ್‌ಗೆ active bed assignment ಇರುವ ವಿದ್ಯಾರ್ಥಿಗಳಿಲ್ಲ.",
+    "emptyRosterHelp": "Allocations ನಲ್ಲಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ bed assign ಮಾಡಿ, ನಂತರ ಇಲ್ಲಿ ಹಾಜರಾತಿ ಗುರುತಿಸಿ.",
+    "assignBeds": "Allocations ಗೆ ಹೋಗಿ",
+    "loadingRoster": "Roster ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
     "columns": {
       "student": "ವಿದ್ಯಾರ್ಥಿ",
       "bed": "ಹಾಸಿಗೆ #",

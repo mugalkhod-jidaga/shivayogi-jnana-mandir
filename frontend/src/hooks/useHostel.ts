@@ -30,6 +30,7 @@ export const hostelKeys = {
   attendance: ['hostel-attendance'] as const,
   sessions: (params: Record<string, unknown>) => [...hostelKeys.attendance, 'sessions', params] as const,
   sessionRecords: (sessionId: string) => [...hostelKeys.attendance, 'records', sessionId] as const,
+  sessionRoster: (sessionId: string) => [...hostelKeys.attendance, 'roster', sessionId] as const,
 };
 
 export function useHostelOverview() {
@@ -201,6 +202,14 @@ export function useHostelAttendanceRecords(sessionId: string | undefined) {
   return useQuery({
     queryKey: hostelKeys.sessionRecords(sessionId ?? ''),
     queryFn: () => apiFetch<HostelAttendanceRecord[]>(`/hostel-attendance/sessions/${sessionId}/records`),
+    enabled: Boolean(sessionId),
+  });
+}
+
+export function useHostelSessionRoster(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: hostelKeys.sessionRoster(sessionId ?? ''),
+    queryFn: () => apiFetch<RoomAllocation[]>(`/hostel-attendance/sessions/${sessionId}/roster`),
     enabled: Boolean(sessionId),
   });
 }

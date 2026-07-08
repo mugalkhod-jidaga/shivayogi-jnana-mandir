@@ -20,6 +20,11 @@ export type StatusBreakdown = {
   count: number;
 };
 
+export type GeoBreakdown = {
+  label: string;
+  count: number;
+};
+
 export type StudentReportSummary = {
   totalStudents: number;
   activeStudents: number;
@@ -29,4 +34,7 @@ export type StudentReportSummary = {
   studentsBySocialCategory: SocialCategoryBreakdown[];
   studentsByGender: GenderBreakdown[];
   studentsByStatus: StatusBreakdown[];
+  studentsByDistrict: GeoBreakdown[];
+  studentsByTaluk: GeoBreakdown[];
+  topVillages: GeoBreakdown[];
 };

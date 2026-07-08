@@ -292,7 +292,7 @@ class HostelRepository extends BaseRepository {
 
   async listAllocations(tenantId: number, query: AllocationListQuery) {
     const { page, limit, search, blockId, roomId, activeOnly } = query;
-    const cappedLimit = Math.min(limit, 100);
+    const cappedLimit = Math.min(limit, 500);
     const offset = (page - 1) * cappedLimit;
 
     let dbQuery = supabase
@@ -304,7 +304,13 @@ class HostelRepository extends BaseRepository {
 
     if (activeOnly) dbQuery = dbQuery.is('allocated_to', null);
     if (roomId) dbQuery = dbQuery.eq('room_id', roomId);
-    if (blockId) dbQuery = dbQuery.eq('hostel_rooms.block_id', blockId);
+    if (blockId) {
+      const roomIds = await this.getRoomIdsForBlock(tenantId, blockId);
+      if (roomIds.length === 0) {
+        return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+      }
+      dbQuery = dbQuery.in('room_id', roomIds);
+    }
     if (search) {
       dbQuery = dbQuery.or(
         `students.first_name.ilike.%${search}%,students.last_name.ilike.%${search}%,students.admission_number.ilike.%${search}%`,
@@ -391,11 +397,26 @@ class HostelRepository extends BaseRepository {
       .is('allocated_to', null)
       .order('allocated_from', { ascending: false });
 
-    if (blockId) dbQuery = dbQuery.eq('hostel_rooms.block_id', blockId);
+    if (blockId) {
+      const roomIds = await this.getRoomIdsForBlock(tenantId, blockId);
+      if (roomIds.length === 0) return [];
+      dbQuery = dbQuery.in('room_id', roomIds);
+    }
 
     const { data, error } = await dbQuery;
     if (error) throw new AppError(500, error.message);
     return (data ?? []).map((row) => serializeAllocation(row as unknown as AllocationRow));
+  }
+
+  async getRoomIdsForBlock(tenantId: number, blockId: number) {
+    const { data, error } = await supabase
+      .from('hostel_rooms')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('block_id', blockId)
+      .is('deleted_at', null);
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => row.id as number);
   }
 }
 

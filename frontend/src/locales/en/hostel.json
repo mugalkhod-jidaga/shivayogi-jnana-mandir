@@ -92,7 +92,10 @@
     "markTitle": "Mark attendance",
     "markDescription": "Set status for each allocated hostel student in this session's roster.",
     "save": "Save attendance",
-    "emptyRoster": "No students in the roster for this session's block filter.",
+    "emptyRoster": "No students with an active bed assignment for this session.",
+    "emptyRosterHelp": "Assign students to beds under Allocations, then return here to mark attendance.",
+    "assignBeds": "Go to allocations",
+    "loadingRoster": "Loading roster…",
     "columns": {
       "student": "Student",
       "bed": "Bed #",

@@ -57,6 +57,12 @@ export const hostelAttendanceController = {
     res.json({ success: true, data });
   },
 
+  async getSessionRoster(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await hostelAttendanceService.getSessionRoster(paramId(req), tenantId);
+    res.json({ success: true, data });
+  },
+
   async upsertRecords(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await hostelAttendanceService.upsertRecords(

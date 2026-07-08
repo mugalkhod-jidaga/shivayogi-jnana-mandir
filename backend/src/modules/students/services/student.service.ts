@@ -24,6 +24,26 @@ import {
 
 const FULL_ACCESS_ROLES = new Set(['Super Admin', 'Admissions Clerk', 'Finance']);
 
+type GeoField = 'district' | 'taluk_mandal' | 'village_town';
+
+function aggregateGeoField(
+  rows: Array<Record<GeoField, string>>,
+  field: GeoField,
+) {
+  const map = new Map<string, { label: string; count: number }>();
+  for (const row of rows) {
+    const raw = row[field]?.trim();
+    if (!raw) continue;
+    const key = raw.toLowerCase();
+    const existing = map.get(key);
+    if (existing) existing.count += 1;
+    else map.set(key, { label: raw, count: 1 });
+  }
+  return [...map.values()].sort(
+    (a, b) => b.count - a.count || a.label.localeCompare(b.label),
+  );
+}
+
 function maskAadhaar(aadhaar: string | null, canViewFull: boolean): string | null {
   if (!aadhaar) return null;
   if (canViewFull) return aadhaar;
@@ -415,6 +435,7 @@ export const studentService = {
       socialDetailsRes,
       genderRes,
       statusRes,
+      familyDetailsRes,
     ] = await Promise.all([
       supabase
         .from('students')
@@ -471,6 +492,12 @@ export const studentService = {
         .select('status')
         .eq('tenant_id', tenantId)
         .is('deleted_at', null),
+      supabase
+        .from('student_family_details')
+        .select('district, taluk_mandal, village_town, students!inner(tenant_id, status)')
+        .eq('students.tenant_id', tenantId)
+        .eq('students.status', 'Active')
+        .is('students.deleted_at', null),
     ]);
 
     for (const res of [
@@ -482,6 +509,7 @@ export const studentService = {
       socialDetailsRes,
       genderRes,
       statusRes,
+      familyDetailsRes,
     ]) {
       if (res.error) throw new AppError(500, res.error.message);
     }
@@ -570,6 +598,13 @@ export const studentService = {
 
     const scopedActiveStudents = studentsByStandard.reduce((sum, row) => sum + row.count, 0);
 
+    const familyRows = (familyDetailsRes.data ?? []) as Array<
+      Record<GeoField, string>
+    >;
+    const studentsByDistrict = aggregateGeoField(familyRows, 'district');
+    const studentsByTaluk = aggregateGeoField(familyRows, 'taluk_mandal');
+    const topVillages = aggregateGeoField(familyRows, 'village_town').slice(0, 15);
+
     return {
       totalStudents: totalStudentsRes.count ?? 0,
       activeStudents: allowedStandardIds ? scopedActiveStudents : (activeStudentsRes.count ?? 0),
@@ -579,6 +614,9 @@ export const studentService = {
       studentsBySocialCategory,
       studentsByGender,
       studentsByStatus,
+      studentsByDistrict,
+      studentsByTaluk,
+      topVillages,
     };
   },
 };

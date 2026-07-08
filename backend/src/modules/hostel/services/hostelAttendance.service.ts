@@ -66,4 +66,9 @@ export const hostelAttendanceService = {
 
     return hostelAttendanceRepository.upsertRecords(tenantId, sessionId, input.records);
   },
+
+  async getSessionRoster(sessionId: string, tenantId: number) {
+    const session = await this.getSession(sessionId, tenantId);
+    return hostelRepository.listAllocationsForBlock(tenantId, session.blockId);
+  },
 };

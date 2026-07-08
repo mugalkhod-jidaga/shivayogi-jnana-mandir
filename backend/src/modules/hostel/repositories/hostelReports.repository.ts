@@ -79,7 +79,28 @@ class HostelReportsRepository {
       .is('allocated_to', null)
       .is('deleted_at', null);
 
-    if (blockId) rosterQuery = rosterQuery.eq('hostel_rooms.block_id', blockId);
+    if (blockId) {
+      const { data: rooms, error: roomsError } = await supabase
+        .from('hostel_rooms')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('block_id', blockId)
+        .is('deleted_at', null);
+      if (roomsError) throw new AppError(500, roomsError.message);
+      const roomIds = (rooms ?? []).map((r) => r.id as number);
+      if (roomIds.length === 0) {
+        return {
+          date,
+          blockId: blockId ?? null,
+          hasSession: sessionIds.length > 0,
+          totals: { roster: 0, present: 0, absent: 0, notMarked: 0 },
+          present: [],
+          absent: [],
+          notMarked: [],
+        };
+      }
+      rosterQuery = rosterQuery.in('room_id', roomIds);
+    }
 
     const { data: roster, error: rosterError } = await rosterQuery;
     if (rosterError) throw new AppError(500, rosterError.message);

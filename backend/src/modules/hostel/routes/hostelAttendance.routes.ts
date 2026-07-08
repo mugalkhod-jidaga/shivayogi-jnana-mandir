@@ -49,6 +49,13 @@ hostelAttendanceRoutes.get(
   asyncHandler(hostelAttendanceController.listRecords),
 );
 
+hostelAttendanceRoutes.get(
+  '/sessions/:id/roster',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:read'),
+  asyncHandler(hostelAttendanceController.getSessionRoster),
+);
+
 hostelAttendanceRoutes.post(
   '/sessions/:id/records',
   extractTenantMiddleware,
