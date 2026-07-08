@@ -1,8 +1,5 @@
-import { supabase } from '../../../config/supabase';
-import { AppError } from '../../../utils/AppError';
-import { hostelRepository } from './hostel.repository';
-import { hostelReportsRepository } from './hostelReports.repository';
-import type { SessionPeriod } from '../schemas/hostelAttendance.schemas';
+import { hostelRepository } from '../repositories/hostel.repository';
+import { hostelReportsRepository } from '../repositories/hostelReports.repository';
 
 export type HostelAttendanceRosterRow = {
   studentId: string;
