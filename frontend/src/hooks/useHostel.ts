@@ -2,21 +2,48 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
 import type {
   HostelAttendanceRecord,
+  HostelAttendanceRosterRow,
   HostelAttendanceSession,
+  HostelBed,
   HostelBlock,
+  HostelDailyBoard,
+  HostelDailyReport,
+  HostelAttendanceTrend,
+  HostelOccupancyReport,
+  HostelOverview,
   HostelRoom,
   RoomAllocation,
 } from '@/types/hostel';
 
 export const hostelKeys = {
   all: ['hostel'] as const,
+  overview: ['hostel', 'overview'] as const,
   blocks: (page: number, search?: string) => [...hostelKeys.all, 'blocks', page, search] as const,
   rooms: (blockId: number) => [...hostelKeys.all, 'rooms', blockId] as const,
+  beds: (roomId: number) => [...hostelKeys.all, 'beds', roomId] as const,
+  vacantBeds: (blockId?: number) => [...hostelKeys.all, 'vacant-beds', blockId ?? 'all'] as const,
   allocations: (params: Record<string, unknown>) => [...hostelKeys.all, 'allocations', params] as const,
+  dailyReport: (date: string, blockId?: number, sessionPeriod?: string) =>
+    [...hostelKeys.all, 'reports', 'daily', date, blockId ?? 'all', sessionPeriod ?? 'all'] as const,
+  dailyBoard: (date: string, blockId?: number) =>
+    [...hostelKeys.attendance, 'daily-board', date, blockId ?? 'all'] as const,
+  occupancyReport: (blockId?: number) =>
+    [...hostelKeys.all, 'reports', 'occupancy', blockId ?? 'all'] as const,
+  attendanceTrend: (endDate: string, blockId?: number) =>
+    [...hostelKeys.all, 'reports', 'trend', endDate, blockId ?? 'all'] as const,
   attendance: ['hostel-attendance'] as const,
   sessions: (params: Record<string, unknown>) => [...hostelKeys.attendance, 'sessions', params] as const,
   sessionRecords: (sessionId: string) => [...hostelKeys.attendance, 'records', sessionId] as const,
+  sessionRoster: (sessionId: string) => [...hostelKeys.attendance, 'roster', sessionId] as const,
 };
+
+export function useHostelOverview() {
+  return useQuery({
+    queryKey: hostelKeys.overview,
+    queryFn: () => apiFetch<HostelOverview>('/hostel/overview'),
+    staleTime: 60_000,
+  });
+}
 
 export function useHostelBlocks(page = 1, search?: string) {
   const params = new URLSearchParams({ page: String(page), limit: '50' });
@@ -35,14 +62,33 @@ export function useHostelRooms(blockId: number | undefined) {
   });
 }
 
-export function useRoomAllocations(filters: {
-  page?: number;
-  activeOnly?: boolean;
-  blockId?: number;
-} = {}) {
+export function useRoomBeds(roomId: number | undefined) {
+  return useQuery({
+    queryKey: hostelKeys.beds(roomId ?? 0),
+    queryFn: () => apiFetch<HostelBed[]>(`/hostel/rooms/${roomId}/beds`),
+    enabled: Boolean(roomId),
+  });
+}
+
+export function useVacantBeds(blockId?: number) {
+  const params = blockId ? `?blockId=${blockId}` : '';
+  return useQuery({
+    queryKey: hostelKeys.vacantBeds(blockId),
+    queryFn: () => apiFetch<HostelBed[]>(`/hostel/beds/vacant${params}`),
+  });
+}
+
+export function useRoomAllocations(
+  filters: {
+    page?: number;
+    limit?: number;
+    activeOnly?: boolean;
+    blockId?: number;
+  } = {},
+) {
   const params = new URLSearchParams({
     page: String(filters.page ?? 1),
-    limit: '20',
+    limit: String(filters.limit ?? 20),
   });
   if (filters.activeOnly) params.set('activeOnly', 'true');
   if (filters.blockId) params.set('blockId', String(filters.blockId));
@@ -50,6 +96,49 @@ export function useRoomAllocations(filters: {
   return useQuery({
     queryKey: hostelKeys.allocations(filters),
     queryFn: () => apiFetchPaginated<RoomAllocation>(`/hostel/allocations?${params}`),
+  });
+}
+
+export function useHostelDailyReport(
+  date: string,
+  blockId?: number,
+  sessionPeriod?: 'morning' | 'evening',
+) {
+  const params = new URLSearchParams({ date });
+  if (blockId) params.set('blockId', String(blockId));
+  if (sessionPeriod) params.set('sessionPeriod', sessionPeriod);
+  return useQuery({
+    queryKey: hostelKeys.dailyReport(date, blockId, sessionPeriod),
+    queryFn: () => apiFetch<HostelDailyReport>(`/hostel/reports/daily?${params}`),
+    enabled: Boolean(date),
+  });
+}
+
+export function useHostelDailyBoard(date: string, blockId?: number) {
+  const params = new URLSearchParams({ date });
+  if (blockId) params.set('blockId', String(blockId));
+  return useQuery({
+    queryKey: hostelKeys.dailyBoard(date, blockId),
+    queryFn: () => apiFetch<HostelDailyBoard>(`/hostel-attendance/daily-board?${params}`),
+    enabled: Boolean(date),
+  });
+}
+
+export function useHostelOccupancyReport(blockId?: number) {
+  const params = blockId ? `?blockId=${blockId}` : '';
+  return useQuery({
+    queryKey: hostelKeys.occupancyReport(blockId),
+    queryFn: () => apiFetch<HostelOccupancyReport>(`/hostel/reports/occupancy${params}`),
+  });
+}
+
+export function useHostelAttendanceTrend(endDate: string, blockId?: number) {
+  const params = new URLSearchParams({ endDate, days: '7' });
+  if (blockId) params.set('blockId', String(blockId));
+  return useQuery({
+    queryKey: hostelKeys.attendanceTrend(endDate, blockId),
+    queryFn: () => apiFetch<HostelAttendanceTrend>(`/hostel/reports/attendance-trend?${params}`),
+    enabled: Boolean(endDate),
   });
 }
 
@@ -80,13 +169,25 @@ export function useCreateRoom(blockId: number) {
 export function useCreateAllocation() {
   const qc = useQueryClient();
   return useMutation({
+    mutationFn: (body: { studentId: string; bedId: number; allocatedFrom: string; notes?: string }) =>
+      apiFetch<RoomAllocation>('/hostel/allocations', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: hostelKeys.all }),
+  });
+}
+
+export function useTransferAllocation() {
+  const qc = useQueryClient();
+  return useMutation({
     mutationFn: (body: {
       studentId: string;
-      roomId: number;
-      allocatedFrom: string;
+      bedId: number;
+      transferDate: string;
       notes?: string;
     }) =>
-      apiFetch<RoomAllocation>('/hostel/allocations', {
+      apiFetch<RoomAllocation>('/hostel/allocations/transfer', {
         method: 'POST',
         body: JSON.stringify(body),
       }),
@@ -108,6 +209,14 @@ export function useHostelAttendanceSessions(filters: { page?: number; attendance
   });
 }
 
+export function useHostelAttendanceSession(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: [...hostelKeys.attendance, 'session', sessionId ?? ''],
+    queryFn: () => apiFetch<HostelAttendanceSession>(`/hostel-attendance/sessions/${sessionId}`),
+    enabled: Boolean(sessionId),
+  });
+}
+
 export function useHostelAttendanceRecords(sessionId: string | undefined) {
   return useQuery({
     queryKey: hostelKeys.sessionRecords(sessionId ?? ''),
@@ -116,15 +225,51 @@ export function useHostelAttendanceRecords(sessionId: string | undefined) {
   });
 }
 
+export function useHostelSessionRoster(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: hostelKeys.sessionRoster(sessionId ?? ''),
+    queryFn: () => apiFetch<HostelAttendanceRosterRow[]>(`/hostel-attendance/sessions/${sessionId}/roster`),
+    enabled: Boolean(sessionId),
+  });
+}
+
+export function useEnsureAttendanceSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      attendanceDate: string;
+      sessionPeriod: 'morning' | 'evening';
+      blockId?: number;
+    }) =>
+      apiFetch<HostelAttendanceSession>('/hostel-attendance/sessions/ensure', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: hostelKeys.attendance });
+      void qc.invalidateQueries({ queryKey: hostelKeys.overview });
+      void qc.invalidateQueries({ queryKey: hostelKeys.all });
+    },
+  });
+}
+
 export function useCreateAttendanceSession() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { attendanceDate: string; blockId?: number; notes?: string }) =>
+    mutationFn: (body: {
+      attendanceDate: string;
+      sessionPeriod?: 'morning' | 'evening';
+      blockId?: number;
+      notes?: string;
+    }) =>
       apiFetch<HostelAttendanceSession>('/hostel-attendance/sessions', {
         method: 'POST',
         body: JSON.stringify(body),
       }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: hostelKeys.attendance }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: hostelKeys.attendance });
+      void qc.invalidateQueries({ queryKey: hostelKeys.overview });
+    },
   });
 }
 
@@ -136,6 +281,11 @@ export function useUpsertAttendanceRecords(sessionId: string) {
         method: 'POST',
         body: JSON.stringify({ records }),
       }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: hostelKeys.sessionRecords(sessionId) }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: hostelKeys.sessionRecords(sessionId) });
+      void qc.invalidateQueries({ queryKey: hostelKeys.overview });
+      void qc.invalidateQueries({ queryKey: hostelKeys.all });
+      void qc.invalidateQueries({ queryKey: hostelKeys.attendance });
+    },
   });
 }

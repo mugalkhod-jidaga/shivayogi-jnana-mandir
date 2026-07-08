@@ -7,6 +7,7 @@ type SessionRow = {
   tenant_id: number;
   attendance_date: string;
   block_id: number | null;
+  session_period: string;
   taken_by: string;
   notes: string | null;
   created_at: string;
@@ -37,7 +38,7 @@ type RecordRow = {
 };
 
 const SESSION_SELECT = `
-  id, tenant_id, attendance_date, block_id, taken_by, notes, created_at, updated_at,
+  id, tenant_id, attendance_date, block_id, session_period, taken_by, notes, created_at, updated_at,
   hostel_blocks ( id, name ),
   taker:user_profiles!hostel_attendance_sessions_taken_by_fkey ( id, first_name, last_name )
 `;
@@ -53,6 +54,7 @@ function serializeSession(row: SessionRow) {
     id: row.id,
     attendanceDate: row.attendance_date,
     blockId: row.block_id,
+    sessionPeriod: row.session_period as 'morning' | 'evening',
     block: row.hostel_blocks,
     notes: row.notes,
     createdAt: row.created_at,
@@ -89,7 +91,7 @@ function serializeRecord(row: RecordRow) {
 
 class HostelAttendanceRepository {
   async listSessions(tenantId: number, query: SessionListQuery) {
-    const { page, limit, search, attendanceDate, blockId } = query;
+    const { page, limit, search, attendanceDate, sessionPeriod, blockId } = query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
 
@@ -101,6 +103,7 @@ class HostelAttendanceRepository {
       .order('attendance_date', { ascending: false });
 
     if (attendanceDate) dbQuery = dbQuery.eq('attendance_date', attendanceDate);
+    if (sessionPeriod) dbQuery = dbQuery.eq('session_period', sessionPeriod);
     if (blockId) dbQuery = dbQuery.eq('block_id', blockId);
     if (search) dbQuery = dbQuery.ilike('notes', `%${search}%`);
 
@@ -115,7 +118,12 @@ class HostelAttendanceRepository {
   async createSession(
     tenantId: number,
     userId: string,
-    payload: { attendance_date: string; block_id?: number | null; notes?: string | null },
+    payload: {
+      attendance_date: string;
+      session_period: string;
+      block_id?: number | null;
+      notes?: string | null;
+    },
   ) {
     const { data, error } = await supabase
       .from('hostel_attendance_sessions')
@@ -128,11 +136,44 @@ class HostelAttendanceRepository {
       .single();
     if (error) {
       if (error.code === '23505') {
-        throw new AppError(409, 'Attendance session already exists for this date and block');
+        throw new AppError(409, 'Attendance session already exists for this date, period, and block');
       }
       throw new AppError(500, error.message);
     }
     return serializeSession(data as unknown as SessionRow);
+  }
+
+  async findSessionByKey(
+    tenantId: number,
+    attendanceDate: string,
+    sessionPeriod: string,
+    blockId: number | null,
+  ) {
+    let dbQuery = supabase
+      .from('hostel_attendance_sessions')
+      .select(SESSION_SELECT)
+      .eq('tenant_id', tenantId)
+      .eq('attendance_date', attendanceDate)
+      .eq('session_period', sessionPeriod)
+      .is('deleted_at', null);
+
+    if (blockId == null) dbQuery = dbQuery.is('block_id', null);
+    else dbQuery = dbQuery.eq('block_id', blockId);
+
+    const { data, error } = await dbQuery.maybeSingle();
+    if (error) throw new AppError(500, error.message);
+    return data ? serializeSession(data as unknown as SessionRow) : null;
+  }
+
+  async countRecords(sessionId: string, tenantId: number) {
+    const { count, error } = await supabase
+      .from('hostel_attendance_records')
+      .select('id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId)
+      .eq('session_id', sessionId)
+      .is('deleted_at', null);
+    if (error) throw new AppError(500, error.message);
+    return count ?? 0;
   }
 
   async findSessionById(id: string, tenantId: number) {

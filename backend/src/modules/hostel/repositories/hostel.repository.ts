@@ -34,6 +34,7 @@ type AllocationRow = {
   tenant_id: number;
   student_id: string;
   room_id: number;
+  bed_id: number | null;
   allocated_from: string;
   allocated_to: string | null;
   notes: string | null;
@@ -51,6 +52,7 @@ type AllocationRow = {
     room_number: string;
     hostel_blocks: { id: number; name: string };
   };
+  hostel_beds: { id: number; slot_number: number } | null;
 };
 
 const ROOM_SELECT = `
@@ -59,13 +61,14 @@ const ROOM_SELECT = `
 `;
 
 const ALLOCATION_SELECT = `
-  id, tenant_id, student_id, room_id, allocated_from, allocated_to, notes, created_by,
+  id, tenant_id, student_id, room_id, bed_id, allocated_from, allocated_to, notes, created_by,
   created_at, updated_at,
   students!inner ( id, first_name, last_name, admission_number ),
   hostel_rooms!inner (
     id, room_number,
     hostel_blocks!inner ( id, name )
-  )
+  ),
+  hostel_beds ( id, slot_number )
 `;
 
 function serializeBlock(row: BlockRow) {
@@ -97,6 +100,7 @@ function serializeAllocation(row: AllocationRow) {
     id: row.id,
     studentId: row.student_id,
     roomId: row.room_id,
+    bedId: row.bed_id,
     allocatedFrom: row.allocated_from,
     allocatedTo: row.allocated_to,
     notes: row.notes,
@@ -108,6 +112,13 @@ function serializeAllocation(row: AllocationRow) {
       lastName: row.students.last_name,
       admissionNumber: row.students.admission_number,
     },
+    bed: row.hostel_beds
+      ? {
+          id: row.hostel_beds.id,
+          slotNumber: row.hostel_beds.slot_number,
+          bedLabel: row.students.admission_number,
+        }
+      : null,
     room: {
       id: row.hostel_rooms.id,
       roomNumber: row.hostel_rooms.room_number,
@@ -281,7 +292,7 @@ class HostelRepository extends BaseRepository {
 
   async listAllocations(tenantId: number, query: AllocationListQuery) {
     const { page, limit, search, blockId, roomId, activeOnly } = query;
-    const cappedLimit = Math.min(limit, 100);
+    const cappedLimit = Math.min(limit, 500);
     const offset = (page - 1) * cappedLimit;
 
     let dbQuery = supabase
@@ -293,7 +304,13 @@ class HostelRepository extends BaseRepository {
 
     if (activeOnly) dbQuery = dbQuery.is('allocated_to', null);
     if (roomId) dbQuery = dbQuery.eq('room_id', roomId);
-    if (blockId) dbQuery = dbQuery.eq('hostel_rooms.block_id', blockId);
+    if (blockId) {
+      const roomIds = await this.getRoomIdsForBlock(tenantId, blockId);
+      if (roomIds.length === 0) {
+        return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+      }
+      dbQuery = dbQuery.in('room_id', roomIds);
+    }
     if (search) {
       dbQuery = dbQuery.or(
         `students.first_name.ilike.%${search}%,students.last_name.ilike.%${search}%,students.admission_number.ilike.%${search}%`,
@@ -314,6 +331,7 @@ class HostelRepository extends BaseRepository {
     payload: {
       student_id: string;
       room_id: number;
+      bed_id: number;
       allocated_from: string;
       notes?: string | null;
     },
@@ -368,6 +386,37 @@ class HostelRepository extends BaseRepository {
       .eq('tenant_id', tenantId);
     if (error) throw new AppError(500, error.message);
     await auditLogRoom(userId, tenantId, id, 'soft_delete');
+  }
+
+  async listAllocationsForBlock(tenantId: number, blockId: number | null) {
+    let dbQuery = supabase
+      .from('room_allocations')
+      .select(ALLOCATION_SELECT)
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
+      .is('allocated_to', null)
+      .order('allocated_from', { ascending: false });
+
+    if (blockId) {
+      const roomIds = await this.getRoomIdsForBlock(tenantId, blockId);
+      if (roomIds.length === 0) return [];
+      dbQuery = dbQuery.in('room_id', roomIds);
+    }
+
+    const { data, error } = await dbQuery;
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => serializeAllocation(row as unknown as AllocationRow));
+  }
+
+  async getRoomIdsForBlock(tenantId: number, blockId: number) {
+    const { data, error } = await supabase
+      .from('hostel_rooms')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('block_id', blockId)
+      .is('deleted_at', null);
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => row.id as number);
   }
 }
 

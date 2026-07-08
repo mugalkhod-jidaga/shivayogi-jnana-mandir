@@ -1,10 +1,46 @@
 {
   "title": "Hostel",
-  "description": "Manage hostel blocks, rooms, and student room allocations.",
+  "description": "Manage hostel blocks, rooms, beds, allocations, attendance, and reports.",
+  "tabs": {
+    "roster": "Student list",
+    "overview": "Overview",
+    "setup": "Setup",
+    "allocations": "Allocations",
+    "attendance": "Attendance",
+    "reports": "Reports"
+  },
   "actions": {
     "attendance": "Hostel attendance",
     "backToHostel": "Back to hostel",
     "backToAttendance": "Back to sessions"
+  },
+  "overview": {
+    "unallocatedWarning": "{{count}} active student(s) have no bed assigned.",
+    "andMore": "…and {{count}} more",
+    "assignBeds": "Assign beds",
+    "todayAttendance": "Today's attendance",
+    "noSessionToday": "No attendance session recorded for today yet.",
+    "goAttendance": "Go to attendance",
+    "kpis": {
+      "totalBeds": "Total beds",
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "unallocated": "Unallocated students"
+    }
+  },
+  "roster": {
+    "noSession": "No attendance session for this date. Record attendance first.",
+    "noSessionForPeriod": "No session recorded for this period yet.",
+    "search": "Search",
+    "searchPlaceholder": "Name or admission number…",
+    "showing": "Showing {{count}} of {{total}} students",
+    "empty": "No students match the current filters.",
+    "filters": {
+      "all": "All"
+    },
+    "columns": {
+      "admission": "Admission #"
+    }
   },
   "blocks": {
     "title": "Blocks",
@@ -17,15 +53,28 @@
     "capacity": "Capacity {{count}}",
     "selectBlock": "Select or create a block to manage rooms."
   },
+  "beds": {
+    "title": "Beds",
+    "description": "Beds are created automatically from room capacity. Occupied beds show the student's admission number.",
+    "slot": "Slot {{number}}",
+    "vacant": "Vacant"
+  },
   "allocations": {
     "title": "Active allocations",
+    "assignTitle": "Assign bed",
+    "transferTitle": "Transfer student",
+    "transferDescription": "Releases the current bed and assigns the selected vacant bed in one step.",
     "student": "Student",
-    "room": "Room",
-    "selectRoom": "Select room",
+    "bed": "Bed",
+    "newBed": "New bed",
+    "selectBed": "Select bed",
     "from": "From date",
-    "assign": "Assign room",
+    "transferDate": "Transfer date",
+    "assign": "Assign bed",
+    "transfer": "Transfer",
     "columns": {
       "student": "Student",
+      "bed": "Bed #",
       "block": "Block",
       "room": "Room",
       "from": "From"
@@ -35,18 +84,84 @@
     "title": "Hostel attendance",
     "description": "Record daily residential attendance (not school attendance).",
     "date": "Date",
+    "block": "Block",
     "notes": "Session notes",
     "createSession": "Create session",
     "loading": "Loading sessions…",
     "allBlocks": "All blocks",
     "mark": "Mark attendance",
     "markTitle": "Mark attendance",
-    "markDescription": "Set status for each allocated hostel student.",
+    "markDescription": "Set status for each allocated hostel student in this session's roster.",
     "save": "Save attendance",
+    "saveAll": "Save all ({{count}} students)",
+    "morning": "Morning",
+    "evening": "Evening",
+    "quickDescription": "Tap Morning or Evening — a session opens automatically. Everyone defaults to Present; change only the absent students.",
+    "defaultPresentHint": "All students start as Present. Change status only for absent, late, or on leave.",
+    "startMarking": "Mark attendance",
+    "continueMarking": "Continue marking",
+    "slotNotStarted": "{{total}} students · not started",
+    "slotProgress": "{{marked}} / {{total}} marked",
+    "slotComplete": "Complete · {{marked}} / {{total}}",
+    "noRoster": "No active students in the roster.",
+    "unassigned": "Unassigned",
+    "showChangedOnly": "Show only non-present",
+    "markSummary": "{{showing}} shown · {{absent}} not present · {{total}} total",
+    "emptyRoster": "No students with an active bed assignment for this session.",
+    "emptyRosterHelp": "Assign students to beds under Allocations, then return here to mark attendance.",
+    "assignBeds": "Go to allocations",
+    "loadingRoster": "Loading roster…",
     "columns": {
       "student": "Student",
+      "bed": "Bed #",
       "room": "Room",
       "status": "Status"
+    }
+  },
+  "reports": {
+    "date": "Date",
+    "block": "Block",
+    "apply": "Apply filters",
+    "loading": "Loading report…",
+    "occupancyTitle": "Bed occupancy",
+    "occupancySummary": "{{occupied}} of {{total}} beds occupied ({{vacant}} vacant)",
+    "totalBeds": "Total beds",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "dailyTitle": "Daily attendance",
+    "dailySummary": "Present: {{present}} · Absent: {{absent}} · Not marked: {{notMarked}} · Roster: {{roster}}",
+    "noSession": "No attendance session for this date.",
+    "present": "Present",
+    "absent": "Absent",
+    "notMarked": "Not marked",
+    "kpis": {
+      "occupancyRate": "Occupancy rate",
+      "occupancyRateHelp": "{{occupied}} of {{total}} beds filled",
+      "vacantBeds": "Vacant beds",
+      "presentToday": "Present today",
+      "presentTodayHelp": "{{rate}}% of roster",
+      "absentToday": "Absent today",
+      "rosterHelp": "Roster: {{count}} students"
+    },
+    "charts": {
+      "occupancySplit": "Bed utilization",
+      "occupancySplitHelp": "Share of occupied vs vacant beds across the hostel.",
+      "attendanceSplit": "Today's attendance",
+      "attendanceSplitHelp": "Breakdown for {{date}}.",
+      "blockOccupancy": "Occupancy by block",
+      "blockOccupancyHelp": "Stacked view of filled and empty beds per block.",
+      "trendTitle": "7-day attendance trend",
+      "trendHelp": "Present and absent counts over the last 7 days ending on the selected date.",
+      "beds": "beds",
+      "students": "students",
+      "noBeds": "No beds configured yet.",
+      "noBlocks": "No blocks configured yet."
+    },
+    "details": {
+      "occupancyTable": "Occupancy details"
+    },
+    "filters": {
+      "blockActive": "Filtered to one block"
     }
   }
 }

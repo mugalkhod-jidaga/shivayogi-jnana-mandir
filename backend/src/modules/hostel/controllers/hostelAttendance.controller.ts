@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
 import type { BulkAttendanceRecordInput, CreateSessionInput, UpdateSessionInput } from '../schemas/hostelAttendance.schemas';
-import { sessionListQuerySchema } from '../schemas/hostelAttendance.schemas';
+import { dailyBoardQuerySchema, ensureSessionSchema, sessionListQuerySchema } from '../schemas/hostelAttendance.schemas';
 import { hostelAttendanceService } from '../services/hostelAttendance.service';
 
 function requireAuthContext(req: Request): { profileId: string; tenantId: number } {
@@ -35,6 +35,20 @@ export const hostelAttendanceController = {
     res.status(201).json({ success: true, data });
   },
 
+  async ensureSession(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const body = ensureSessionSchema.parse(req.body);
+    const data = await hostelAttendanceService.ensureSession(tenantId, body, profileId);
+    res.json({ success: true, data });
+  },
+
+  async getDailyBoard(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = dailyBoardQuerySchema.parse(req.query);
+    const data = await hostelAttendanceService.getDailyBoard(tenantId, query);
+    res.json({ success: true, data });
+  },
+
   async getSession(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await hostelAttendanceService.getSession(paramId(req), tenantId);
@@ -54,6 +68,12 @@ export const hostelAttendanceController = {
   async listRecords(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await hostelAttendanceService.listRecords(paramId(req), tenantId);
+    res.json({ success: true, data });
+  },
+
+  async getSessionRoster(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await hostelAttendanceService.getSessionRoster(paramId(req), tenantId);
     res.json({ success: true, data });
   },
 

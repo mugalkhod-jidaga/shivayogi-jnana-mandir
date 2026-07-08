@@ -15,8 +15,12 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 11. `011_karnataka_social_categories.sql` — Karnataka social category codes (sc, st, cat_*)
 12. `012_bulk_import_social.sql` — optional blood/admission category; SATS + social details in bulk import
 13. `013_medical_staff_role.sql` — Medical Staff role (infirmary-only: medical + student read)
+14. `014_hostel_beds.sql` — `hostel_beds` table, `room_allocations.bed_id`, backfill beds from room capacity
+15. `015_hostel_session_period.sql` — morning/evening `session_period`; deduplicates existing same-day sessions before unique index (safe to re-run if index step failed)
 
-Apply migrations through `012` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+Apply migrations through `015` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+
+**Note on `015`:** If a previous run failed on `idx_hostel_attendance_session_unique`, the `session_period` column may already exist. Re-run the full `015` script — it is idempotent and will merge duplicate same-day sessions (keep oldest two as morning/evening, soft-delete extras, re-point attendance records) before creating the index.
 
 After migrations, insert the Phase 1 tenant (Section 5.4):
 

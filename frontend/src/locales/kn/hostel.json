@@ -1,10 +1,46 @@
 {
   "title": "ವಸತಿ ನಿಲಯ",
-  "description": "ವಸತಿ ನಿಲಯ ಬ್ಲಾಕ್‌ಗಳು, ಕೊಠಡಿಗಳು ಮತ್ತು ವಿದ್ಯಾರ್ಥಿ ಕೊಠಡಿ ಹಂಚಿಕೆಯನ್ನು ನಿರ್ವಹಿಸಿ.",
+  "description": "ವಸತಿ ನಿಲಯ ಬ್ಲಾಕ್‌ಗಳು, ಕೊಠಡಿಗಳು, ಹಾಸಿಗೆಗಳು, ಹಂಚಿಕೆ, ಹಾಜರಾತಿ ಮತ್ತು ವರದಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ.",
+  "tabs": {
+    "roster": "Student list",
+    "overview": "ಅವಲೋಕನ",
+    "setup": "ಸೆಟಪ್",
+    "allocations": "ಹಂಚಿಕೆ",
+    "attendance": "ಹಾಜರಾತಿ",
+    "reports": "ವರದಿಗಳು"
+  },
   "actions": {
     "attendance": "ವಸತಿ ಹಾಜರಾತಿ",
     "backToHostel": "ವಸತಿ ನಿಲಯಕ್ಕೆ ಹಿಂತಿರುಗಿ",
     "backToAttendance": "ಸೆಷನ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ"
+  },
+  "overview": {
+    "unallocatedWarning": "{{count}} ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹಾಸಿಗೆ ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ.",
+    "andMore": "…ಮತ್ತು {{count}} ಹೆಚ್ಚು",
+    "assignBeds": "ಹಾಸಿಗೆ ನಿಯೋಜಿಸಿ",
+    "todayAttendance": "ಇಂದಿನ ಹಾಜರಾತಿ",
+    "noSessionToday": "ಇಂದು ಇನ್ನೂ ಹಾಜರಾತಿ ಸೆಷನ್ ದಾಖಲಾಗಿಲ್ಲ.",
+    "goAttendance": "ಹಾಜರಾತಿಗೆ ಹೋಗಿ",
+    "kpis": {
+      "totalBeds": "ಒಟ್ಟು ಹಾಸಿಗೆಗಳು",
+      "occupied": "occupied",
+      "vacant": "ಖಾಲಿ",
+      "unallocated": "ಹಂಚಿಕೆಯಾಗದ ವಿದ್ಯಾರ್ಥಿಗಳು"
+    }
+  },
+  "roster": {
+    "noSession": "ಈ ದಿನಾಂಕಕ್ಕೆ ಹಾಜರಾತಿ ಸೆಷನ್ ಇಲ್ಲ. ಮೊದಲು ಹಾಜರಾತಿ ದಾಖಲಿಸಿ.",
+    "noSessionForPeriod": "ಈ ಅವಧಿಗೆ ಇನ್ನೂ ಸೆಷನ್ ದಾಖಲಾಗಿಲ್ಲ.",
+    "search": "Search",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ admission number…",
+    "showing": "{{total}} ರಲ್ಲಿ {{count}} students",
+    "empty": "ಪ್ರಸ್ತುತ filters ಗೆ students ಇಲ್ಲ.",
+    "filters": {
+      "all": "All"
+    },
+    "columns": {
+      "admission": "Admission #"
+    }
   },
   "blocks": {
     "title": "ಬ್ಲಾಕ್‌ಗಳು",
@@ -17,15 +53,28 @@
     "capacity": "ಸಾಮರ್ಥ್ಯ {{count}}",
     "selectBlock": "ಕೊಠಡಿಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಬ್ಲಾಕ್ ಆಯ್ಕೆಮಾಡಿ."
   },
+  "beds": {
+    "title": "ಹಾಸಿಗೆಗಳು",
+    "description": "ಕೊಠಡಿ ಸಾಮರ್ಥ್ಯದಿಂದ ಹಾಸಿಗೆಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲ್ಪಡುತ್ತವೆ. occupied ಹಾಸಿಗೆಗಳು ವಿದ್ಯಾರ್ಥಿಯ ಪ್ರವೇಶ ಸಂಖ್ಯೆಯನ್ನು ತೋರಿಸುತ್ತವೆ.",
+    "slot": "ಸ್ಲಾಟ್ {{number}}",
+    "vacant": "ಖಾಲಿ"
+  },
   "allocations": {
     "title": "ಸಕ್ರಿಯ ಹಂಚಿಕೆಗಳು",
+    "assignTitle": "ಹಾಸಿಗೆ ನಿಯೋಜಿಸಿ",
+    "transferTitle": "ವಿದ್ಯಾರ್ಥಿ ವರ್ಗಾಯಿಸಿ",
+    "transferDescription": "ಪ್ರಸ್ತುತ ಹಾಸಿಗೆಯನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ ಆಯ್ಕೆಮಾಡಿದ ಖಾಲಿ ಹಾಸಿಗೆಯನ್ನು ಒಂದೇ ಹೆಜ್ಜೆಯಲ್ಲಿ ನಿಯೋಜಿಸುತ್ತದೆ.",
     "student": "ವಿದ್ಯಾರ್ಥಿ",
-    "room": "ಕೊಠಡಿ",
-    "selectRoom": "ಕೊಠಡಿ ಆಯ್ಕೆಮಾಡಿ",
+    "bed": "ಹಾಸಿಗೆ",
+    "newBed": "ಹೊಸ ಹಾಸಿಗೆ",
+    "selectBed": "ಹಾಸಿಗೆ ಆಯ್ಕೆಮಾಡಿ",
     "from": "ಆರಂಭ ದಿನಾಂಕ",
-    "assign": "ಕೊಠಡಿ ನಿಯೋಜಿಸಿ",
+    "transferDate": "ವರ್ಗಾವಣೆ ದಿನಾಂಕ",
+    "assign": "ಹಾಸಿಗೆ ನಿಯೋಜಿಸಿ",
+    "transfer": "ವರ್ಗಾಯಿಸಿ",
     "columns": {
       "student": "ವಿದ್ಯಾರ್ಥಿ",
+      "bed": "ಹಾಸಿಗೆ #",
       "block": "ಬ್ಲಾಕ್",
       "room": "ಕೊಠಡಿ",
       "from": "ಆರಂಭ"
@@ -35,18 +84,84 @@
     "title": "ವಸತಿ ಹಾಜರಾತಿ",
     "description": "ದೈನಂದಿನ ವಸತಿ ಹಾಜರಾತಿಯನ್ನು ದಾಖಲಿಸಿ (ಶಾಲಾ ಹಾಜರಾತಿ ಅಲ್ಲ).",
     "date": "ದಿನಾಂಕ",
+    "block": "ಬ್ಲಾಕ್",
     "notes": "ಸೆಷನ್ ಟಿಪ್ಪಣಿಗಳು",
     "createSession": "ಸೆಷನ್ ರಚಿಸಿ",
     "loading": "ಸೆಷನ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
     "allBlocks": "ಎಲ್ಲಾ ಬ್ಲಾಕ್‌ಗಳು",
     "mark": "ಹಾಜರಾತಿ ಗುರುತಿಸಿ",
     "markTitle": "ಹಾಜರಾತಿ ಗುರುತಿಸಿ",
-    "markDescription": "ಪ್ರತಿ ವಸತಿ ವಿದ್ಯಾರ್ಥಿಗೆ ಸ್ಥಿತಿಯನ್ನು ಹೊಂದಿಸಿ.",
+    "markDescription": "ಈ ಸೆಷನ್‌ನ roster ಗೆ ಸೇರಿದ ಪ್ರತಿ ವಸತಿ ವಿದ್ಯಾರ್ಥಿಗೆ ಸ್ಥಿತಿಯನ್ನು ಹೊಂದಿಸಿ.",
     "save": "ಹಾಜರಾತಿ ಉಳಿಸಿ",
+    "saveAll": "ಎಲ್ಲಾ ಉಳಿಸಿ ({{count}} ವಿದ್ಯಾರ್ಥಿಗಳು)",
+    "morning": "ಬೆಳಿಗ್ಗೆ",
+    "evening": "ಸಂಜೆ",
+    "quickDescription": "ಬೆಳಿಗ್ಗೆ ಅಥವಾ ಸಂಜೆ ಒತ್ತಿ — ಸೆಷನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತೆರೆಯುತ್ತದೆ. ಎಲ್ಲರೂ Present; absent ಮಾತ್ರ ಬದಲಾಯಿಸಿ.",
+    "defaultPresentHint": "ಎಲ್ಲಾ ವಿದ್ಯಾರ್ಥಿಗಳು Present ಆಗಿ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ. absent, late, on leave ಮಾತ್ರ ಬದಲಾಯಿಸಿ.",
+    "startMarking": "ಹಾಜರಾತಿ ಗುರುತಿಸಿ",
+    "continueMarking": "ಮುಂದುವರಿಸಿ",
+    "slotNotStarted": "{{total}} ವಿದ್ಯಾರ್ಥಿಗಳು · ಪ್ರಾರಂಭವಾಗಿಲ್ಲ",
+    "slotProgress": "{{marked}} / {{total}} ಗುರುತಿಸಲಾಗಿದೆ",
+    "slotComplete": "ಪೂರ್ಣ · {{marked}} / {{total}}",
+    "noRoster": "Roster ನಲ್ಲಿ ಸಕ್ರಿಯ ವಿದ್ಯಾರ್ಥಿಗಳಿಲ್ಲ.",
+    "unassigned": "ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ",
+    "showChangedOnly": "Present ಅಲ್ಲದವರನ್ನು ಮಾತ್ರ ತೋರಿಸಿ",
+    "markSummary": "{{showing}} ತೋರಿಸಲಾಗಿದೆ · {{absent}} present ಅಲ್ಲ · {{total}} ಒಟ್ಟು",
+    "emptyRoster": "ಈ ಸೆಷನ್‌ಗೆ roster ನಲ್ಲಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಲ್ಲ.",
+    "emptyRosterHelp": "Allocations ನಲ್ಲಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ bed assign ಮಾಡಿ, ನಂತರ ಇಲ್ಲಿ ಹಾಜರಾತಿ ಗುರುತಿಸಿ.",
+    "assignBeds": "Allocations ಗೆ ಹೋಗಿ",
+    "loadingRoster": "Roster ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
     "columns": {
       "student": "ವಿದ್ಯಾರ್ಥಿ",
+      "bed": "ಹಾಸಿಗೆ #",
       "room": "ಕೊಠಡಿ",
       "status": "ಸ್ಥಿತಿ"
+    }
+  },
+  "reports": {
+    "date": "ದಿನಾಂಕ",
+    "block": "ಬ್ಲಾಕ್",
+    "apply": "ಫಿಲ್ಟರ್ ಅನ್ವಯಿಸಿ",
+    "loading": "ವರದಿ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+    "occupancyTitle": "ಹಾಸಿಗೆ occupancy",
+    "occupancySummary": "{{total}} ರಲ್ಲಿ {{occupied}} occupied ({{vacant}} vacant)",
+    "totalBeds": "ಒಟ್ಟು ಹಾಸಿಗೆಗಳು",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "dailyTitle": "ದೈನಂದಿನ ಹಾಜರಾತಿ",
+    "dailySummary": "Present: {{present}} · Absent: {{absent}} · Not marked: {{notMarked}} · Roster: {{roster}}",
+    "noSession": "ಈ ದಿನಾಂಕಕ್ಕೆ ಹಾಜರಾತಿ ಸೆಷನ್ ಇಲ್ಲ.",
+    "present": "Present",
+    "absent": "Absent",
+    "notMarked": "Not marked",
+    "kpis": {
+      "occupancyRate": "Occupancy rate",
+      "occupancyRateHelp": "{{total}} ರಲ್ಲಿ {{occupied}} filled",
+      "vacantBeds": "Vacant beds",
+      "presentToday": "ಇಂದು present",
+      "presentTodayHelp": "Roster ನ {{rate}}%",
+      "absentToday": "ಇಂದು absent",
+      "rosterHelp": "Roster: {{count}} ವಿದ್ಯಾರ್ಥಿಗಳು"
+    },
+    "charts": {
+      "occupancySplit": "Bed utilization",
+      "occupancySplitHelp": "Occupied vs vacant ಹಾಸಿಗೆಗಳ ಪಾಲು.",
+      "attendanceSplit": "ಇಂದಿನ ಹಾಜರಾತಿ",
+      "attendanceSplitHelp": "{{date}} ಗಾಗಿ breakdown.",
+      "blockOccupancy": "Block-wise occupancy",
+      "blockOccupancyHelp": "ಪ್ರತಿ block ಗೆ filled ಮತ್ತು empty ಹಾಸಿಗೆಗಳ view.",
+      "trendTitle": "7-ದಿನ ಹಾಜರಾತಿ trend",
+      "trendHelp": "ಆಯ್ಕೆಮಾಡಿದ ದಿನಾಂಕದಿಂದ ಕಳೆದ 7 ದಿನಗಳ present ಮತ್ತು absent.",
+      "beds": "ಹಾಸಿಗೆಗಳು",
+      "students": "ವಿದ್ಯಾರ್ಥಿಗಳು",
+      "noBeds": "ಇನ್ನೂ ಹಾಸಿಗೆಗಳು configure ಆಗಿಲ್ಲ.",
+      "noBlocks": "ಇನ್ನೂ blocks configure ಆಗಿಲ್ಲ."
+    },
+    "details": {
+      "occupancyTable": "Occupancy details"
+    },
+    "filters": {
+      "blockActive": "ಒಂದು block ಗೆ filter ಮಾಡಲಾಗಿದೆ"
     }
   }
 }

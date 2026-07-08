@@ -9,11 +9,54 @@ import {
   createBlockSchema,
   createRoomSchema,
   endAllocationSchema,
+  transferAllocationSchema,
   updateBlockSchema,
   updateRoomSchema,
 } from '../schemas/hostel.schemas';
 
 export const hostelRoutes = Router();
+
+hostelRoutes.get(
+  '/overview',
+  extractTenantMiddleware,
+  requirePermission('hostel:read'),
+  asyncHandler(hostelController.getOverview),
+);
+
+hostelRoutes.get(
+  '/reports/daily',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:read'),
+  asyncHandler(hostelController.getDailyReport),
+);
+
+hostelRoutes.get(
+  '/reports/occupancy',
+  extractTenantMiddleware,
+  requirePermission('hostel:read'),
+  asyncHandler(hostelController.getOccupancyReport),
+);
+
+hostelRoutes.get(
+  '/reports/attendance-trend',
+  extractTenantMiddleware,
+  requirePermission('hostel_attendance:read'),
+  asyncHandler(hostelController.getAttendanceTrend),
+);
+
+hostelRoutes.get(
+  '/beds/vacant',
+  extractTenantMiddleware,
+  requirePermission('hostel:read'),
+  asyncHandler(hostelController.listVacantBeds),
+);
+
+hostelRoutes.get(
+  '/rooms/:roomId/beds',
+  extractTenantMiddleware,
+  requirePermission('hostel:read'),
+  asyncHandler(hostelController.listBedsByRoom),
+);
 
 hostelRoutes.get(
   '/blocks',
@@ -88,6 +131,14 @@ hostelRoutes.post(
   requirePermission('hostel:manage'),
   validateZod(createAllocationSchema),
   asyncHandler(hostelController.createAllocation),
+);
+
+hostelRoutes.post(
+  '/allocations/transfer',
+  extractTenantMiddleware,
+  requirePermission('hostel:manage'),
+  validateZod(transferAllocationSchema),
+  asyncHandler(hostelController.transferAllocation),
 );
 
 hostelRoutes.patch(

@@ -59,6 +59,18 @@
     "byStatus": {
       "title": "Students by status",
       "description": "Active, alumni, and discontinued — click a chip to view that list."
+    },
+    "byLocation": {
+      "title": "Students by location",
+      "description": "Based on family address (free text). Exact drill-down will improve once district/taluk/village lookups are added.",
+      "byDistrict": "By district",
+      "byTaluk": "Top taluks / mandals",
+      "topVillages": "Top villages / towns",
+      "topVillagesHelp": "Top 15 places by active student count.",
+      "districtTable": "All districts",
+      "columnPlace": "Village / town",
+      "columnDistrict": "District",
+      "empty": "No address data for active students yet."
     }
   },
   "form": {

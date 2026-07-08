@@ -1,67 +1,110 @@
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCreateAttendanceSession, useHostelAttendanceSessions } from '@/hooks/useHostel';
+import { useEnsureAttendanceSession, useHostelBlocks, useHostelDailyBoard } from '@/hooks/useHostel';
 
 export function HostelAttendancePage() {
   const { t } = useTranslation('hostel');
+  const navigate = useNavigate();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [notes, setNotes] = useState('');
-  const { data, isLoading } = useHostelAttendanceSessions({ attendanceDate: date });
-  const createSession = useCreateAttendanceSession();
-  const sessions = data?.data ?? [];
+  const [blockId, setBlockId] = useState('');
+  const blockFilter = blockId ? Number(blockId) : undefined;
+
+  const { data: blocksData } = useHostelBlocks();
+  const blocks = blocksData?.data ?? [];
+  const { data: board, isLoading } = useHostelDailyBoard(date, blockFilter);
+  const ensureSession = useEnsureAttendanceSession();
+
+  const openMark = async (period: 'morning' | 'evening') => {
+    const session = await ensureSession.mutateAsync({
+      attendanceDate: date,
+      sessionPeriod: period,
+      blockId: blockFilter,
+    });
+    navigate(`/hostel/attendance/${session.id}`);
+  };
+
+  const renderSlot = (period: 'morning' | 'evening', icon: React.ReactNode, label: string) => {
+    const slot = board?.slots[period];
+    const marked = slot?.markedCount ?? 0;
+    const total = slot?.rosterCount ?? board?.rosterCount ?? 0;
+    const complete = total > 0 && marked >= total;
+
+    return (
+      <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            {icon}
+          </div>
+          <div>
+            <h2 className="font-semibold">{label}</h2>
+            <p className="text-sm text-muted-foreground">
+              {isLoading
+                ? '…'
+                : total === 0
+                  ? t('attendance.noRoster')
+                  : complete
+                    ? t('attendance.slotComplete', { marked, total })
+                    : slot?.hasSession
+                      ? t('attendance.slotProgress', { marked, total })
+                      : t('attendance.slotNotStarted', { total })}
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          size="lg"
+          disabled={ensureSession.isPending || total === 0}
+          onClick={() => void openMark(period)}
+        >
+          {slot?.hasSession ? t('attendance.continueMarking') : t('attendance.startMarking')}
+        </Button>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('attendance.title')} description={t('attendance.description')}>
-        <Button asChild variant="outline">
-          <Link to="/hostel">{t('actions.backToHostel')}</Link>
-        </Button>
-      </PageHeader>
+      <p className="text-sm text-muted-foreground">{t('attendance.quickDescription')}</p>
 
-      <form
-        className="grid gap-3 rounded-lg border p-4 md:grid-cols-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void createSession.mutateAsync({ attendanceDate: date, notes: notes || undefined });
-        }}
-      >
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4 shadow-sm">
         <div>
-          <Label>{t('attendance.date')}</Label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Label htmlFor="attendance-date">{t('attendance.date')}</Label>
+          <Input
+            id="attendance-date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </div>
-        <div className="md:col-span-2">
-          <Label>{t('attendance.notes')}</Label>
-          <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <div>
+          <Label htmlFor="attendance-block">{t('attendance.block')}</Label>
+          <select
+            id="attendance-block"
+            className="flex h-10 min-w-[160px] rounded-md border bg-background px-3 text-sm"
+            value={blockId}
+            onChange={(e) => setBlockId(e.target.value)}
+          >
+            <option value="">{t('attendance.allBlocks')}</option>
+            {blocks.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex items-end">
-          <Button type="submit" disabled={createSession.isPending}>
-            {t('attendance.createSession')}
-          </Button>
-        </div>
-      </form>
+      </div>
 
-      {isLoading && <p className="text-muted-foreground">{t('attendance.loading')}</p>}
-      <ul className="space-y-2">
-        {sessions.map((session) => (
-          <li key={session.id} className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <p className="font-medium">{session.attendanceDate}</p>
-              <p className="text-sm text-muted-foreground">
-                {session.block?.name ?? t('attendance.allBlocks')} ·{' '}
-                {[session.takenBy.firstName, session.takenBy.lastName].filter(Boolean).join(' ')}
-              </p>
-            </div>
-            <Button asChild variant="outline" size="sm">
-              <Link to={`/hostel/attendance/${session.id}`}>{t('attendance.mark')}</Link>
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <div className="grid gap-4 md:grid-cols-2">
+        {renderSlot('morning', <Sun className="size-5" />, t('attendance.morning'))}
+        {renderSlot('evening', <Moon className="size-5" />, t('attendance.evening'))}
+      </div>
+
+      <p className="text-xs text-muted-foreground">{t('attendance.defaultPresentHint')}</p>
     </div>
   );
 }

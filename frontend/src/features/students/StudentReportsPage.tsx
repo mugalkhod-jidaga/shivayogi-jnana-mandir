@@ -1,4 +1,4 @@
-import { GraduationCap, PieChartIcon, TrendingUp, Users } from 'lucide-react';
+import { GraduationCap, MapPin, PieChartIcon, TrendingUp, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
@@ -77,6 +77,26 @@ export function StudentReportsPage() {
       })) ?? [];
 
   const totalSocial = socialChartData.reduce((sum, row) => sum + row.count, 0);
+
+  const districtChartData =
+    data?.studentsByDistrict
+      .filter((row) => row.count > 0)
+      .slice(0, 10)
+      .map((row, index) => ({
+        ...row,
+        name: row.label,
+        fill: chartColor(index),
+      })) ?? [];
+
+  const talukChartData =
+    data?.studentsByTaluk
+      .filter((row) => row.count > 0)
+      .slice(0, 10)
+      .map((row, index) => ({
+        ...row,
+        name: row.label,
+        fill: chartColor(index + 2),
+      })) ?? [];
 
   return (
     <div className="space-y-6">
@@ -371,6 +391,141 @@ export function StudentReportsPage() {
                 </div>
               )}
             </div>
+          </section>
+
+          <section className="space-y-6">
+            <div className="flex items-center gap-2">
+              <MapPin className="size-5 text-blue-600" />
+              <div>
+                <h2 className="text-lg font-semibold">{t('reports.byLocation.title')}</h2>
+                <p className="text-sm text-muted-foreground">{t('reports.byLocation.description')}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <h3 className="font-medium">{t('reports.byLocation.byDistrict')}</h3>
+                {!isLoading && districtChartData.length === 0 && (
+                  <p className="mt-4 text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
+                )}
+                {!isLoading && districtChartData.length > 0 && (
+                  <div className="mt-4 h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={districtChartData}
+                        layout="vertical"
+                        margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Bar dataKey="count" radius={[0, 6, 6, 0]} maxBarSize={24}>
+                          {districtChartData.map((entry, index) => (
+                            <Cell key={entry.label} fill={entry.fill ?? chartColor(index)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <h3 className="font-medium">{t('reports.byLocation.byTaluk')}</h3>
+                {!isLoading && talukChartData.length === 0 && (
+                  <p className="mt-4 text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
+                )}
+                {!isLoading && talukChartData.length > 0 && (
+                  <div className="mt-4 h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={talukChartData}
+                        layout="vertical"
+                        margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Bar dataKey="count" radius={[0, 6, 6, 0]} maxBarSize={24}>
+                          {talukChartData.map((entry, index) => (
+                            <Cell key={entry.label} fill={entry.fill ?? chartColor(index + 2)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {!isLoading && (data?.topVillages.length ?? 0) > 0 && (
+              <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <h3 className="font-medium">{t('reports.byLocation.topVillages')}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('reports.byLocation.topVillagesHelp')}
+                </p>
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="py-2 font-medium">{t('reports.byLocation.columnPlace')}</th>
+                        <th className="py-2 font-medium text-right">
+                          {t('reports.bySocialCategory.columnStudents')}
+                        </th>
+                        <th className="py-2 font-medium text-right">{t('reports.columnShare')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data?.topVillages.map((row) => (
+                        <tr key={row.label} className="border-b last:border-b-0">
+                          <td className="py-2">{row.label}</td>
+                          <td className="py-2 text-right tabular-nums">{row.count}</td>
+                          <td className="py-2 text-right tabular-nums text-muted-foreground">
+                            {data.activeStudents > 0
+                              ? `${Math.round((row.count / data.activeStudents) * 100)}%`
+                              : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {!isLoading && districtChartData.length > 0 && (
+              <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <h3 className="font-medium">{t('reports.byLocation.districtTable')}</h3>
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="py-2 font-medium">{t('reports.byLocation.columnDistrict')}</th>
+                        <th className="py-2 font-medium text-right">
+                          {t('reports.bySocialCategory.columnStudents')}
+                        </th>
+                        <th className="py-2 font-medium text-right">{t('reports.columnShare')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data?.studentsByDistrict.map((row) => (
+                        <tr key={row.label} className="border-b last:border-b-0">
+                          <td className="py-2">{row.label}</td>
+                          <td className="py-2 text-right tabular-nums">{row.count}</td>
+                          <td className="py-2 text-right tabular-nums text-muted-foreground">
+                            {(data?.activeStudents ?? 0) > 0
+                              ? `${Math.round((row.count / (data?.activeStudents ?? 1)) * 100)}%`
+                              : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </section>
         </>
       )}
