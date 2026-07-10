@@ -44,12 +44,6 @@ function aggregateGeoField(
   );
 }
 
-function maskAadhaar(aadhaar: string | null, canViewFull: boolean): string | null {
-  if (!aadhaar) return null;
-  if (canViewFull) return aadhaar;
-  return `XXXX-XXXX-${aadhaar.slice(-4)}`;
-}
-
 function serializeFamily(family: FamilyDetailsRow) {
   return {
     fatherName: family.father_name,
@@ -104,8 +98,7 @@ function serializeEmergencyContact(contact: EmergencyContactRow) {
   };
 }
 
-function serializeStudent(student: StudentRow, permissions: string[], includeFamily = true) {
-  const canViewSensitive = permissions.includes('students:view_sensitive_data');
+function serializeStudent(student: StudentRow, _permissions: string[], includeFamily = true) {
   const enrollment = unwrapEnrollment(student);
   const social = unwrapSocial(student);
 
@@ -122,7 +115,7 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     socialCategory: social?.social_category ?? null,
     motherTongue: student.mother_tongue ?? null,
     admissionDate: student.admission_date,
-    aadhaarNumber: maskAadhaar(student.aadhaar_number, canViewSensitive),
+    aadhaarNumber: student.aadhaar_number,
     satsId: student.sats_id,
     satsTransferStatus: student.sats_transfer_status,
     currentEnrollment: enrollment ? serializeEnrollment(enrollment) : null,
@@ -134,7 +127,7 @@ function serializeStudent(student: StudentRow, permissions: string[], includeFam
     medicalAlerts: student.medical_alerts,
   };
 
-  if (!includeFamily || !canViewSensitive) {
+  if (!includeFamily) {
     return base;
   }
 
@@ -357,16 +350,10 @@ export const studentService = {
     }
 
     if (input.familyDetails) {
-      if (!permissions.includes('students:view_sensitive_data')) {
-        throw new AppError(403, 'Permission denied to update family details');
-      }
       await studentsRepository.updateFamilyDetails(id, input.familyDetails);
     }
 
     if (input.socialDetails) {
-      if (!permissions.includes('students:view_sensitive_data')) {
-        throw new AppError(403, 'Permission denied to update social details');
-      }
       await studentsRepository.updateSocialDetails(id, input.socialDetails);
     }
 

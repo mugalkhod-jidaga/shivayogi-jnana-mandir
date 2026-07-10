@@ -15,6 +15,7 @@ export type StaffMember = {
   status: StaffStatus;
   mustResetPassword: boolean;
   roles: Role[];
+  assignedStandardIds?: number[];
   createdAt: string;
   updatedAt: string;
 };
@@ -28,12 +29,14 @@ export type CreateStaffPayload = {
   lastName?: string;
   phone: string;
   roleId: number;
+  assignedStandardIds?: number[];
 };
 
 export type UpdateStaffPayload = {
   firstName?: string;
   lastName?: string | null;
   roleId?: number;
+  assignedStandardIds?: number[];
 };
 
 export type TempPasswordMeta = {

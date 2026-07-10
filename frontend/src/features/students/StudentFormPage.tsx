@@ -37,7 +37,6 @@ export function StudentFormPage() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const { hasPermission } = usePermissions();
-  const canViewFamily = hasPermission('students:view_sensitive_data');
   const { currentAcademicYear, socialCategories } = useLookups();
   const { createStudentFormSchema, updateStudentFormSchema } = useStudentFormSchemas();
 
@@ -278,11 +277,6 @@ export function StudentFormPage() {
   };
 
   const onCreate = createForm.handleSubmit(async (values) => {
-    if (!canViewFamily) {
-      toast.error(t('form.errors.noFamilyPermission'));
-      return;
-    }
-
     if (!academicYearId || !standardId) {
       toast.error(t('form.errors.academicRequired'));
       return;
@@ -305,7 +299,7 @@ export function StudentFormPage() {
     }
 
     try {
-      const payload = buildUpdateStudentPayload(values, lookupIds, canViewFamily);
+      const payload = buildUpdateStudentPayload(values, lookupIds, true);
       const updated = await updateStudent.mutateAsync(payload);
       toast.success(t('form.updateSuccess'));
       navigate(`/students/${updated.id}`);
@@ -421,8 +415,7 @@ export function StudentFormPage() {
           </div>
         </section>
 
-        {canViewFamily && (
-          <section className="rounded-lg border p-6">
+        <section className="rounded-lg border p-6">
             <h2 className="text-lg font-medium">{t('form.sections.social')}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t('form.hints.social')}</p>
             <div className="mt-4">
@@ -447,10 +440,8 @@ export function StudentFormPage() {
               )}
             </div>
           </section>
-        )}
 
-        {canViewFamily && (
-          <section className="rounded-lg border p-6">
+        <section className="rounded-lg border p-6">
             <h2 className="text-lg font-medium">{t('form.sections.family')}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t('form.hints.family')}</p>
             <div className="mt-4">
@@ -467,7 +458,6 @@ export function StudentFormPage() {
               )}
             </div>
           </section>
-        )}
 
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>

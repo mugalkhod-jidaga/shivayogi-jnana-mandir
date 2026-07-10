@@ -13,8 +13,8 @@ const tabs = [
     permission: 'medical:create',
   },
   {
-    to: '/health/recent',
-    labelKey: 'nav.recentVisits',
+    to: '/health/visits',
+    labelKey: 'nav.visits',
     icon: History,
     end: false,
     permission: 'medical:read',

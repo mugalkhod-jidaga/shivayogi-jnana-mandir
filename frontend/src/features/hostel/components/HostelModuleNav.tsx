@@ -24,7 +24,6 @@ export function HostelModuleNav() {
   return (
     <ModuleNav
       theme="saffron"
-      hideLabelsOnMobile
       tabs={tabs.map(({ to, labelKey, icon, end }) => ({
         to,
         label: t(labelKey),

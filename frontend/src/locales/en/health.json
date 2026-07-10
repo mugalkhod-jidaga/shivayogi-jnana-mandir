@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "recordVisit": "Record visit",
-    "recentVisits": "Recent visits",
+    "visits": "Visits",
     "reports": "Reports"
   },
   "record": {
@@ -18,6 +18,13 @@
     "class": "Class",
     "visitDate": "Visit date",
     "severity": "Severity",
+    "healthOutcome": "After this visit, student is",
+    "healthOutcomeHelp": "Defaults from severity. Choose Recovered when discharging the student.",
+    "healthOutcomeOptions": {
+      "sick": "Still sick",
+      "recovering": "Improving / recovering",
+      "healthy": "Recovered / healthy"
+    },
     "issueType": "Type of issue",
     "customIssue": "Other issue (optional)",
     "symptoms": "Investigation / symptoms",
@@ -42,14 +49,15 @@
     "schedulePreset": "Schedule",
     "foodTiming": "Food timing",
     "medicineNotes": "Medicine notes",
-    "takePhoto": "Take / choose photo",
+    "takePhoto": "Take photo",
+    "chooseFromGallery": "Choose from gallery",
     "photoCount": "{{count}} / {{max}} photos",
     "saveVisit": "Save visit",
     "saving": "Saving…",
     "successTitle": "Visit saved",
     "successDescription": "The health visit has been recorded successfully.",
     "recordAnother": "Record another visit",
-    "viewRecent": "View recent visits",
+    "viewRecent": "View visits",
     "noPriorVisits": "No prior infirmary visits for this student.",
     "priorVisitsSummary": "Treated {{count}} time(s) before · Last visit: {{date}} — {{issue}}",
     "sections": {
@@ -72,14 +80,29 @@
       "saveFailed": "Failed to save visit."
     }
   },
-  "recent": {
-    "title": "Recent Visits",
-    "description": "Last 50 infirmary visits, newest first.",
+  "visits": {
+    "title": "Visits",
+    "description": "All infirmary visits, newest first. Filter by student, severity, class, or date.",
     "recordVisit": "Record visit",
-    "searchPlaceholder": "Search by issue or symptoms…",
-    "search": "Search",
-    "empty": "No visits found.",
-    "photoCount": "{{count}} photo(s)"
+    "searchPlaceholder": "Search student, admission #, issue, or symptoms…",
+    "allSeverities": "All severities",
+    "allClasses": "All classes",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "clearFilters": "Clear filters",
+    "empty": "No visits recorded yet.",
+    "emptyFiltered": "No visits match these filters.",
+    "error": "Could not load visits.",
+    "photoCount": "{{count}} photo(s)",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "columns": {
+      "date": "Date",
+      "student": "Student",
+      "severity": "Severity",
+      "issue": "Issue",
+      "medicines": "Medicines",
+      "photos": "Photos"
+    }
   },
   "dashboard": {
     "title": "Health Dashboard",
@@ -112,7 +135,13 @@
     "guardianPhone": "Guardian phone",
     "visitHistory": "Visit history",
     "noVisits": "No infirmary visits recorded yet.",
-    "backToStudent": "Back to student profile"
+    "backToStudent": "Back to student profile",
+    "backToVisits": "Back to visits",
+    "backToHealth": "Back to health",
+    "markRecovered": "Mark as recovered",
+    "markingRecovered": "Updating…",
+    "markRecoveredSuccess": "Student marked as healthy.",
+    "markRecoveredFailed": "Could not update health status."
   },
   "visitDetail": {
     "close": "Close",

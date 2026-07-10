@@ -73,7 +73,7 @@ async function validateLookups(tenantId: number, input: CreateHealthVisitInput) 
   return severity;
 }
 
-function mapHealthStatus(severityCode: string): string {
+function mapHealthStatusFromSeverity(severityCode: string): CreateHealthVisitInput['healthStatus'] {
   if (severityCode === 'normal') return 'recovering';
   return 'sick';
 }
@@ -204,12 +204,23 @@ export const healthService = {
     await healthRepository.updateStudentHealthStatus(
       input.studentId,
       tenantId,
-      mapHealthStatus(severity.code),
+      input.healthStatus ?? mapHealthStatusFromSeverity(severity.code),
       userId,
     );
 
     const full = await healthRepository.findById(visit.id, tenantId);
     if (!full) throw new AppError(500, 'Failed to load created visit');
     return full;
+  },
+
+  async updateStudentHealthStatus(
+    studentId: string,
+    tenantId: number,
+    healthStatus: CreateHealthVisitInput['healthStatus'],
+    userId: string,
+  ) {
+    await assertStudentIdAccess(studentId, tenantId, userId);
+    await healthRepository.updateStudentHealthStatus(studentId, tenantId, healthStatus, userId);
+    return { studentId, healthStatus };
   },
 };

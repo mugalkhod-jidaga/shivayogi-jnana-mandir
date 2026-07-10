@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { PhotoGallery } from '@/features/health/components/PhotoGallery';
@@ -33,6 +33,8 @@ type Props = {
 
 export function VisitDetailModal({ visit, open, onClose }: Props) {
   const { t } = useTranslation('health');
+  const location = useLocation();
+  const profileLinkState = { from: `${location.pathname}${location.search}` };
 
   if (!open || !visit) return null;
 
@@ -43,6 +45,7 @@ export function VisitDetailModal({ visit, open, onClose }: Props) {
           <div>
             <Link
               to={`/health/students/${visit.studentId}`}
+              state={profileLinkState}
               onClick={onClose}
               className="text-lg font-semibold text-primary hover:underline"
             >
@@ -103,6 +106,7 @@ export function VisitDetailModal({ visit, open, onClose }: Props) {
 
           <Link
             to={`/health/students/${visit.studentId}`}
+            state={profileLinkState}
             onClick={onClose}
             className="mt-4 block text-center text-sm font-medium text-primary hover:underline"
           >

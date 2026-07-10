@@ -22,11 +22,16 @@ import {
 } from '@/hooks/useHealth';
 import { useStudent } from '@/hooks/useStudent';
 import { EMPTY_SCHEDULE, useHealthLookups } from '@/hooks/useHealthLookups';
-import type { MedicineRowInput, PendingPhoto } from '@/types/health';
+import type { MedicineRowInput, PendingPhoto, StudentHealthStatus } from '@/types/health';
 import type { StudentSummary } from '@/types/student';
+import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
 
 function formatName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
+}
+
+function defaultOutcomeForSeverity(code: string | undefined): StudentHealthStatus {
+  return code === 'normal' ? 'recovering' : 'sick';
 }
 
 function emptyMedicine(): MedicineRowInput {
@@ -59,6 +64,7 @@ export function RecordVisitPage() {
   const [visitDate, setVisitDate] = useState(new Date().toISOString().slice(0, 10));
   const [symptoms, setSymptoms] = useState('');
   const [severityId, setSeverityId] = useState('');
+  const [healthStatus, setHealthStatus] = useState<StudentHealthStatus>('recovering');
   const [treatedBy, setTreatedBy] = useState('');
   const [notes, setNotes] = useState('');
   const [temperature, setTemperature] = useState('');
@@ -91,6 +97,13 @@ export function RecordVisitPage() {
   const defaultPresetId =
     schedulePresets.find((p) => p.code === 'twice_daily')?.id ?? schedulePresets[0]?.id;
 
+  const resolvedSeverityId = Number(severityId || defaultSeverityId);
+  const selectedSeverity = severities.find((s) => s.id === resolvedSeverityId);
+
+  useEffect(() => {
+    setHealthStatus(defaultOutcomeForSeverity(selectedSeverity?.code));
+  }, [selectedSeverity?.code]);
+
   const handleStudentChange = (id: string, student: StudentSummary | null) => {
     setStudentId(id);
     setSelectedStudent(student);
@@ -114,6 +127,7 @@ export function RecordVisitPage() {
     setVisitDate(new Date().toISOString().slice(0, 10));
     setSymptoms('');
     setSeverityId('');
+    setHealthStatus('recovering');
     setTreatedBy('');
     setNotes('');
     setTemperature('');
@@ -152,7 +166,6 @@ export function RecordVisitPage() {
       return;
     }
 
-    const resolvedSeverityId = Number(severityId || defaultSeverityId);
     if (!resolvedSeverityId) {
       setError(t('record.errors.severityRequired'));
       return;
@@ -169,6 +182,7 @@ export function RecordVisitPage() {
         issueType: issueTypeValue,
         symptoms: symptoms.trim(),
         severityId: resolvedSeverityId,
+        healthStatus,
         treatedBy: treatedBy.trim() || undefined,
         notes: notes.trim() || undefined,
         temperature: temperature.trim() || undefined,
@@ -207,7 +221,7 @@ export function RecordVisitPage() {
               {t('record.recordAnother')}
             </Button>
             <Button type="button" variant="outline" asChild>
-              <Link to="/health/recent">{t('record.viewRecent')}</Link>
+              <Link to="/health/visits">{t('record.viewRecent')}</Link>
             </Button>
           </div>
         </ModuleSectionCard>
@@ -230,7 +244,10 @@ export function RecordVisitPage() {
 
           {selectedStudent && (
             <div className="rounded-md bg-muted/50 p-4 text-sm">
-              <p className="font-medium">{formatName(selectedStudent.firstName, selectedStudent.lastName)}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium">{formatName(selectedStudent.firstName, selectedStudent.lastName)}</p>
+                <HealthStatusBadge status={selectedStudent.healthStatus} />
+              </div>
               <p className="text-muted-foreground">
                 {selectedStudent.admissionNumber}
                 {selectedStudent.currentEnrollment?.standard?.value &&
@@ -270,6 +287,19 @@ export function RecordVisitPage() {
                   </option>
                 ))}
               </Select>
+            </div>
+            <div className="sm:col-span-2">
+              <Label>{t('record.healthOutcome')}</Label>
+              <Select
+                value={healthStatus}
+                onChange={(e) => setHealthStatus(e.target.value as StudentHealthStatus)}
+                required
+              >
+                <option value="sick">{t('record.healthOutcomeOptions.sick')}</option>
+                <option value="recovering">{t('record.healthOutcomeOptions.recovering')}</option>
+                <option value="healthy">{t('record.healthOutcomeOptions.healthy')}</option>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">{t('record.healthOutcomeHelp')}</p>
             </div>
           </div>
 

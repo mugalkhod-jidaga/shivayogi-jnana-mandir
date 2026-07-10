@@ -9,6 +9,7 @@ import type {
   HealthVisitSummary,
   MedicineCatalogItem,
   PendingPhoto,
+  StudentHealthStatus,
   VisitAttachmentInput,
 } from '@/types/health';
 
@@ -34,6 +35,9 @@ function buildListQuery(filters: HealthVisitListFilters) {
   if (filters.search) params.set('search', filters.search);
   if (filters.studentId) params.set('studentId', filters.studentId);
   if (filters.severityId) params.set('severityId', String(filters.severityId));
+  if (filters.standardId) params.set('standardId', String(filters.standardId));
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
   return params.toString();
 }
 
@@ -107,6 +111,31 @@ export function useCreateHealthVisit() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: healthKeys.all });
       void queryClient.invalidateQueries({ queryKey: ['students'] });
+    },
+  });
+}
+
+export function useUpdateStudentHealthStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      studentId,
+      healthStatus,
+    }: {
+      studentId: string;
+      healthStatus: StudentHealthStatus;
+    }) =>
+      apiFetch<{ studentId: string; healthStatus: StudentHealthStatus }>(
+        `/health/students/${studentId}/health-status`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ healthStatus }),
+        },
+      ),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: healthKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ['students'] });
+      void queryClient.invalidateQueries({ queryKey: ['students', 'detail', variables.studentId] });
     },
   });
 }
