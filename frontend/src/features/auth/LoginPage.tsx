@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { BRAND } from '@/components/module-ui/brandAssets';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -75,20 +76,28 @@ export function LoginPage() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
-      <img
-        src="/assets/banner.jpg"
-        alt=""
-        className="absolute inset-0 size-full object-cover object-[center_30%]"
-      />
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-red-950/45 to-black/75" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+      <picture>
+        <source type="image/webp" srcSet={BRAND.bannerImage.srcSetWebp} sizes={BRAND.bannerImage.sizes} />
+        <source type="image/jpeg" srcSet={BRAND.bannerImage.srcSetJpeg} sizes={BRAND.bannerImage.sizes} />
+        <img
+          src={BRAND.bannerImage.src}
+          alt=""
+          className="absolute inset-0 size-full object-cover object-[center_30%]"
+          sizes={BRAND.bannerImage.sizes}
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-red-950/50 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/35" />
+      <div className="absolute inset-0 backdrop-blur-[2px] sm:backdrop-blur-0" />
       <div className="absolute right-4 top-4 z-10">
         <LanguageToggle />
       </div>
       <Card className="relative z-10 w-full max-w-sm border-white/20 bg-white/95 shadow-2xl backdrop-blur-sm dark:bg-card/95">
         <CardHeader className="text-center">
           <img
-            src="/assets/logo.png"
+            src={BRAND.logo}
             alt={tc('appName')}
             className="mx-auto mb-3 size-16 object-contain"
             width={64}

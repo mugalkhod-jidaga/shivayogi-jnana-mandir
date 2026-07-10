@@ -23,6 +23,7 @@
       "actions": "Actions"
     },
     "actions": {
+      "editRole": "Change role",
       "resetPassword": "Reset password",
       "deactivate": "Deactivate"
     }
@@ -41,6 +42,14 @@
     "submitting": "Creating…",
     "success": "Staff account created",
     "error": "Could not create staff account"
+  },
+  "edit": {
+    "title": "Change staff role",
+    "description": "Update the role for {{name}}. Permissions change immediately on next request.",
+    "submit": "Save role",
+    "submitting": "Saving…",
+    "success": "Staff role updated",
+    "error": "Could not update staff role"
   },
   "deactivate": {
     "title": "Deactivate staff account",

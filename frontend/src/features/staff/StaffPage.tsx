@@ -1,4 +1,4 @@
-import { KeyRound, Plus, Search, UserCog, UserX } from 'lucide-react';
+import { KeyRound, Pencil, Plus, Search, UserCog, UserX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateStaffDialog } from '@/features/staff/components/CreateStaffDialog';
 import { DeactivateStaffDialog } from '@/features/staff/components/DeactivateStaffDialog';
+import { EditStaffDialog } from '@/features/staff/components/EditStaffDialog';
 import { ResetStaffPasswordDialog } from '@/features/staff/components/ResetStaffPasswordDialog';
 import { StaffStatusBadge } from '@/features/staff/components/StaffStatusBadge';
 import { TempPasswordDialog } from '@/features/staff/components/TempPasswordDialog';
@@ -14,6 +15,7 @@ import { useMe } from '@/hooks/useMe';
 import { useStaffList } from '@/hooks/useStaff';
 import { phoneToDisplay } from '@/lib/phone';
 import { roleLabel } from '@/lib/enumLabels';
+import type { StaffMember } from '@/types/user';
 
 function formatStaffName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
@@ -35,6 +37,7 @@ export function StaffPage() {
     name: string;
   } | null>(null);
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string } | null>(null);
+  const [editTarget, setEditTarget] = useState<StaffMember | null>(null);
 
   const { data: me } = useMe();
 
@@ -146,6 +149,16 @@ export function StaffPage() {
                           size="sm"
                           variant="outline"
                           disabled={!isActive}
+                          onClick={() => setEditTarget(member)}
+                        >
+                          <Pencil className="size-4" />
+                          {t('list.actions.editRole')}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={!isActive}
                           onClick={() => setResetTarget({ id: member.id, name })}
                         >
                           <KeyRound className="size-4" />
@@ -205,6 +218,16 @@ export function StaffPage() {
         onOpenChange={setCreateOpen}
         onCreated={(staffName, password) => setTempPassword({ name: staffName, password })}
       />
+
+      {editTarget && (
+        <EditStaffDialog
+          staff={editTarget}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditTarget(null);
+          }}
+        />
+      )}
 
       {deactivateTarget && (
         <DeactivateStaffDialog

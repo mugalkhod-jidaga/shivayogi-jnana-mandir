@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
-import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -81,7 +80,6 @@ export function StudentDetailPage() {
   }
 
   const displayName = [student.firstName, student.lastName].filter(Boolean).join(' ');
-  const canViewFamily = hasPermission('students:view_sensitive_data') && student.familyDetails;
   const enrollment = student.currentEnrollment;
   const emergencyContact = student.emergencyContacts[0];
 
@@ -250,7 +248,7 @@ export function StudentDetailPage() {
             </dl>
           </section>
 
-          {canViewFamily && student.socialDetails && (
+          {student.socialDetails && (
             <section className="rounded-lg border p-6">
               <h2 className="text-lg font-medium">{t('form.sections.social')}</h2>
               <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -270,7 +268,7 @@ export function StudentDetailPage() {
             </section>
           )}
 
-          {canViewFamily && student.familyDetails && (
+          {student.familyDetails && (
             <section className="rounded-lg border p-6">
               <h2 className="text-lg font-medium">{t('form.sections.family')}</h2>
               <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -310,13 +308,6 @@ export function StudentDetailPage() {
                 <DetailField label={t('form.fields.pincode')} value={student.familyDetails.pincode} />
               </dl>
             </section>
-          )}
-
-          {!canViewFamily && (
-            <PlaceholderPanel
-              title={t('detail.hiddenFamily.title')}
-              description={t('detail.hiddenFamily.description')}
-            />
           )}
         </div>
       )}
