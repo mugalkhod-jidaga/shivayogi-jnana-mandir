@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Camera, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PendingPhoto } from '@/types/health';
 
@@ -17,7 +18,8 @@ type Props = {
 
 export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
   const { t } = useTranslation('health');
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   function handleFiles(fileList: FileList | null) {
     const files = Array.from(fileList ?? []).filter((f) => f.type.startsWith('image/'));
@@ -43,18 +45,32 @@ export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
   }
 
   const atLimit = photos.length >= MAX_PHOTOS_PER_VISIT;
+  const inputDisabled = disabled || atLimit;
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
+        {/* Camera — capture attribute opens the rear camera on mobile */}
         <input
-          ref={fileRef}
+          ref={cameraRef}
           type="file"
           accept="image/*"
           capture="environment"
+          className="hidden"
+          disabled={inputDisabled}
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = '';
+          }}
+        />
+        {/* Gallery — no capture attribute so the OS file picker / photo library opens */}
+        <input
+          ref={galleryRef}
+          type="file"
+          accept="image/*"
           multiple
           className="hidden"
-          disabled={disabled || atLimit}
+          disabled={inputDisabled}
           onChange={(e) => {
             handleFiles(e.target.files);
             e.target.value = '';
@@ -63,10 +79,20 @@ export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
         <Button
           type="button"
           variant="outline"
-          disabled={disabled || atLimit}
-          onClick={() => fileRef.current?.click()}
+          disabled={inputDisabled}
+          onClick={() => cameraRef.current?.click()}
         >
+          <Camera className="size-4" />
           {t('record.takePhoto')}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={inputDisabled}
+          onClick={() => galleryRef.current?.click()}
+        >
+          <ImageIcon className="size-4" />
+          {t('record.chooseFromGallery')}
         </Button>
         <span className="text-sm text-muted-foreground">
           {t('record.photoCount', { count: photos.length, max: MAX_PHOTOS_PER_VISIT })}
