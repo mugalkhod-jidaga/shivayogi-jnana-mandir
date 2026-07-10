@@ -184,6 +184,24 @@ class HealthRepository extends BaseRepository {
     );
   }
 
+  private async findStudentIdsBySearch(tenantId: number, search: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('students')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
+      .or(
+        [
+          `first_name.ilike.%${search}%`,
+          `last_name.ilike.%${search}%`,
+          `admission_number.ilike.%${search}%`,
+        ].join(','),
+      )
+      .limit(200);
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => row.id as string);
+  }
+
   async list(tenantId: number, query: HealthVisitListQuery, assignedStandardIds?: number[]) {
     const { page, limit, search, studentId, severityId, standardId, from, to } = query;
     const cappedLimit = Math.min(limit, 100);
@@ -228,15 +246,14 @@ class HealthRepository extends BaseRepository {
     if (from) dbQuery = dbQuery.gte('visit_date', from);
     if (to) dbQuery = dbQuery.lte('visit_date', to);
     if (search) {
-      dbQuery = dbQuery.or(
-        [
-          `issue_type.ilike.%${search}%`,
-          `symptoms.ilike.%${search}%`,
-          `students.first_name.ilike.%${search}%`,
-          `students.last_name.ilike.%${search}%`,
-          `students.admission_number.ilike.%${search}%`,
-        ].join(','),
-      );
+      // Nested students.* filters cannot be mixed into .or() on health_visits —
+      // resolve matching students first, then OR with visit text fields.
+      const matchingStudentIds = await this.findStudentIdsBySearch(tenantId, search);
+      const orParts = [`issue_type.ilike.%${search}%`, `symptoms.ilike.%${search}%`];
+      if (matchingStudentIds.length > 0) {
+        orParts.push(`student_id.in.(${matchingStudentIds.join(',')})`);
+      }
+      dbQuery = dbQuery.or(orParts.join(','));
     }
 
     const { data, count, error } = await dbQuery.range(offset, offset + cappedLimit - 1);
