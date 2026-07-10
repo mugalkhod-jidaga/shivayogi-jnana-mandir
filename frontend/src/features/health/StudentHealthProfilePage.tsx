@@ -1,7 +1,7 @@
 import { ArrowLeft, HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
@@ -16,10 +16,21 @@ import { useStudent } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
 import { genderLabel } from '@/lib/enumLabels';
 
+function resolveBackNav(from: string | undefined, studentId: string, t: (key: string) => string) {
+  if (from?.startsWith('/health/visits') || from?.startsWith('/health/recent')) {
+    return { to: from, label: t('profile.backToVisits') };
+  }
+  if (from?.startsWith('/health')) {
+    return { to: from, label: t('profile.backToHealth') };
+  }
+  return { to: `/students/${studentId}`, label: t('profile.backToStudent') };
+}
+
 export function StudentHealthProfilePage() {
   const { t } = useTranslation('health');
   const { t: tc } = useTranslation();
   const { studentId } = useParams();
+  const location = useLocation();
   const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
 
   const { data: student, isLoading: studentLoading, isError } = useStudent(studentId);
@@ -42,13 +53,15 @@ export function StudentHealthProfilePage() {
 
   const visits = visitsData?.data ?? [];
   const name = [student.firstName, student.lastName].filter(Boolean).join(' ');
+  const from = (location.state as { from?: string } | null)?.from;
+  const back = resolveBackNav(from, studentId, t);
 
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
-        <Link to={`/students/${studentId}`}>
+        <Link to={back.to}>
           <ArrowLeft className="size-4" />
-          {t('profile.backToStudent')}
+          {back.label}
         </Link>
       </Button>
 

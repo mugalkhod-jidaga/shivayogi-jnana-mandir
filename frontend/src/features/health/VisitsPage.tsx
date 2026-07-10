@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AcademicStandardSelect } from '@/components/lookups/AcademicStandardSelect';
 import { RequirePermission } from '@/components/RequirePermission';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,10 @@ import { useHealthLookups } from '@/hooks/useHealthLookups';
 export function VisitsPage() {
   const { t } = useTranslation('health');
   const { t: tc } = useTranslation();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { severities } = useHealthLookups();
+  const returnTo = `${location.pathname}${location.search}`;
 
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -202,6 +204,7 @@ export function VisitsPage() {
                   <td className="px-4 py-3">
                     <Link
                       to={`/health/students/${visit.studentId}`}
+                      state={{ from: returnTo }}
                       className="font-medium text-primary hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >

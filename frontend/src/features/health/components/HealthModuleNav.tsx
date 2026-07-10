@@ -4,7 +4,6 @@ import { ModuleNav } from '@/components/module-ui/ModuleNav';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const tabs = [
-  { to: '/health', labelKey: 'nav.dashboard', icon: Activity, end: true, permission: 'medical:read' },
   {
     to: '/health/record-visit',
     labelKey: 'nav.recordVisit',
@@ -19,6 +18,7 @@ const tabs = [
     end: false,
     permission: 'medical:read',
   },
+  { to: '/health', labelKey: 'nav.dashboard', icon: Activity, end: true, permission: 'medical:read' },
   {
     to: '/health/reports',
     labelKey: 'nav.reports',

@@ -128,7 +128,9 @@
     "guardianPhone": "ಪೋಷಕರ ಫೋನ್",
     "visitHistory": "ಭೇಟಿ ಇತಿಹಾಸ",
     "noVisits": "ಇನ್ನೂ ಯಾವುದೇ infirmary ಭೇಟಿಗಳಿಲ್ಲ.",
-    "backToStudent": "ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗೆ ಹಿಂತಿರುಗಿ"
+    "backToStudent": "ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "backToVisits": "ಭೇಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "backToHealth": "ಆರೋಗ್ಯಕ್ಕೆ ಹಿಂತಿರುಗಿ"
   },
   "visitDetail": {
     "close": "ಮುಚ್ಚಿ",

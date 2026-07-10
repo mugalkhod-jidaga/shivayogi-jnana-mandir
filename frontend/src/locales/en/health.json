@@ -128,7 +128,9 @@
     "guardianPhone": "Guardian phone",
     "visitHistory": "Visit history",
     "noVisits": "No infirmary visits recorded yet.",
-    "backToStudent": "Back to student profile"
+    "backToStudent": "Back to student profile",
+    "backToVisits": "Back to visits",
+    "backToHealth": "Back to health"
   },
   "visitDetail": {
     "close": "Close",
