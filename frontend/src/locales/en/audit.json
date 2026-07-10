@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Audit Logs",
+    "description": "Search and review system activity across the tenant.",
+    "tagline": "Trace · Review · Accountability"
+  },
   "title": "Audit Logs",
   "description": "Search and review system activity across the tenant.",
   "searchPlaceholder": "Search by entity or action type",

@@ -1,8 +1,8 @@
-import { Search } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DocumentActions } from '@/features/documents/components/DocumentActions';
@@ -72,7 +72,13 @@ export function DocumentQueuePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('queue.title')} description={t('queue.description')} />
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={FileText}
+        module="documents"
+      />
 
       <div className="flex flex-wrap gap-2">
         {statusFilters.map((filter) => (
@@ -81,6 +87,11 @@ export function DocumentQueuePage() {
             type="button"
             size="sm"
             variant={statusParam === filter.value ? 'default' : 'outline'}
+            className={
+              statusParam === filter.value
+                ? 'bg-indigo-600 hover:bg-indigo-700'
+                : 'border-indigo-200 hover:bg-indigo-50 dark:border-indigo-800'
+            }
             onClick={() => setStatusFilter(filter.value)}
           >
             {filter.label}

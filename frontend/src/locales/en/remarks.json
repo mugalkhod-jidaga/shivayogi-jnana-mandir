@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Student Remarks",
+    "description": "Track positive, negative, and observation notes for students.",
+    "tagline": "Guidance · Notes · Progress"
+  },
   "title": "Student Remarks",
   "description": "Track positive, negative, and observation notes for students.",
   "loading": "Loading remarks…",

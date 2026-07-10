@@ -74,13 +74,27 @@ export function LoginPage() {
   });
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center p-4">
-      <div className="absolute right-4 top-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      <img
+        src="/assets/banner.jpg"
+        alt=""
+        className="absolute inset-0 size-full object-cover object-[center_30%]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-red-950/45 to-black/75" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+      <div className="absolute right-4 top-4 z-10">
         <LanguageToggle />
       </div>
-      <Card className="w-full max-w-sm">
+      <Card className="relative z-10 w-full max-w-sm border-white/20 bg-white/95 shadow-2xl backdrop-blur-sm dark:bg-card/95">
         <CardHeader className="text-center">
-          <CardTitle>{tc('appName')}</CardTitle>
+          <img
+            src="/assets/logo.png"
+            alt={tc('appName')}
+            className="mx-auto mb-3 size-16 object-contain"
+            width={64}
+            height={64}
+          />
+          <CardTitle className="text-xl">{tc('appName')}</CardTitle>
           <CardDescription>{t('subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,7 +132,7 @@ export function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={isSubmitting}>
               {isSubmitting ? t('signingIn') : t('signIn')}
             </Button>
           </form>

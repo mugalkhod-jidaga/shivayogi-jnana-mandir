@@ -83,10 +83,12 @@ export function HostelRosterPage() {
             type="button"
             onClick={() => setFilters({ sessionPeriod: period })}
             className={cn(
-              'rounded-full border px-3 py-1 text-sm transition-colors',
+              'rounded-full border px-4 py-1.5 text-sm font-medium transition-all',
               sessionPeriod === period
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                ? period === 'morning'
+                  ? 'border-amber-400 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                  : 'border-indigo-400 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
+                : 'bg-background text-muted-foreground hover:border-orange-300 hover:text-foreground',
             )}
           >
             {period === 'morning' ? t('attendance.morning') : t('attendance.evening')}

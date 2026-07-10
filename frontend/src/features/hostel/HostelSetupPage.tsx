@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { BedDouble, Building2, DoorOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RequirePermission } from '@/components/RequirePermission';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { HostelSectionCard } from '@/features/hostel/components/HostelSectionCard';
+import { cn } from '@/lib/utils';
 import { useCreateBlock, useCreateRoom, useHostelBlocks, useHostelRooms, useRoomBeds } from '@/hooks/useHostel';
 
 export function HostelSetupPage() {
@@ -27,11 +30,17 @@ export function HostelSetupPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="space-y-4 rounded-lg border p-4">
-        <h2 className="font-medium">{t('blocks.title')}</h2>
+      <HostelSectionCard
+        title={t('blocks.title')}
+        icon={
+          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
+            <Building2 className="size-5" />
+          </div>
+        }
+      >
         <RequirePermission permission="hostel:manage">
           <form
-            className="flex gap-2"
+            className="mb-4 flex gap-2"
             onSubmit={(e) => {
               e.preventDefault();
               void createBlock.mutateAsync({ name: newBlockName }).then(() => setNewBlockName(''));
@@ -53,9 +62,12 @@ export function HostelSetupPage() {
             <li key={block.id}>
               <button
                 type="button"
-                className={`w-full rounded border px-3 py-2 text-left text-sm ${
-                  activeBlockId === block.id ? 'border-primary bg-primary/5' : ''
-                }`}
+                className={cn(
+                  'w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-all',
+                  activeBlockId === block.id
+                    ? 'border-indigo-300 bg-indigo-50 text-indigo-900 shadow-sm dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-100'
+                    : 'hover:border-indigo-200 hover:bg-muted/50',
+                )}
                 onClick={() => {
                   setSelectedBlockId(block.id);
                   setSelectedRoomId(null);
@@ -66,15 +78,21 @@ export function HostelSetupPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </HostelSectionCard>
 
-      <section className="space-y-4 rounded-lg border p-4">
-        <h2 className="font-medium">{t('rooms.title')}</h2>
+      <HostelSectionCard
+        title={t('rooms.title')}
+        icon={
+          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow">
+            <DoorOpen className="size-5" />
+          </div>
+        }
+      >
         {activeBlockId ? (
           <>
             <RequirePermission permission="hostel:manage">
               <form
-                className="grid gap-2 sm:grid-cols-3"
+                className="mb-4 grid gap-2 sm:grid-cols-3"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void createRoom
@@ -102,14 +120,17 @@ export function HostelSetupPage() {
                 </Button>
               </form>
             </RequirePermission>
-            <ul className="space-y-1 text-sm">
+            <ul className="space-y-2">
               {rooms.map((room) => (
                 <li key={room.id}>
                   <button
                     type="button"
-                    className={`flex w-full justify-between rounded border px-3 py-2 text-left ${
-                      activeRoomId === room.id ? 'border-primary bg-primary/5' : ''
-                    }`}
+                    className={cn(
+                      'flex w-full justify-between rounded-lg border px-4 py-3 text-left text-sm transition-all',
+                      activeRoomId === room.id
+                        ? 'border-orange-300 bg-orange-50 font-medium text-orange-900 shadow-sm dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-100'
+                        : 'hover:border-orange-200 hover:bg-muted/50',
+                    )}
                     onClick={() => setSelectedRoomId(room.id)}
                   >
                     <span>
@@ -123,30 +144,43 @@ export function HostelSetupPage() {
         ) : (
           <p className="text-sm text-muted-foreground">{t('rooms.selectBlock')}</p>
         )}
-      </section>
+      </HostelSectionCard>
 
       {activeRoomId && (
-        <section className="space-y-3 rounded-lg border p-4 lg:col-span-2">
-          <h2 className="font-medium">{t('beds.title')}</h2>
-          <p className="text-sm text-muted-foreground">{t('beds.description')}</p>
-          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+        <HostelSectionCard
+          title={t('beds.title')}
+          description={t('beds.description')}
+          className="lg:col-span-2"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow">
+              <BedDouble className="size-5" />
+            </div>
+          }
+        >
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
             {(beds ?? []).map((bed) => (
               <div
                 key={bed.id}
-                className={`rounded-md border p-3 text-sm ${
-                  bed.isOccupied ? 'bg-muted/50' : 'border-dashed'
-                }`}
+                className={cn(
+                  'flex flex-col items-center justify-center rounded-xl border-2 p-4 text-center transition-transform hover:scale-[1.02]',
+                  bed.isOccupied
+                    ? 'border-emerald-300 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md'
+                    : 'border-dashed border-slate-300 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-900/40',
+                )}
               >
-                <p className="font-medium">
+                <BedDouble
+                  className={cn('mb-2 size-6', bed.isOccupied ? 'text-white/90' : 'text-slate-400')}
+                />
+                <p className="text-xs font-bold uppercase tracking-wide opacity-90">
                   {t('beds.slot', { number: bed.slotNumber })}
                 </p>
-                <p className="text-muted-foreground">
+                <p className={cn('mt-1 text-sm font-medium', !bed.isOccupied && 'text-muted-foreground')}>
                   {bed.isOccupied ? bed.bedLabel : t('beds.vacant')}
                 </p>
               </div>
             ))}
           </div>
-        </section>
+        </HostelSectionCard>
       )}
     </div>
   );

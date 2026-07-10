@@ -1,4 +1,4 @@
-import { Activity, Pill, Stethoscope, TrendingUp } from 'lucide-react';
+import { Activity, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   Bar,
@@ -14,9 +14,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
+import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
-import { KpiCard } from '@/features/dashboard/components/KpiCard';
 import { useHealthReports } from '@/hooks/useHealthReports';
 import { chartColor } from '@/lib/chartColors';
 import { formatDobDisplay } from '@/lib/date';
@@ -78,7 +78,7 @@ export function HealthReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('reports.title')} description={t('reports.description')} />
+      <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
 
       {isError && (
         <PlaceholderPanel title={t('reports.errorTitle')} description={t('reports.errorDescription')} />
@@ -87,38 +87,46 @@ export function HealthReportsPage() {
       {!isError && (
         <>
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.totalVisits')}
               value={isLoading ? '…' : (data?.totalVisits ?? 0)}
               description={t('reports.kpis.totalVisitsHelp')}
-              className="border-l-4 border-l-blue-500"
+              icon={Stethoscope}
+              accent="sky"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.visitsMonth')}
               value={isLoading ? '…' : (data?.visitsThisMonth ?? 0)}
-              className="border-l-4 border-l-violet-500"
+              icon={TrendingUp}
+              accent="indigo"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.visitsWeek')}
               value={isLoading ? '…' : (data?.visitsThisWeek ?? 0)}
-              className="border-l-4 border-l-amber-500"
+              icon={Activity}
+              accent="saffron"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.uniqueStudents')}
               value={isLoading ? '…' : (data?.uniqueStudentsVisited ?? 0)}
               description={t('reports.kpis.uniqueStudentsHelp')}
-              className="border-l-4 border-l-emerald-500"
+              icon={Users}
+              accent="emerald"
             />
           </section>
 
-          <section className="rounded-xl border bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="size-5 text-blue-600" />
-              <h2 className="text-lg font-semibold">{t('reports.trend.title')}</h2>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">{t('reports.trend.description')}</p>
+          <ModuleSectionCard
+            title={t('reports.trend.title')}
+            description={t('reports.trend.description')}
+            icon={
+              <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-md">
+                <TrendingUp className="size-5" />
+              </div>
+            }
+            headerClassName="from-sky-50/90 to-cyan-50/60 dark:from-sky-950/25 dark:to-cyan-950/20"
+          >
             {!isLoading && trendData.length > 0 && (
-              <div className="mt-6 h-64">
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -150,17 +158,21 @@ export function HealthReportsPage() {
                 </ResponsiveContainer>
               </div>
             )}
-          </section>
+          </ModuleSectionCard>
 
           <section className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Activity className="size-5 text-red-600" />
-                <h2 className="text-lg font-semibold">{t('reports.bySeverity.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.bySeverity.description')}</p>
+            <ModuleSectionCard
+              title={t('reports.bySeverity.title')}
+              description={t('reports.bySeverity.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md">
+                  <Activity className="size-5" />
+                </div>
+              }
+              headerClassName="from-rose-50/90 to-pink-50/60 dark:from-rose-950/25 dark:to-pink-950/20"
+            >
               {!isLoading && severityChartData.length > 0 && (
-                <div className="mt-6 h-56">
+                <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -182,16 +194,20 @@ export function HealthReportsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ModuleSectionCard>
 
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Stethoscope className="size-5 text-emerald-600" />
-                <h2 className="text-lg font-semibold">{t('reports.healthStatus.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.healthStatus.description')}</p>
+            <ModuleSectionCard
+              title={t('reports.healthStatus.title')}
+              description={t('reports.healthStatus.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
+                  <Stethoscope className="size-5" />
+                </div>
+              }
+              headerClassName="from-emerald-50/90 to-teal-50/60 dark:from-emerald-950/25 dark:to-teal-950/20"
+            >
               {!isLoading && healthStatusData.length > 0 && (
-                <div className="mt-6 h-56">
+                <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={healthStatusData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -207,21 +223,24 @@ export function HealthReportsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ModuleSectionCard>
           </section>
 
           <section className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Stethoscope className="size-5 text-violet-600" />
-                <h2 className="text-lg font-semibold">{t('reports.topIssues.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.topIssues.description')}</p>
+            <ModuleSectionCard
+              title={t('reports.topIssues.title')}
+              description={t('reports.topIssues.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+                  <Stethoscope className="size-5" />
+                </div>
+              }
+            >
               {!isLoading && issueChartData.length === 0 && (
-                <p className="mt-6 text-sm text-muted-foreground">{t('reports.empty')}</p>
+                <p className="text-sm text-muted-foreground">{t('reports.empty')}</p>
               )}
               {!isLoading && issueChartData.length > 0 && (
-                <div className="mt-6 h-72">
+                <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={issueChartData}
@@ -241,17 +260,20 @@ export function HealthReportsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ModuleSectionCard>
 
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Pill className="size-5 text-blue-600" />
-                <h2 className="text-lg font-semibold">{t('reports.topMedicines.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.topMedicines.description')}</p>
+            <ModuleSectionCard
+              title={t('reports.topMedicines.title')}
+              description={t('reports.topMedicines.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-md">
+                  <Pill className="size-5" />
+                </div>
+              }
+            >
               {!isLoading && medicineChartData.length > 0 && (
                 <>
-                  <div className="mt-6 h-56">
+                  <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={medicineChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -286,7 +308,7 @@ export function HealthReportsPage() {
                   </div>
                 </>
               )}
-            </div>
+            </ModuleSectionCard>
           </section>
         </>
       )}

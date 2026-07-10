@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Students",
+    "description": "Search, filter, and manage student records across the institution.",
+    "tagline": "Learning · Records · Community"
+  },
   "nav": {
     "directory": "Directory",
     "reports": "Reports"

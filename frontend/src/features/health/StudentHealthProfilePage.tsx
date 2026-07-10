@@ -1,8 +1,8 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
@@ -52,17 +52,19 @@ export function StudentHealthProfilePage() {
         </Link>
       </Button>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
-          title={name}
-          description={`${student.admissionNumber}${student.currentEnrollment?.standard?.value ? ` · ${t('record.class')} ${student.currentEnrollment.standard.value}` : ''}`}
-        />
-        <Button asChild>
+      <ModuleHeroBanner
+        title={name}
+        description={`${student.admissionNumber}${student.currentEnrollment?.standard?.value ? ` · ${t('record.class')} ${student.currentEnrollment.standard.value}` : ''}`}
+        tagline={t('hero.tagline')}
+        icon={HeartPulse}
+        module="health"
+      >
+        <Button asChild className="bg-teal-600 hover:bg-teal-700">
           <Link to={`/health/record-visit?studentId=${student.id}`}>{t('profile.recordVisit')}</Link>
         </Button>
-      </div>
+      </ModuleHeroBanner>
 
-      <section className="grid gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 rounded-xl border border-teal-200/50 bg-gradient-to-br from-teal-50/30 to-transparent p-4 sm:grid-cols-2 lg:grid-cols-4 dark:border-teal-900/30 dark:from-teal-950/15">
         <div>
           <p className="text-xs text-muted-foreground">{t('profile.healthStatusLabel')}</p>
           <div className="mt-1">

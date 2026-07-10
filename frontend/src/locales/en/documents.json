@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Documents",
+    "description": "Review uploaded documents across students. Finance users only see Income Certificate and BPL Card.",
+    "tagline": "Verify · Review · Comply"
+  },
   "queue": {
     "title": "Documents",
     "description": "Review uploaded documents across students. Finance users only see Income Certificate and BPL Card.",

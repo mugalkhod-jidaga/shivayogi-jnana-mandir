@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { toCommitRows, useMigrationCommit, useMigrationParse } from '@/hooks/useMigration';
 import { ApiError } from '@/lib/api';
@@ -120,9 +120,15 @@ export function ImportPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('title')} description={t('description')} />
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={FileSpreadsheet}
+        module="import"
+      />
 
-      <ol className="flex gap-4 border-b pb-4">
+      <ol className="flex gap-4 rounded-xl border border-emerald-200/50 bg-gradient-to-r from-emerald-50/50 to-cyan-50/40 p-4 dark:border-emerald-900/30 dark:from-emerald-950/20 dark:to-cyan-950/15">
         {steps.map((item, index) => (
           <li
             key={item.key}
