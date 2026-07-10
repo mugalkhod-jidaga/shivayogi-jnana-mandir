@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HostelProgressRing } from '@/features/hostel/components/HostelProgressRing';
+import { HostelSectionCard } from '@/features/hostel/components/HostelSectionCard';
 import { useEnsureAttendanceSession, useHostelBlocks, useHostelDailyBoard } from '@/hooks/useHostel';
+import { cn } from '@/lib/utils';
 
 export function HostelAttendancePage() {
   const { t } = useTranslation('hostel');
@@ -28,21 +31,41 @@ export function HostelAttendancePage() {
     navigate(`/hostel/attendance/${session.id}`);
   };
 
-  const renderSlot = (period: 'morning' | 'evening', icon: React.ReactNode, label: string) => {
+  const renderSlot = (
+    period: 'morning' | 'evening',
+    icon: React.ReactNode,
+    label: string,
+    gradient: string,
+    ringColor: string,
+  ) => {
     const slot = board?.slots[period];
     const marked = slot?.markedCount ?? 0;
     const total = slot?.rosterCount ?? board?.rosterCount ?? 0;
     const complete = total > 0 && marked >= total;
 
     return (
-      <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-            {icon}
-          </div>
-          <div>
-            <h2 className="font-semibold">{label}</h2>
-            <p className="text-sm text-muted-foreground">
+      <div
+        className={cn(
+          'relative flex flex-col gap-5 overflow-hidden rounded-2xl border p-6 shadow-md',
+          gradient,
+        )}
+      >
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-white/15 blur-xl" />
+        <div className="relative flex items-center gap-4">
+          <HostelProgressRing
+            value={marked}
+            max={total || 1}
+            indicatorClassName={ringColor}
+            label={total > 0 ? `${marked}/${total}` : '—'}
+          />
+          <div className="min-w-0 flex-1 text-white">
+            <div className="flex items-center gap-2">
+              <span className="flex size-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                {icon}
+              </span>
+              <h2 className="text-lg font-bold">{label}</h2>
+            </div>
+            <p className="mt-2 text-sm text-white/90">
               {isLoading
                 ? '…'
                 : total === 0
@@ -58,6 +81,8 @@ export function HostelAttendancePage() {
         <Button
           type="button"
           size="lg"
+          variant="secondary"
+          className="relative w-full bg-white font-semibold text-foreground shadow hover:bg-white/95"
           disabled={ensureSession.isPending || total === 0}
           onClick={() => void openMark(period)}
         >
@@ -69,42 +94,66 @@ export function HostelAttendancePage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t('attendance.quickDescription')}</p>
+      <HostelSectionCard
+        title={t('attendance.title')}
+        description={t('attendance.quickDescription')}
+        icon={
+          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow">
+            <Sun className="size-5" />
+          </div>
+        }
+        headerClassName="border-orange-200/40"
+      >
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <Label htmlFor="attendance-date">{t('attendance.date')}</Label>
+            <Input
+              id="attendance-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="border-orange-200/50 focus-visible:ring-orange-400"
+            />
+          </div>
+          <div>
+            <Label htmlFor="attendance-block">{t('attendance.block')}</Label>
+            <select
+              id="attendance-block"
+              className="flex h-10 min-w-[180px] rounded-md border border-orange-200/50 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              value={blockId}
+              onChange={(e) => setBlockId(e.target.value)}
+            >
+              <option value="">{t('attendance.allBlocks')}</option>
+              {blocks.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </HostelSectionCard>
 
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4 shadow-sm">
-        <div>
-          <Label htmlFor="attendance-date">{t('attendance.date')}</Label>
-          <Input
-            id="attendance-date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="attendance-block">{t('attendance.block')}</Label>
-          <select
-            id="attendance-block"
-            className="flex h-10 min-w-[160px] rounded-md border bg-background px-3 text-sm"
-            value={blockId}
-            onChange={(e) => setBlockId(e.target.value)}
-          >
-            <option value="">{t('attendance.allBlocks')}</option>
-            {blocks.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="grid gap-5 md:grid-cols-2">
+        {renderSlot(
+          'morning',
+          <Sun className="size-5" />,
+          t('attendance.morning'),
+          'border-amber-300/50 bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600',
+          'text-amber-200',
+        )}
+        {renderSlot(
+          'evening',
+          <Moon className="size-5" />,
+          t('attendance.evening'),
+          'border-indigo-300/50 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700',
+          'text-violet-200',
+        )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {renderSlot('morning', <Sun className="size-5" />, t('attendance.morning'))}
-        {renderSlot('evening', <Moon className="size-5" />, t('attendance.evening'))}
-      </div>
-
-      <p className="text-xs text-muted-foreground">{t('attendance.defaultPresentHint')}</p>
+      <p className="rounded-lg border border-dashed border-orange-200/60 bg-orange-50/50 px-4 py-3 text-center text-xs text-muted-foreground dark:border-orange-900/40 dark:bg-orange-950/20">
+        {t('attendance.defaultPresentHint')}
+      </p>
     </div>
   );
 }

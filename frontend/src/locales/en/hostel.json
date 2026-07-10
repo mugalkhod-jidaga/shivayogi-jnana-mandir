@@ -1,6 +1,12 @@
 {
   "title": "Hostel",
   "description": "Manage hostel blocks, rooms, beds, allocations, attendance, and reports.",
+  "hero": {
+    "tagline": "Care · Shelter · Daily presence",
+    "filled": "filled",
+    "occupancyBar": "Bed occupancy",
+    "attendanceRecorded": "Sessions recorded for today"
+  },
   "tabs": {
     "roster": "Student list",
     "overview": "Overview",
