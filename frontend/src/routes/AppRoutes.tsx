@@ -21,7 +21,7 @@ import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
 import { HealthLayout } from '@/features/health/HealthLayout';
 import { HealthReportsPage } from '@/features/health/HealthReportsPage';
 import { RecordVisitPage } from '@/features/health/RecordVisitPage';
-import { RecentVisitsPage } from '@/features/health/RecentVisitsPage';
+import { VisitsPage } from '@/features/health/VisitsPage';
 import { StudentHealthProfilePage } from '@/features/health/StudentHealthProfilePage';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
 import { StaffPage } from '@/features/staff/StaffPage';
@@ -124,7 +124,8 @@ export function AppRoutes() {
                 </PermissionRoute>
               }
             />
-            <Route path="recent" element={<RecentVisitsPage />} />
+            <Route path="visits" element={<VisitsPage />} />
+            <Route path="recent" element={<Navigate to="/health/visits" replace />} />
             <Route path="reports" element={<HealthReportsPage />} />
           </Route>
           <Route

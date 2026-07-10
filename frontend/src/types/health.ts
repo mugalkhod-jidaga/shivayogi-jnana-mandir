@@ -148,4 +148,7 @@ export type HealthVisitListFilters = {
   search?: string;
   studentId?: string;
   severityId?: number;
+  standardId?: number;
+  from?: string;
+  to?: string;
 };

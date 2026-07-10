@@ -185,12 +185,32 @@ class HealthRepository extends BaseRepository {
   }
 
   async list(tenantId: number, query: HealthVisitListQuery, assignedStandardIds?: number[]) {
-    const { page, limit, search, studentId, severityId } = query;
+    const { page, limit, search, studentId, severityId, standardId, from, to } = query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
 
-    const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
+    let scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
     if (scopedIds && scopedIds.length === 0) {
+      return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+    }
+
+    if (standardId) {
+      const byStandard = await studentsRepository.listStudentIdsByStandards(tenantId, [standardId]);
+      if (byStandard.length === 0) {
+        return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+      }
+      if (scopedIds) {
+        const allowed = new Set(byStandard);
+        scopedIds = scopedIds.filter((id) => allowed.has(id));
+        if (scopedIds.length === 0) {
+          return { data: [], meta: { total: 0, page, limit: cappedLimit } };
+        }
+      } else {
+        scopedIds = byStandard;
+      }
+    }
+
+    if (studentId && scopedIds && !scopedIds.includes(studentId)) {
       return { data: [], meta: { total: 0, page, limit: cappedLimit } };
     }
 
@@ -203,10 +223,20 @@ class HealthRepository extends BaseRepository {
       .order('created_at', { ascending: false });
 
     if (studentId) dbQuery = dbQuery.eq('student_id', studentId);
-    if (scopedIds) dbQuery = dbQuery.in('student_id', scopedIds);
+    else if (scopedIds) dbQuery = dbQuery.in('student_id', scopedIds);
     if (severityId) dbQuery = dbQuery.eq('severity_id', severityId);
+    if (from) dbQuery = dbQuery.gte('visit_date', from);
+    if (to) dbQuery = dbQuery.lte('visit_date', to);
     if (search) {
-      dbQuery = dbQuery.or(`issue_type.ilike.%${search}%,symptoms.ilike.%${search}%`);
+      dbQuery = dbQuery.or(
+        [
+          `issue_type.ilike.%${search}%`,
+          `symptoms.ilike.%${search}%`,
+          `students.first_name.ilike.%${search}%`,
+          `students.last_name.ilike.%${search}%`,
+          `students.admission_number.ilike.%${search}%`,
+        ].join(','),
+      );
     }
 
     const { data, count, error } = await dbQuery.range(offset, offset + cappedLimit - 1);

@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "recordVisit": "Record visit",
-    "recentVisits": "Recent visits",
+    "visits": "Visits",
     "reports": "Reports"
   },
   "record": {
@@ -50,7 +50,7 @@
     "successTitle": "Visit saved",
     "successDescription": "The health visit has been recorded successfully.",
     "recordAnother": "Record another visit",
-    "viewRecent": "View recent visits",
+    "viewRecent": "View visits",
     "noPriorVisits": "No prior infirmary visits for this student.",
     "priorVisitsSummary": "Treated {{count}} time(s) before · Last visit: {{date}} — {{issue}}",
     "sections": {
@@ -73,14 +73,29 @@
       "saveFailed": "Failed to save visit."
     }
   },
-  "recent": {
-    "title": "Recent Visits",
-    "description": "Last 50 infirmary visits, newest first.",
+  "visits": {
+    "title": "Visits",
+    "description": "All infirmary visits, newest first. Filter by student, severity, class, or date.",
     "recordVisit": "Record visit",
-    "searchPlaceholder": "Search by issue or symptoms…",
-    "search": "Search",
-    "empty": "No visits found.",
-    "photoCount": "{{count}} photo(s)"
+    "searchPlaceholder": "Search student, admission #, issue, or symptoms…",
+    "allSeverities": "All severities",
+    "allClasses": "All classes",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "clearFilters": "Clear filters",
+    "empty": "No visits recorded yet.",
+    "emptyFiltered": "No visits match these filters.",
+    "error": "Could not load visits.",
+    "photoCount": "{{count}} photo(s)",
+    "pageOf": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "columns": {
+      "date": "Date",
+      "student": "Student",
+      "severity": "Severity",
+      "issue": "Issue",
+      "medicines": "Medicines",
+      "photos": "Photos"
+    }
   },
   "dashboard": {
     "title": "Health Dashboard",

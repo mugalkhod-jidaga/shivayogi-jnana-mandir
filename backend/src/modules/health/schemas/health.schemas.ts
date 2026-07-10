@@ -40,9 +40,17 @@ export const createHealthVisitSchema = z.object({
   attachments: z.array(visitAttachmentSchema).max(4).optional(),
 });
 
+const isoDateQuerySchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
+
 export const healthVisitListQuerySchema = paginationSchema.extend({
   studentId: z.string().uuid().optional(),
   severityId: z.coerce.number().int().positive().optional(),
+  standardId: z.coerce.number().int().positive().optional(),
+  from: isoDateQuerySchema.optional(),
+  to: isoDateQuerySchema.optional(),
 });
 
 export const recentVisitsQuerySchema = z.object({

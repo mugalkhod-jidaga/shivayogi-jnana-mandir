@@ -207,7 +207,7 @@ export function RecordVisitPage() {
               {t('record.recordAnother')}
             </Button>
             <Button type="button" variant="outline" asChild>
-              <Link to="/health/recent">{t('record.viewRecent')}</Link>
+              <Link to="/health/visits">{t('record.viewRecent')}</Link>
             </Button>
           </div>
         </ModuleSectionCard>

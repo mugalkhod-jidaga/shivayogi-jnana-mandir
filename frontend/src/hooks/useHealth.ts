@@ -34,6 +34,9 @@ function buildListQuery(filters: HealthVisitListFilters) {
   if (filters.search) params.set('search', filters.search);
   if (filters.studentId) params.set('studentId', filters.studentId);
   if (filters.severityId) params.set('severityId', String(filters.severityId));
+  if (filters.standardId) params.set('standardId', String(filters.standardId));
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
   return params.toString();
 }
 

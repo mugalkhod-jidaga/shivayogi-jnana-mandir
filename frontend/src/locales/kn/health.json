@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
-    "recentVisits": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳು",
+    "visits": "ಭೇಟಿಗಳು",
     "reports": "ವರದಿಗಳು"
   },
   "record": {
@@ -50,7 +50,7 @@
     "successTitle": "ಭೇಟಿ ಉಳಿಸಲಾಗಿದೆ",
     "successDescription": "ಆರೋಗ್ಯ ಭೇಟಿ ಯಶಸ್ವಿಯಾಗಿ ದಾಖಲಾಗಿದೆ.",
     "recordAnother": "ಮತ್ತೊಂದು ಭೇಟಿ ದಾಖಲಿಸಿ",
-    "viewRecent": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳನ್ನು ನೋಡಿ",
+    "viewRecent": "ಭೇಟಿಗಳನ್ನು ನೋಡಿ",
     "noPriorVisits": "ಈ ವಿದ್ಯಾರ್ಥಿಗೆ ಹಿಂದಿನ ಭೇಟಿಗಳಿಲ್ಲ.",
     "priorVisitsSummary": "ಹಿಂದೆ {{count}} ಬಾರಿ ಚಿಕಿತ್ಸೆ · ಕೊನೆಯ ಭೇಟಿ: {{date}} — {{issue}}",
     "sections": {
@@ -73,14 +73,29 @@
       "saveFailed": "ಭೇಟಿ ಉಳಿಸಲು ವಿಫಲ."
     }
   },
-  "recent": {
-    "title": "ಇತ್ತೀಚಿನ ಭೇಟಿಗಳು",
-    "description": "ಕೊನೆಯ 50 infirmary ಭೇಟಿಗಳು.",
+  "visits": {
+    "title": "ಭೇಟಿಗಳು",
+    "description": "ಎಲ್ಲಾ infirmary ಭೇಟಿಗಳು, ಹೊಸದು ಮೊದಲು. ವಿದ್ಯಾರ್ಥಿ, ತೀವ್ರತೆ, ತರಗತಿ ಅಥವಾ ದಿನಾಂಕದಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ.",
     "recordVisit": "ಭೇಟಿ ದಾಖಲಿಸಿ",
-    "searchPlaceholder": "ಸಮಸ್ಯೆ ಅಥವಾ ಲಕ್ಷಣಗಳಿಂದ ಹುಡುಕಿ…",
-    "search": "ಹುಡುಕಿ",
-    "empty": "ಯಾವುದೇ ಭೇಟಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
-    "photoCount": "{{count}} ಫೋಟೋ(ಗಳು)"
+    "searchPlaceholder": "ವಿದ್ಯಾರ್ಥಿ, ಪ್ರವೇಶ ಸಂಖ್ಯೆ, ಸಮಸ್ಯೆ ಅಥವಾ ಲಕ್ಷಣಗಳು…",
+    "allSeverities": "ಎಲ್ಲಾ ತೀವ್ರತೆಗಳು",
+    "allClasses": "ಎಲ್ಲಾ ತರಗತಿಗಳು",
+    "fromDate": "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
+    "toDate": "ಅಂತ್ಯ ದಿನಾಂಕ",
+    "clearFilters": "ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
+    "empty": "ಯಾವುದೇ ಭೇಟಿಗಳು ದಾಖಲಾಗಿಲ್ಲ.",
+    "emptyFiltered": "ಈ ಫಿಲ್ಟರ್‌ಗಳಿಗೆ ಹೊಂದುವ ಭೇಟಿಗಳಿಲ್ಲ.",
+    "error": "ಭೇಟಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.",
+    "photoCount": "{{count}} ಫೋಟೋ(ಗಳು)",
+    "pageOf": "ಪುಟ {{page}} / {{totalPages}} · ಒಟ್ಟು {{total}}",
+    "columns": {
+      "date": "ದಿನಾಂಕ",
+      "student": "ವಿದ್ಯಾರ್ಥಿ",
+      "severity": "ತೀವ್ರತೆ",
+      "issue": "ಸಮಸ್ಯೆ",
+      "medicines": "ಔಷಧಿಗಳು",
+      "photos": "ಫೋಟೋಗಳು"
+    }
   },
   "dashboard": {
     "title": "ಆರೋಗ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",

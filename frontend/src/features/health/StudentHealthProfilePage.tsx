@@ -30,7 +30,7 @@ export function StudentHealthProfilePage() {
   });
   const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
-  if (!studentId) return <Navigate to="/health/recent" replace />;
+  if (!studentId) return <Navigate to="/health/visits" replace />;
 
   if (studentLoading) {
     return <p className="text-muted-foreground">{t('loading')}</p>;
@@ -132,7 +132,7 @@ export function StudentHealthProfilePage() {
               <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
               {visit.attachments?.length > 0 && (
                 <span className="text-xs text-muted-foreground">
-                  · {t('recent.photoCount', { count: visit.attachments.length })}
+                  · {t('visits.photoCount', { count: visit.attachments.length })}
                 </span>
               )}
             </div>
