@@ -162,22 +162,24 @@ export function StudentDetailPage() {
         </div>
       </ModuleHeroBanner>
 
-      <div className="flex gap-2 border-b">
-        {tabs.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            className={cn(
-              'border-b-2 px-4 py-2 text-sm font-medium transition-colors',
-              tab === item.key
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-            onClick={() => setTab(item.key)}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className="-mx-1 overflow-x-auto border-b [scrollbar-width:thin]">
+        <div className="flex w-max min-w-full gap-1 px-1">
+          {tabs.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={cn(
+                'shrink-0 border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:px-4',
+                tab === item.key
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+              onClick={() => setTab(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === 'profile' && (
