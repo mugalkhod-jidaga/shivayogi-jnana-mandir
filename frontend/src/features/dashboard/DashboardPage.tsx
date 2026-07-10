@@ -2,7 +2,6 @@ import {
   CalendarDays,
   FileText,
   GraduationCap,
-  LayoutDashboard,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -44,12 +43,15 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <ModuleHeroBanner
+        // module="temple"
+      />
+      {/* <ModuleHeroBanner
         title={t('title')}
         description={t('description')}
         tagline={t('hero.tagline')}
         icon={LayoutDashboard}
         module="temple"
-      />
+      /> */}
 
       {summary.isError && (
         <PlaceholderPanel title={t('errorTitle')} description={t('errorDescription')} />
