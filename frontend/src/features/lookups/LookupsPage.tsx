@@ -1,6 +1,8 @@
+import { List } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
 import { useLookupAdminLists } from '@/hooks/useLookupAdminLists';
@@ -36,7 +38,13 @@ export function LookupsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('page.title')} description={t('page.description')} />
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={List}
+        gradientClassName={MODULE_GRADIENTS.lookups}
+      />
 
       {isError && (
         <PlaceholderPanel title={t('page.errorTitle')} description={t('page.errorDescription')} />

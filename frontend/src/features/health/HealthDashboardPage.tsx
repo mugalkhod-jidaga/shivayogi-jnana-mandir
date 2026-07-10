@@ -1,7 +1,8 @@
+import { Activity, AlertTriangle, Stethoscope, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '@/components/PageHeader';
-import { KpiCard } from '@/features/dashboard/components/KpiCard';
+import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
+import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
 import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
@@ -15,43 +16,56 @@ export function HealthDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
+      <p className="text-sm text-muted-foreground">{t('dashboard.description')}</p>
 
       {isError && <p className="text-destructive">{t('dashboard.error')}</p>}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
+        <ModuleStatCard
           title={t('dashboard.kpis.totalStudents')}
           value={isLoading ? '…' : (data?.totalStudents ?? 0)}
+          icon={Users}
+          accent="sky"
         />
-        <KpiCard
+        <ModuleStatCard
           title={t('dashboard.kpis.sickToday')}
           value={isLoading ? '…' : (data?.sickToday ?? 0)}
-          className="border-amber-200"
+          icon={Activity}
+          accent="saffron"
         />
-        <KpiCard
+        <ModuleStatCard
           title={t('dashboard.kpis.urgentWeek')}
           value={isLoading ? '…' : (data?.urgentCount ?? 0)}
-          className="border-red-200"
+          icon={AlertTriangle}
+          accent="rose"
         />
-        <KpiCard
+        <ModuleStatCard
           title={t('dashboard.kpis.visitsWeek')}
           value={isLoading ? '…' : (data?.visitsThisWeek ?? 0)}
+          icon={Stethoscope}
+          accent="emerald"
         />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border p-4">
-          <h2 className="font-semibold text-red-700">{t('dashboard.urgentAlerts')}</h2>
+        <ModuleSectionCard
+          title={t('dashboard.urgentAlerts')}
+          headerClassName="from-rose-50/90 to-pink-50/60 dark:from-rose-950/25 dark:to-pink-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md">
+              <AlertTriangle className="size-5" />
+            </div>
+          }
+        >
           {!isLoading && (data?.urgentAlerts.length ?? 0) === 0 && (
-            <p className="mt-3 text-sm text-muted-foreground">{t('dashboard.noUrgent')}</p>
+            <p className="text-sm text-muted-foreground">{t('dashboard.noUrgent')}</p>
           )}
-          <div className="mt-3 space-y-3">
+          <div className="space-y-3">
             {(data?.urgentAlerts ?? []).map((visit) => (
               <button
                 key={visit.id}
                 type="button"
-                className="w-full rounded-md border border-red-100 bg-red-50/50 p-3 text-left text-sm transition-colors hover:bg-red-50"
+                className="w-full rounded-lg border border-rose-100 bg-rose-50/50 p-3 text-left text-sm transition-colors hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20"
                 onClick={() => setSelectedVisitId(visit.id)}
               >
                 <div className="flex flex-wrap items-center gap-2">
@@ -64,19 +78,26 @@ export function HealthDashboardPage() {
               </button>
             ))}
           </div>
-        </div>
+        </ModuleSectionCard>
 
-        <div className="rounded-lg border p-4">
-          <h2 className="font-semibold">{t('dashboard.recentEntries')}</h2>
+        <ModuleSectionCard
+          title={t('dashboard.recentEntries')}
+          headerClassName="from-teal-50/90 to-emerald-50/60 dark:from-teal-950/25 dark:to-emerald-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-md">
+              <Stethoscope className="size-5" />
+            </div>
+          }
+        >
           {!isLoading && (data?.recentEntries.length ?? 0) === 0 && (
-            <p className="mt-3 text-sm text-muted-foreground">{t('dashboard.noRecent')}</p>
+            <p className="text-sm text-muted-foreground">{t('dashboard.noRecent')}</p>
           )}
-          <div className="mt-3 space-y-3">
+          <div className="space-y-3">
             {(data?.recentEntries ?? []).map((visit) => (
               <button
                 key={visit.id}
                 type="button"
-                className="w-full rounded-md border p-3 text-left text-sm transition-colors hover:bg-muted/50"
+                className="w-full rounded-lg border p-3 text-left text-sm transition-colors hover:bg-teal-50/50 dark:hover:bg-teal-950/20"
                 onClick={() => setSelectedVisitId(visit.id)}
               >
                 <div className="flex flex-wrap items-center gap-2">
@@ -88,7 +109,7 @@ export function HealthDashboardPage() {
               </button>
             ))}
           </div>
-        </div>
+        </ModuleSectionCard>
       </section>
 
       <VisitDetailModal

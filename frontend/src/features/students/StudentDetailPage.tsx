@@ -1,8 +1,9 @@
-import { ArrowLeft, HeartPulse, Pencil, Download } from 'lucide-react';
+import { ArrowLeft, GraduationCap, HeartPulse, Pencil, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -108,64 +109,61 @@ export function StudentDetailPage() {
         </Link>
       </Button>
 
-      <PageHeader
+      <ModuleHeroBanner
         title={displayName}
         description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
+        tagline={t('hero.tagline')}
+        icon={GraduationCap}
+        gradientClassName={MODULE_GRADIENTS.students}
       >
-        <div className="flex flex-wrap items-center gap-3">
-          {/* <StudentInitialsAvatar
-            firstName={student.firstName}
-            lastName={student.lastName}
-            size="sm"
-          /> */}
-          <div className="flex flex-wrap gap-2">
-            <StatusBadge status={student.status} />
-            <RequirePermission permission="students:edit">
-              <Button asChild variant="outline" size="sm">
-                <Link to={`/students/${student.id}/edit`}>
-                  <Pencil className="size-4" />
-                  {t('detail.actions.edit')}
-                </Link>
-              </Button>
-            </RequirePermission>
-            <RequirePermission permission="medical:read">
-              <Button asChild variant="outline" size="sm">
-                <Link to={`/health/students/${student.id}`}>
-                  <HeartPulse className="size-4" />
-                  {t('detail.actions.healthProfile')}
-                </Link>
-              </Button>
-            </RequirePermission>
-            <RequirePermission permission="exports:pdf">
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge status={student.status} />
+          <RequirePermission permission="students:edit">
+            <Button asChild variant="secondary" size="sm" className="bg-white/20 text-white hover:bg-white/30">
+              <Link to={`/students/${student.id}/edit`}>
+                <Pencil className="size-4" />
+                {t('detail.actions.edit')}
+              </Link>
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="medical:read">
+            <Button asChild variant="secondary" size="sm" className="bg-white/20 text-white hover:bg-white/30">
+              <Link to={`/health/students/${student.id}`}>
+                <HeartPulse className="size-4" />
+                {t('detail.actions.healthProfile')}
+              </Link>
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="exports:pdf">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="bg-white/20 text-white hover:bg-white/30"
+              disabled={pdfLoading}
+              onClick={() => {
+                setPdfLoading(true);
+                void pdfExports.studentDetail(student.id).finally(() => setPdfLoading(false));
+              }}
+            >
+              <Download className="size-4" />
+              {t('detail.actions.downloadProfilePdf')}
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="students:soft_delete">
+            {student.status === 'Active' && (
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 size="sm"
-                disabled={pdfLoading}
-                onClick={() => {
-                  setPdfLoading(true);
-                  void pdfExports.studentDetail(student.id).finally(() => setPdfLoading(false));
-                }}
+                onClick={() => setDeactivateOpen(true)}
               >
-                <Download className="size-4" />
-                {t('detail.actions.downloadProfilePdf')}
+                {t('detail.actions.deactivate')}
               </Button>
-            </RequirePermission>
-            <RequirePermission permission="students:soft_delete">
-              {student.status === 'Active' && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeactivateOpen(true)}
-                >
-                  {t('detail.actions.deactivate')}
-                </Button>
-              )}
-            </RequirePermission>
-          </div>
+            )}
+          </RequirePermission>
         </div>
-      </PageHeader>
+      </ModuleHeroBanner>
 
       <div className="flex gap-2 border-b">
         {tabs.map((item) => (

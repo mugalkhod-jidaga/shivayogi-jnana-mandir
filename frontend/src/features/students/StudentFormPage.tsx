@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { GraduationCap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { AcademicPlacementFields } from '@/features/students/components/AcademicPlacementFields';
 import { DemographicsFields } from '@/features/students/components/DemographicsFields';
@@ -342,21 +344,24 @@ export function StudentFormPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ModuleHeroBanner
         title={isEdit ? t('form.editTitle') : t('form.addTitle')}
         description={
           isEdit
             ? t('form.editDescription', { admissionNumber: student?.admissionNumber })
             : t('form.addDescription')
         }
+        tagline={t('hero.tagline')}
+        icon={GraduationCap}
+        gradientClassName={MODULE_GRADIENTS.students}
       >
-        <Button asChild variant="outline">
+        <Button asChild variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
           <Link to={isEdit ? `/students/${id}` : '/students'}>{tc('actions.cancel')}</Link>
         </Button>
-      </PageHeader>
+      </ModuleHeroBanner>
 
       <form className="space-y-8" onSubmit={isEdit ? onUpdate : onCreate}>
-        <section className="rounded-lg border p-6">
+        <section className="rounded-xl border border-indigo-200/50 bg-gradient-to-br from-indigo-50/20 to-transparent p-6 dark:border-indigo-900/30 dark:from-indigo-950/10">
           <h2 className="text-lg font-medium">{t('form.sections.basic')}</h2>
           <div className="mt-4">
             {isEdit ? (

@@ -14,9 +14,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
+import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
-import { KpiCard } from '@/features/dashboard/components/KpiCard';
 import { useStudentReports } from '@/hooks/useStudentReports';
 import { CHART_COLORS, chartColor } from '@/lib/chartColors';
 import { genderLabel } from '@/lib/enumLabels';
@@ -100,7 +100,7 @@ export function StudentReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('reports.title')} description={t('reports.description')} />
+      <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
 
       {isError && (
         <PlaceholderPanel title={t('reports.errorTitle')} description={t('reports.errorDescription')} />
@@ -109,57 +109,58 @@ export function StudentReportsPage() {
       {!isError && (
         <>
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.activeStudents')}
               value={isLoading ? '…' : (data?.activeStudents ?? 0)}
               description={t('reports.kpis.totalEnrolled', { count: data?.totalStudents ?? 0 })}
-              className="border-l-4 border-l-blue-500"
+              icon={Users}
+              accent="sky"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.admissionsYear')}
               value={isLoading ? '…' : (data?.admissionsThisAcademicYear ?? 0)}
               description={data?.currentAcademicYear ?? undefined}
-              className="border-l-4 border-l-violet-500"
+              icon={GraduationCap}
+              accent="indigo"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.standards')}
               value={isLoading ? '…' : standardChartData.length}
               description={t('reports.kpis.standardsHelp')}
-              className="border-l-4 border-l-emerald-500"
+              icon={GraduationCap}
+              accent="emerald"
             />
-            <KpiCard
+            <ModuleStatCard
               title={t('reports.kpis.socialCategories')}
               value={isLoading ? '…' : socialChartData.length}
               description={t('reports.kpis.socialCategoriesHelp')}
-              className="border-l-4 border-l-amber-500"
+              icon={PieChartIcon}
+              accent="saffron"
             />
           </section>
 
           <section className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="size-5 text-blue-600" />
-                    <h2 className="text-lg font-semibold">{t('reports.byStandard.title')}</h2>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('reports.byStandard.description')}
-                  </p>
+            <ModuleSectionCard
+              title={t('reports.byStandard.title')}
+              description={t('reports.byStandard.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-md">
+                  <GraduationCap className="size-5" />
                 </div>
-              </div>
-
+              }
+              headerClassName="from-sky-50/90 to-cyan-50/60 dark:from-sky-950/25 dark:to-cyan-950/20"
+            >
               {isLoading && (
-                <p className="mt-8 text-sm text-muted-foreground">{tc('loading')}</p>
+                <p className="text-sm text-muted-foreground">{tc('loading')}</p>
               )}
 
               {!isLoading && standardChartData.length === 0 && (
-                <p className="mt-8 text-sm text-muted-foreground">{t('reports.byStandard.empty')}</p>
+                <p className="text-sm text-muted-foreground">{t('reports.byStandard.empty')}</p>
               )}
 
               {!isLoading && standardChartData.length > 0 && (
                 <>
-                  <div className="mt-6 h-72">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={standardChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -210,34 +211,31 @@ export function StudentReportsPage() {
                   </div>
                 </>
               )}
-            </div>
+            </ModuleSectionCard>
 
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <PieChartIcon className="size-5 text-violet-600" />
-                    <h2 className="text-lg font-semibold">{t('reports.bySocialCategory.title')}</h2>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('reports.bySocialCategory.description')}
-                  </p>
+            <ModuleSectionCard
+              title={t('reports.bySocialCategory.title')}
+              description={t('reports.bySocialCategory.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+                  <PieChartIcon className="size-5" />
                 </div>
-              </div>
-
+              }
+              headerClassName="from-indigo-50/90 to-violet-50/60 dark:from-indigo-950/25 dark:to-violet-950/20"
+            >
               {isLoading && (
-                <p className="mt-8 text-sm text-muted-foreground">{tc('loading')}</p>
+                <p className="text-sm text-muted-foreground">{tc('loading')}</p>
               )}
 
               {!isLoading && socialChartData.length === 0 && (
-                <p className="mt-8 text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t('reports.bySocialCategory.empty')}
                 </p>
               )}
 
               {!isLoading && socialChartData.length > 0 && (
                 <>
-                  <div className="mt-4 h-72">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -315,19 +313,22 @@ export function StudentReportsPage() {
                   </div>
                 </>
               )}
-            </div>
+            </ModuleSectionCard>
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Users className="size-5 text-emerald-600" />
-                <h2 className="text-lg font-semibold">{t('reports.byGender.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.byGender.description')}</p>
-
+            <ModuleSectionCard
+              title={t('reports.byGender.title')}
+              description={t('reports.byGender.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
+                  <Users className="size-5" />
+                </div>
+              }
+              headerClassName="from-emerald-50/90 to-teal-50/60 dark:from-emerald-950/25 dark:to-teal-950/20"
+            >
               {!isLoading && genderChartData.length > 0 && (
-                <div className="mt-6 h-56">
+                <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={genderChartData}
@@ -347,17 +348,20 @@ export function StudentReportsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </ModuleSectionCard>
 
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="size-5 text-amber-600" />
-                <h2 className="text-lg font-semibold">{t('reports.byStatus.title')}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{t('reports.byStatus.description')}</p>
-
+            <ModuleSectionCard
+              title={t('reports.byStatus.title')}
+              description={t('reports.byStatus.description')}
+              icon={
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md">
+                  <TrendingUp className="size-5" />
+                </div>
+              }
+              headerClassName="from-orange-50/90 to-amber-50/60 dark:from-orange-950/25 dark:to-amber-950/20"
+            >
               {!isLoading && statusChartData.length > 0 && (
-                <div className="mt-6 h-56">
+                <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={statusChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
@@ -383,19 +387,21 @@ export function StudentReportsPage() {
                     <Link
                       key={row.status}
                       to={`/students?status=${row.status}`}
-                      className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
+                      className="rounded-full border border-amber-200/80 bg-amber-50/80 px-3 py-1 text-xs font-medium transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
                     >
                       {tc(`status.${row.status.toLowerCase()}` as 'status.active')}: {row.count}
                     </Link>
                   ))}
                 </div>
               )}
-            </div>
+            </ModuleSectionCard>
           </section>
 
           <section className="space-y-6">
-            <div className="flex items-center gap-2">
-              <MapPin className="size-5 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-md">
+                <MapPin className="size-5" />
+              </div>
               <div>
                 <h2 className="text-lg font-semibold">{t('reports.byLocation.title')}</h2>
                 <p className="text-sm text-muted-foreground">{t('reports.byLocation.description')}</p>
@@ -403,13 +409,12 @@ export function StudentReportsPage() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="font-medium">{t('reports.byLocation.byDistrict')}</h3>
+              <ModuleSectionCard title={t('reports.byLocation.byDistrict')}>
                 {!isLoading && districtChartData.length === 0 && (
-                  <p className="mt-4 text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
+                  <p className="text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
                 )}
                 {!isLoading && districtChartData.length > 0 && (
-                  <div className="mt-4 h-72">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={districtChartData}
@@ -429,15 +434,14 @@ export function StudentReportsPage() {
                     </ResponsiveContainer>
                   </div>
                 )}
-              </div>
+              </ModuleSectionCard>
 
-              <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="font-medium">{t('reports.byLocation.byTaluk')}</h3>
+              <ModuleSectionCard title={t('reports.byLocation.byTaluk')}>
                 {!isLoading && talukChartData.length === 0 && (
-                  <p className="mt-4 text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
+                  <p className="text-sm text-muted-foreground">{t('reports.byLocation.empty')}</p>
                 )}
                 {!isLoading && talukChartData.length > 0 && (
-                  <div className="mt-4 h-72">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={talukChartData}
@@ -457,15 +461,14 @@ export function StudentReportsPage() {
                     </ResponsiveContainer>
                   </div>
                 )}
-              </div>
+              </ModuleSectionCard>
             </div>
 
             {!isLoading && (data?.topVillages.length ?? 0) > 0 && (
-              <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="font-medium">{t('reports.byLocation.topVillages')}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t('reports.byLocation.topVillagesHelp')}
-                </p>
+              <ModuleSectionCard
+                title={t('reports.byLocation.topVillages')}
+                description={t('reports.byLocation.topVillagesHelp')}
+              >
                 <div className="mt-4 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -492,12 +495,11 @@ export function StudentReportsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </ModuleSectionCard>
             )}
 
             {!isLoading && districtChartData.length > 0 && (
-              <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="font-medium">{t('reports.byLocation.districtTable')}</h3>
+              <ModuleSectionCard title={t('reports.byLocation.districtTable')}>
                 <div className="mt-4 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -524,7 +526,7 @@ export function StudentReportsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </ModuleSectionCard>
             )}
           </section>
         </>

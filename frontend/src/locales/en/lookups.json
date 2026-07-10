@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Lookups",
+    "description": "Manage tenant-specific dropdown values for student forms and document uploads.",
+    "tagline": "Configure · Organize · Standardize"
+  },
   "page": {
     "title": "Lookups",
     "description": "Manage tenant-specific dropdown values for student forms and document uploads.",

@@ -1,8 +1,9 @@
-import { Search } from 'lucide-react';
+import { ScrollText, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuditLogs } from '@/hooks/useAuditLogs';
@@ -66,10 +67,16 @@ export function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('title')} description={t('description')} />
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={ScrollText}
+        gradientClassName={MODULE_GRADIENTS.audit}
+      />
 
       <form
-        className="flex gap-2"
+        className="flex gap-2 rounded-xl border border-slate-200/50 bg-gradient-to-br from-slate-50/50 to-zinc-50/40 p-4 dark:border-slate-800/30 dark:from-slate-950/20 dark:to-zinc-950/15"
         onSubmit={(event) => {
           event.preventDefault();
           applySearch();

@@ -1,8 +1,9 @@
-import { KeyRound, Plus, Search, UserX } from 'lucide-react';
+import { KeyRound, Plus, Search, UserCog, UserX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateStaffDialog } from '@/features/staff/components/CreateStaffDialog';
@@ -66,15 +67,21 @@ export function StaffPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('list.title')} description={t('list.description')}>
-        <Button type="button" onClick={() => setCreateOpen(true)}>
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={UserCog}
+        gradientClassName={MODULE_GRADIENTS.staff}
+      >
+        <Button type="button" onClick={() => setCreateOpen(true)} className="bg-violet-600 hover:bg-violet-700">
           <Plus className="size-4" />
           {t('list.addStaff')}
         </Button>
-      </PageHeader>
+      </ModuleHeroBanner>
 
       <form
-        className="flex gap-2"
+        className="flex gap-2 rounded-xl border border-violet-200/50 bg-gradient-to-br from-violet-50/40 to-fuchsia-50/30 p-4 dark:border-violet-900/30 dark:from-violet-950/20 dark:to-fuchsia-950/15"
         onSubmit={(event) => {
           event.preventDefault();
           applySearch();

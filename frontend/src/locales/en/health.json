@@ -1,5 +1,10 @@
 {
   "loading": "Loading…",
+  "hero": {
+    "title": "Health & Infirmary",
+    "description": "Record visits, track student wellness, and review infirmary analytics.",
+    "tagline": "Care · Records · Wellness"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "recordVisit": "Record visit",

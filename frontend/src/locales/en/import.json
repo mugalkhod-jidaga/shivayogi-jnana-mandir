@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Bulk Import",
+    "description": "Upload a CSV or spreadsheet, review validation errors, then commit student records.",
+    "tagline": "Upload · Review · Import"
+  },
   "title": "Bulk Import",
   "description": "Upload a CSV or spreadsheet, review validation errors, then commit student records.",
   "steps": {

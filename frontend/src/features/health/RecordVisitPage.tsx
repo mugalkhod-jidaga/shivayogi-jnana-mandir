@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
 import { StudentSearchPicker } from '@/components/students/StudentSearchPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -200,26 +200,27 @@ export function RecordVisitPage() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 text-center">
-        <PageHeader title={t('record.successTitle')} description={t('record.successDescription')} />
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button type="button" onClick={resetForm}>
-            {t('record.recordAnother')}
-          </Button>
-          <Button type="button" variant="outline" asChild>
-            <Link to="/health/recent">{t('record.viewRecent')}</Link>
-          </Button>
-        </div>
+      <div className="mx-auto max-w-lg space-y-6">
+        <ModuleSectionCard title={t('record.successTitle')} description={t('record.successDescription')}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button type="button" onClick={resetForm}>
+              {t('record.recordAnother')}
+            </Button>
+            <Button type="button" variant="outline" asChild>
+              <Link to="/health/recent">{t('record.viewRecent')}</Link>
+            </Button>
+          </div>
+        </ModuleSectionCard>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <PageHeader title={t('record.title')} description={t('record.description')} />
+      <p className="text-sm text-muted-foreground">{t('record.description')}</p>
 
       <form className="space-y-8" onSubmit={(e) => void handleSubmit(e)}>
-        <section className="space-y-4 rounded-lg border p-4">
+        <section className="space-y-4 rounded-xl border border-teal-200/50 bg-gradient-to-br from-teal-50/30 to-transparent p-4 dark:border-teal-900/30 dark:from-teal-950/15">
           <h2 className="font-semibold">{t('record.sections.findStudent')}</h2>
           <StudentSearchPicker
             value={studentId}

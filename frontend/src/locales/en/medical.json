@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Medical Records",
+    "description": "View and filter student medical records across the school.",
+    "tagline": "Records · History · Care"
+  },
   "loading": "Loading medical records…",
   "empty": "No medical records for this student yet.",
   "ongoing": "Ongoing",

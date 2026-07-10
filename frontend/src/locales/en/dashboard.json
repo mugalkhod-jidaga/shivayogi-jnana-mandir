@@ -1,6 +1,9 @@
 {
   "title": "Dashboard",
   "description": "School operations overview — students, staff, and enrollment breakdown.",
+  "hero": {
+    "tagline": "Insight · Enrollment · Daily operations"
+  },
   "errorTitle": "Could not load dashboard",
   "errorDescription": "Check that the backend is running and you have dashboard access.",
   "kpis": {

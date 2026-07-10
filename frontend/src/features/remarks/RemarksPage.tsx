@@ -1,8 +1,10 @@
-import { Download, MessageSquarePlus } from 'lucide-react';
+import { Download, MessageSquare, MessageSquarePlus, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
+import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
+import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
+import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { RequirePermission } from '@/components/RequirePermission';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,40 +57,43 @@ export function RemarksPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('title')} description={t('description')}>
-        <div className="flex gap-2">
-          <RequirePermission permission="exports:pdf">
-            <Button type="button" variant="outline" disabled={pdfLoading} onClick={() => void handlePdf()}>
-              <Download className="size-4" />
-              {t('actions.downloadPdf')}
-            </Button>
-          </RequirePermission>
-        </div>
-      </PageHeader>
+      <ModuleHeroBanner
+        title={t('hero.title')}
+        description={t('hero.description')}
+        tagline={t('hero.tagline')}
+        icon={MessageSquare}
+        gradientClassName={MODULE_GRADIENTS.remarks}
+      >
+        <RequirePermission permission="exports:pdf">
+          <Button
+            type="button"
+            variant="secondary"
+            className="bg-white/20 text-white hover:bg-white/30"
+            disabled={pdfLoading}
+            onClick={() => void handlePdf()}
+          >
+            <Download className="size-4" />
+            {t('actions.downloadPdf')}
+          </Button>
+        </RequirePermission>
+      </ModuleHeroBanner>
 
       {stats && (
         <div className="grid gap-4 sm:grid-cols-4">
-          <div className="rounded-lg border p-4">
-            <p className="text-xs text-muted-foreground">{t('stats.total')}</p>
-            <p className="text-2xl font-semibold">{stats.total}</p>
-          </div>
-          <div className="rounded-lg border p-4">
-            <p className="text-xs text-muted-foreground">{t('stats.positive')}</p>
-            <p className="text-2xl font-semibold text-green-700">{stats.positive}</p>
-          </div>
-          <div className="rounded-lg border p-4">
-            <p className="text-xs text-muted-foreground">{t('stats.negative')}</p>
-            <p className="text-2xl font-semibold text-red-700">{stats.negative}</p>
-          </div>
-          <div className="rounded-lg border p-4">
-            <p className="text-xs text-muted-foreground">{t('stats.observation')}</p>
-            <p className="text-2xl font-semibold">{stats.observation}</p>
-          </div>
+          <ModuleStatCard title={t('stats.total')} value={stats.total} icon={MessageSquare} accent="saffron" />
+          <ModuleStatCard title={t('stats.positive')} value={stats.positive} icon={ThumbsUp} accent="emerald" />
+          <ModuleStatCard title={t('stats.negative')} value={stats.negative} icon={ThumbsDown} accent="rose" />
+          <ModuleStatCard
+            title={t('stats.observation')}
+            value={stats.observation}
+            icon={MessageSquarePlus}
+            accent="indigo"
+          />
         </div>
       )}
 
       <form
-        className="grid gap-3 rounded-lg border p-4 md:grid-cols-5"
+        className="grid gap-3 rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-50/40 to-rose-50/30 p-4 dark:border-amber-900/30 dark:from-amber-950/20 dark:to-rose-950/15 md:grid-cols-5"
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
@@ -19,10 +18,10 @@ export function RecentVisitsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('recent.title')} description={t('recent.description')} />
+      <p className="text-sm text-muted-foreground">{t('recent.description')}</p>
 
       <form
-        className="flex gap-2"
+        className="flex gap-2 rounded-xl border border-teal-200/50 bg-gradient-to-br from-teal-50/40 to-cyan-50/30 p-4 dark:border-teal-900/30 dark:from-teal-950/20 dark:to-cyan-950/15"
         onSubmit={(e) => {
           e.preventDefault();
           setAppliedSearch(search);

@@ -1,4 +1,9 @@
 {
+  "hero": {
+    "title": "Staff",
+    "description": "Create staff accounts, assign roles, and manage access.",
+    "tagline": "Roles · Access · Team"
+  },
   "list": {
     "title": "Staff",
     "description": "Create staff accounts, assign roles, and manage access.",
