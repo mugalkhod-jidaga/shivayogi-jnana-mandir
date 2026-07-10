@@ -31,9 +31,9 @@ export function ModuleSectionCard({
           headerClassName,
         )}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           {icon}
-          <div>
+          <div className="min-w-0">
             <h2 className="font-semibold tracking-tight">{title}</h2>
             {description && (
               <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
