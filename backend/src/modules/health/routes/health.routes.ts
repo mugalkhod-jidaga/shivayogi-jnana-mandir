@@ -7,6 +7,7 @@ import { healthController } from '../controllers/health.controller';
 import {
   attachmentPresignSchema,
   createHealthVisitSchema,
+  updateStudentHealthStatusSchema,
 } from '../schemas/health.schemas';
 
 export const healthRoutes = Router();
@@ -95,4 +96,12 @@ healthRoutes.get(
   extractTenantMiddleware,
   requirePermission('medical:read'),
   asyncHandler(healthController.getStudentSummary),
+);
+
+healthRoutes.patch(
+  '/students/:studentId/health-status',
+  extractTenantMiddleware,
+  requirePermission('medical:create'),
+  validateZod(updateStudentHealthStatusSchema),
+  asyncHandler(healthController.updateStudentHealthStatus),
 );

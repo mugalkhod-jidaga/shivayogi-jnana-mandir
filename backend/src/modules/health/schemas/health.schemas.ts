@@ -31,6 +31,7 @@ export const createHealthVisitSchema = z.object({
   issueType: z.string().trim().min(1).max(500),
   symptoms: z.string().trim().min(1).max(5000),
   severityId: z.coerce.number().int().positive(),
+  healthStatus: z.enum(['healthy', 'sick', 'recovering']),
   treatedBy: z.string().trim().max(255).optional(),
   notes: z.string().trim().max(5000).optional(),
   temperature: z.string().trim().max(20).optional(),
@@ -38,6 +39,10 @@ export const createHealthVisitSchema = z.object({
   oxygenLevel: z.string().trim().max(20).optional(),
   medicines: z.array(medicineRowSchema).min(1).max(10),
   attachments: z.array(visitAttachmentSchema).max(4).optional(),
+});
+
+export const updateStudentHealthStatusSchema = z.object({
+  healthStatus: z.enum(['healthy', 'sick', 'recovering']),
 });
 
 const isoDateQuerySchema = z
@@ -76,6 +81,7 @@ export const attachmentPresignSchema = z.object({
 });
 
 export type CreateHealthVisitInput = z.infer<typeof createHealthVisitSchema>;
+export type UpdateStudentHealthStatusInput = z.infer<typeof updateStudentHealthStatusSchema>;
 export type MedicineRowInput = z.infer<typeof medicineRowSchema>;
 export type VisitAttachmentInput = z.infer<typeof visitAttachmentSchema>;
 export type HealthVisitListQuery = z.infer<typeof healthVisitListQuerySchema>;
@@ -83,3 +89,4 @@ export type RecentVisitsQuery = z.infer<typeof recentVisitsQuerySchema>;
 export type MedicineCatalogSuggestQuery = z.infer<typeof medicineCatalogSuggestQuerySchema>;
 export type StaffSearchQuery = z.infer<typeof staffSearchQuerySchema>;
 export type AttachmentPresignInput = z.infer<typeof attachmentPresignSchema>;
+export type StudentHealthStatus = UpdateStudentHealthStatusInput['healthStatus'];

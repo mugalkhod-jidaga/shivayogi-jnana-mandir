@@ -127,12 +127,15 @@ export type MedicineRowInput = {
   medicineNotes?: string;
 };
 
+export type StudentHealthStatus = 'healthy' | 'sick' | 'recovering';
+
 export type CreateHealthVisitInput = {
   studentId: string;
   visitDate: string;
   issueType: string;
   symptoms: string;
   severityId: number;
+  healthStatus: StudentHealthStatus;
   treatedBy?: string;
   notes?: string;
   temperature?: string;

@@ -18,6 +18,13 @@
     "class": "ತರಗತಿ",
     "visitDate": "ಭೇಟಿ ದಿನಾಂಕ",
     "severity": "ತೀವ್ರತೆ",
+    "healthOutcome": "ಈ ಭೇಟಿಯ ನಂತರ ವಿದ್ಯಾರ್ಥಿ",
+    "healthOutcomeHelp": "ತೀವ್ರತೆಯಿಂದ ಡೀಫಾಲ್ಟ್. ಗುಣಮುಖವಾದಾಗ Recovered ಆಯ್ಕೆಮಾಡಿ.",
+    "healthOutcomeOptions": {
+      "sick": "ಇನ್ನೂ ಅಸ್ವಸ್ಥ",
+      "recovering": "ಗುಣಮುಖವಾಗುತ್ತಿದೆ",
+      "healthy": "ಗುಣಮುಖ / ಆರೋಗ್ಯವಾಗಿದೆ"
+    },
     "issueType": "ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ",
     "customIssue": "ಇತರ ಸಮಸ್ಯೆ (ಐಚ್ಛಿಕ)",
     "symptoms": "ಲಕ್ಷಣಗಳು / ವಿವರಣೆ",
@@ -130,7 +137,11 @@
     "noVisits": "ಇನ್ನೂ ಯಾವುದೇ infirmary ಭೇಟಿಗಳಿಲ್ಲ.",
     "backToStudent": "ವಿದ್ಯಾರ್ಥಿ ಪ್ರೊಫೈಲ್‌ಗೆ ಹಿಂತಿರುಗಿ",
     "backToVisits": "ಭೇಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
-    "backToHealth": "ಆರೋಗ್ಯಕ್ಕೆ ಹಿಂತಿರುಗಿ"
+    "backToHealth": "ಆರೋಗ್ಯಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+    "markRecovered": "ಗುಣಮುಖ ಎಂದು ಗುರುತಿಸಿ",
+    "markingRecovered": "ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ…",
+    "markRecoveredSuccess": "ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಆರೋಗ್ಯವಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ.",
+    "markRecoveredFailed": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ ನವೀಕರಿಸಲು ವಿಫಲ."
   },
   "visitDetail": {
     "close": "ಮುಚ್ಚಿ",

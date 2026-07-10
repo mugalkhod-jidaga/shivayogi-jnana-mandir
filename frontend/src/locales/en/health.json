@@ -18,6 +18,13 @@
     "class": "Class",
     "visitDate": "Visit date",
     "severity": "Severity",
+    "healthOutcome": "After this visit, student is",
+    "healthOutcomeHelp": "Defaults from severity. Choose Recovered when discharging the student.",
+    "healthOutcomeOptions": {
+      "sick": "Still sick",
+      "recovering": "Improving / recovering",
+      "healthy": "Recovered / healthy"
+    },
     "issueType": "Type of issue",
     "customIssue": "Other issue (optional)",
     "symptoms": "Investigation / symptoms",
@@ -130,7 +137,11 @@
     "noVisits": "No infirmary visits recorded yet.",
     "backToStudent": "Back to student profile",
     "backToVisits": "Back to visits",
-    "backToHealth": "Back to health"
+    "backToHealth": "Back to health",
+    "markRecovered": "Mark as recovered",
+    "markingRecovered": "Updating…",
+    "markRecoveredSuccess": "Student marked as healthy.",
+    "markRecoveredFailed": "Could not update health status."
   },
   "visitDetail": {
     "close": "Close",

@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../../utils/AppError';
-import type { AttachmentPresignInput, CreateHealthVisitInput } from '../schemas/health.schemas';
+import type {
+  AttachmentPresignInput,
+  CreateHealthVisitInput,
+  UpdateStudentHealthStatusInput,
+} from '../schemas/health.schemas';
 import {
   attachmentPresignSchema,
   healthVisitListQuerySchema,
@@ -113,5 +117,18 @@ export const healthController = {
       profileId,
     );
     res.status(201).json({ success: true, data });
+  },
+
+  async updateStudentHealthStatus(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const studentId = paramId(req, 'studentId');
+    const body = req.body as UpdateStudentHealthStatusInput;
+    const data = await healthService.updateStudentHealthStatus(
+      studentId,
+      tenantId,
+      body.healthStatus,
+      profileId,
+    );
+    res.json({ success: true, data });
   },
 };
