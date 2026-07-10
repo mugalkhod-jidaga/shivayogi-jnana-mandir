@@ -76,11 +76,12 @@ export function LoginPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       <img
-        src="/assets/hero-temple.jpg"
+        src="/assets/banner.jpg"
         alt=""
-        className="absolute inset-0 size-full object-cover"
+        className="absolute inset-0 size-full object-cover object-[center_30%]"
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-950/80 via-amber-900/70 to-indigo-950/80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-red-950/45 to-black/75" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
       <div className="absolute right-4 top-4 z-10">
         <LanguageToggle />
       </div>

@@ -2,14 +2,16 @@
 export const BRAND = {
   logo: '/assets/logo.png',
   favicon: '/favicon.png',
+  /** Designed wide institutional banner (Kannada title + Guruji + students) */
+  banner: '/assets/banner.jpg',
 } as const;
 
 /**
  * Module photo banners — prefer web-sized images (~200–700KB).
- * Note: /assets/banner.jpg is ~50MB and is intentionally not used until compressed.
+ * Dashboard / Hostel / Login use BRAND.banner (designed strip).
  */
 export const MODULE_BANNER_IMAGES = {
-  temple: '/assets/hero-temple.jpg',
+  temple: BRAND.banner,
   students: '/assets/students-guruji.jpg',
   health: '/assets/students-pooja.jpg',
   documents: '/assets/hero-campus.jpg',
@@ -21,3 +23,6 @@ export const MODULE_BANNER_IMAGES = {
 } as const;
 
 export type ModuleBannerKey = keyof typeof MODULE_BANNER_IMAGES;
+
+/** Modules that use the designed brand banner (already has Kannada title) */
+export const BRAND_BANNER_MODULES: ReadonlySet<ModuleBannerKey> = new Set(['temple']);

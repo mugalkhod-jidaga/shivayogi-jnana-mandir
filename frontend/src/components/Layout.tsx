@@ -89,13 +89,9 @@ export function Layout() {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            <img
+            {/* <img
               src="/assets/banner.jpg"
-              alt=""
-              // className="size-8 shrink-0 rounded-md object-contain"
-              // width={32}
-              // height={32}
-            />
+            /> */}
             <LanguageToggle />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">{displayName}</p>

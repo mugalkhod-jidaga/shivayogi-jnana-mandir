@@ -15,6 +15,8 @@ export function HostelLayout() {
         tagline={t('hero.tagline')}
         icon={BedDouble}
         module="temple"
+        imageSrc="/assets/banner.jpg"
+        variant="brand"
       />
       <HostelModuleNav />
       <Outlet />
