@@ -2,7 +2,6 @@ import { FileText, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +77,7 @@ export function DocumentQueuePage() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={FileText}
-        gradientClassName={MODULE_GRADIENTS.documents}
+        module="documents"
       />
 
       <div className="flex flex-wrap gap-2">

@@ -2,7 +2,6 @@ import { ScrollText, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +71,7 @@ export function AuditLogsPage() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={ScrollText}
-        gradientClassName={MODULE_GRADIENTS.audit}
+        module="audit"
       />
 
       <form

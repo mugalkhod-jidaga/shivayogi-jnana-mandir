@@ -1,7 +1,6 @@
 import { GraduationCap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { StudentsModuleNav } from '@/features/students/components/StudentsModuleNav';
 
@@ -15,7 +14,7 @@ export function StudentsLayout() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={GraduationCap}
-        gradientClassName={MODULE_GRADIENTS.students}
+        module="students"
       />
       <StudentsModuleNav />
       <Outlet />

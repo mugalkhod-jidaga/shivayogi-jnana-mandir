@@ -1,7 +1,6 @@
 import { List } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
@@ -43,7 +42,7 @@ export function LookupsPage() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={List}
-        gradientClassName={MODULE_GRADIENTS.lookups}
+        module="lookups"
       />
 
       {isError && (

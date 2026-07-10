@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { AcademicPlacementFields } from '@/features/students/components/AcademicPlacementFields';
@@ -353,7 +352,7 @@ export function StudentFormPage() {
         }
         tagline={t('hero.tagline')}
         icon={GraduationCap}
-        gradientClassName={MODULE_GRADIENTS.students}
+        module="students"
       >
         <Button asChild variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
           <Link to={isEdit ? `/students/${id}` : '/students'}>{tc('actions.cancel')}</Link>

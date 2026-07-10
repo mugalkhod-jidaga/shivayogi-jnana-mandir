@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
 import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
@@ -49,7 +48,7 @@ export function DashboardPage() {
         description={t('description')}
         tagline={t('hero.tagline')}
         icon={LayoutDashboard}
-        gradientClassName={MODULE_GRADIENTS.temple}
+        module="temple"
       />
 
       {summary.isError && (

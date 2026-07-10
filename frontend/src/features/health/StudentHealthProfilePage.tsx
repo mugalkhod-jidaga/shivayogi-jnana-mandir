@@ -2,7 +2,6 @@ import { ArrowLeft, HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
@@ -58,7 +57,7 @@ export function StudentHealthProfilePage() {
         description={`${student.admissionNumber}${student.currentEnrollment?.standard?.value ? ` · ${t('record.class')} ${student.currentEnrollment.standard.value}` : ''}`}
         tagline={t('hero.tagline')}
         icon={HeartPulse}
-        gradientClassName={MODULE_GRADIENTS.health}
+        module="health"
       >
         <Button asChild className="bg-teal-600 hover:bg-teal-700">
           <Link to={`/health/record-visit?studentId=${student.id}`}>{t('profile.recordVisit')}</Link>

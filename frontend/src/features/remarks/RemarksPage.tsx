@@ -2,7 +2,6 @@ import { Download, MessageSquare, MessageSquarePlus, ThumbsDown, ThumbsUp } from
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { RequirePermission } from '@/components/RequirePermission';
@@ -62,7 +61,7 @@ export function RemarksPage() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={MessageSquare}
-        gradientClassName={MODULE_GRADIENTS.remarks}
+        module="remarks"
       >
         <RequirePermission permission="exports:pdf">
           <Button

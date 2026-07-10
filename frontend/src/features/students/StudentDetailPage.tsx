@@ -2,7 +2,6 @@ import { ArrowLeft, GraduationCap, HeartPulse, Pencil, Download } from 'lucide-r
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
 import { RequirePermission } from '@/components/RequirePermission';
@@ -114,7 +113,7 @@ export function StudentDetailPage() {
         description={t('detail.admissionDescription', { admissionNumber: student.admissionNumber })}
         tagline={t('hero.tagline')}
         icon={GraduationCap}
-        gradientClassName={MODULE_GRADIENTS.students}
+        module="students"
       >
         <div className="flex flex-wrap gap-2">
           <StatusBadge status={student.status} />

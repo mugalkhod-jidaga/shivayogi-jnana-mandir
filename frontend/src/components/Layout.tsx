@@ -38,8 +38,19 @@ export function Layout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
         <div className="border-b px-6 py-5">
-          <p className="text-sm font-semibold leading-tight">{t('appName')}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t('appSubtitle')}</p>
+          <div className="flex items-center gap-3">
+            <img
+              src="/assets/logo.png"
+              alt={t('appName')}
+              className="size-10 shrink-0 rounded-lg object-contain ring-1 ring-orange-200/70"
+              width={40}
+              height={40}
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-tight">{t('appName')}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t('appSubtitle')}</p>
+            </div>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
@@ -66,11 +77,25 @@ export function Layout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b bg-card px-4 py-3 md:px-6">
-          <div className="min-w-0 md:hidden">
+          <div className="flex min-w-0 items-center gap-2 md:hidden">
+            <img
+              src="/assets/logo.png"
+              alt=""
+              className="size-8 shrink-0 rounded-md object-contain"
+              width={32}
+              height={32}
+            />
             <p className="truncate text-sm font-semibold">{t('appName')}</p>
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <img
+              src="/assets/banner.jpg"
+              alt=""
+              // className="size-8 shrink-0 rounded-md object-contain"
+              // width={32}
+              // height={32}
+            />
             <LanguageToggle />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">{displayName}</p>

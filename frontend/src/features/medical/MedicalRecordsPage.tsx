@@ -2,7 +2,6 @@ import { Stethoscope } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { MODULE_GRADIENTS } from '@/components/module-ui/moduleGradients';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +38,7 @@ export function MedicalRecordsPage() {
         description={t('hero.description')}
         tagline={t('hero.tagline')}
         icon={Stethoscope}
-        gradientClassName={MODULE_GRADIENTS.health}
+        module="health"
       />
 
       <form
