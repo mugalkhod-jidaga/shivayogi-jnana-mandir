@@ -113,6 +113,11 @@ export function StudentHealthProfilePage() {
           <Button asChild className="bg-teal-600 hover:bg-teal-700">
             <Link to={`/health/record-visit?studentId=${student.id}`}>{t('profile.recordVisit')}</Link>
           </Button>
+          <Button asChild variant="outline" className="border-white/40 bg-white/15 text-white hover:bg-white/25">
+            <Link to={`/students/${student.id}?tab=health`} state={{ from: `${location.pathname}${location.search}` }}>
+              {t('profile.fullStudentProfile')}
+            </Link>
+          </Button>
         </div>
       </ModuleHeroBanner>
 

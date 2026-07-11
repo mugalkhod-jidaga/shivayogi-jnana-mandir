@@ -7,6 +7,7 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { StudentDocumentsTab } from '@/features/documents/StudentDocumentsTab';
+import { StudentHealthVisitsTab } from '@/features/health/StudentHealthVisitsTab';
 import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
 import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
@@ -20,7 +21,7 @@ import { cn } from '@/lib/utils';
 
 import { pdfExports } from '@/lib/pdfDownload';
 
-type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'medical';
+type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'health' | 'medical';
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -37,6 +38,9 @@ function resolveBackNav(from: string | undefined, t: (key: string) => string) {
   }
   if (from?.startsWith('/hostel')) {
     return { to: from, label: t('detail.actions.backToHostel') };
+  }
+  if (from?.startsWith('/health')) {
+    return { to: from, label: t('detail.actions.backToHealth') };
   }
   return { to: from && from.startsWith('/') ? from : '/students', label: t('detail.actions.backToStudents') };
 }
@@ -58,6 +62,7 @@ export function StudentDetailPage() {
       tabParam === 'documents' ||
       tabParam === 'avatar' ||
       tabParam === 'remarks' ||
+      tabParam === 'health' ||
       tabParam === 'medical'
     ) {
       return tabParam;
@@ -66,6 +71,7 @@ export function StudentDetailPage() {
   });
   const { t: tRemarks } = useTranslation('remarks');
   const { t: tMedical } = useTranslation('medical');
+  const { t: tHealth } = useTranslation('health');
   const [pdfLoading, setPdfLoading] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
 
@@ -75,6 +81,7 @@ export function StudentDetailPage() {
       tabParam === 'avatar' ||
       tabParam === 'profile' ||
       tabParam === 'remarks' ||
+      tabParam === 'health' ||
       tabParam === 'medical'
     ) {
       setTab(tabParam);
@@ -105,7 +112,10 @@ export function StudentDetailPage() {
       ? [{ key: 'remarks' as const, label: tRemarks('detail.tabs.remarks') }]
       : []),
     ...(hasPermission('medical:read')
-      ? [{ key: 'medical' as const, label: tMedical('detail.tabs.medical') }]
+      ? [
+          { key: 'health' as const, label: tHealth('detail.tabs.health') },
+          { key: 'medical' as const, label: tMedical('detail.tabs.medical') },
+        ]
       : []),
     { key: 'avatar', label: t('detail.tabs.photo') },
   ];
@@ -150,7 +160,7 @@ export function StudentDetailPage() {
           </RequirePermission>
           <RequirePermission permission="medical:read">
             <Button asChild variant="secondary" size="sm" className="bg-white/20 text-white hover:bg-white/30">
-              <Link to={`/health/students/${student.id}`}>
+              <Link to={`/students/${student.id}?tab=health`}>
                 <HeartPulse className="size-4" />
                 {t('detail.actions.healthProfile')}
               </Link>
@@ -345,6 +355,10 @@ export function StudentDetailPage() {
 
       {tab === 'remarks' && hasPermission('remarks:read') && (
         <StudentRemarksTab studentId={student.id} />
+      )}
+
+      {tab === 'health' && hasPermission('medical:read') && (
+        <StudentHealthVisitsTab studentId={student.id} student={student} />
       )}
 
       {tab === 'medical' && hasPermission('medical:read') && (

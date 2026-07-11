@@ -114,13 +114,23 @@
     "noRecent": "No visits this week yet.",
     "kpis": {
       "totalStudents": "Active students",
-      "sickToday": "Sick today",
+      "sickToday": "Visited today",
+      "currentlySick": "Currently sick",
+      "currentlyRecovering": "Recovering",
       "urgentWeek": "Urgent (7 days)",
-      "visitsWeek": "Visits this week"
-    }
+      "visitsWeek": "Visits this week",
+      "clickToList": "Click to show list"
+    },
+    "sickListTitle": "Students currently sick",
+    "recoveringListTitle": "Students recovering",
+    "statusListHelp": "Based on each student’s current health status. Open a row for visit history.",
+    "noSick": "No students marked sick right now.",
+    "noRecovering": "No students marked recovering right now."
   },
   "profile": {
     "recordVisit": "Record visit",
+    "openInHealth": "Open in Health module",
+    "fullStudentProfile": "Full student profile",
     "healthStatusLabel": "Health status",
     "healthStatus": {
       "healthy": "Healthy",
@@ -143,6 +153,11 @@
     "markRecoveredSuccess": "Student marked as healthy.",
     "markRecoveredFailed": "Could not update health status."
   },
+  "detail": {
+    "tabs": {
+      "health": "Health visits"
+    }
+  },
   "visitDetail": {
     "close": "Close",
     "photos": "Reference photos",
@@ -152,21 +167,27 @@
   "reports": {
     "title": "Health reports",
     "description": "Live infirmary overview and analytics — alerts, trends, severity, issues, and medicines.",
+    "period": "Period",
+    "periodOptions": {
+      "7": "Last 7 days",
+      "30": "Last 30 days",
+      "90": "Last 90 days",
+      "all": "All time"
+    },
     "errorTitle": "Could not load reports",
     "errorDescription": "Check that the backend is running and try again.",
     "empty": "No visit data yet.",
     "visitsLabel": "visits",
     "kpis": {
-      "totalVisits": "Total visits (90 days)",
-      "totalVisitsHelp": "All infirmary entries in range",
+      "totalVisits": "Total visits",
+      "totalVisitsHelp": "Infirmary entries in selected period",
       "visitsMonth": "Visits this month",
-      "visitsWeek": "Visits this week",
       "uniqueStudents": "Students seen",
       "uniqueStudentsHelp": "Distinct students with visits"
     },
     "trend": {
       "title": "Daily visit trend",
-      "description": "Infirmary visits over the last 30 days."
+      "description": "Visit counts by day for the selected period (chart capped at 90 days)."
     },
     "bySeverity": {
       "title": "Visits by severity",

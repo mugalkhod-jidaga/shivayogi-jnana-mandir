@@ -116,9 +116,9 @@ export const healthService = {
     return healthRepository.getDashboardStats(tenantId, assignedStandardIds);
   },
 
-  async getReports(tenantId: number, userId: string) {
+  async getReports(tenantId: number, userId: string, days?: number) {
     const assignedStandardIds = await resolveStandardScope(userId);
-    return healthRepository.getReports(tenantId, assignedStandardIds);
+    return healthRepository.getReports(tenantId, assignedStandardIds, days);
   },
 
   async suggestMedicines(tenantId: number, query: MedicineCatalogSuggestQuery) {

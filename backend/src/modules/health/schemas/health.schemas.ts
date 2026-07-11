@@ -74,6 +74,11 @@ export const staffSearchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(20).default(6),
 });
 
+/** Omit or empty = all time; otherwise last N days for visit analytics. */
+export const healthReportsQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(3650).optional(),
+});
+
 export const attachmentPresignSchema = z.object({
   studentId: z.string().uuid(),
   filename: z.string().trim().min(1).max(255),
@@ -88,5 +93,6 @@ export type HealthVisitListQuery = z.infer<typeof healthVisitListQuerySchema>;
 export type RecentVisitsQuery = z.infer<typeof recentVisitsQuerySchema>;
 export type MedicineCatalogSuggestQuery = z.infer<typeof medicineCatalogSuggestQuerySchema>;
 export type StaffSearchQuery = z.infer<typeof staffSearchQuerySchema>;
+export type HealthReportsQuery = z.infer<typeof healthReportsQuerySchema>;
 export type AttachmentPresignInput = z.infer<typeof attachmentPresignSchema>;
 export type StudentHealthStatus = UpdateStudentHealthStatusInput['healthStatus'];

@@ -1,6 +1,7 @@
 import { Activity, AlertTriangle, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Bar,
   BarChart,
@@ -18,6 +19,8 @@ import {
 import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
 import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
+import { Select } from '@/components/ui/select';
+import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
 import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
@@ -25,6 +28,8 @@ import { useHealthDashboardStats, useHealthVisit } from '@/hooks/useHealth';
 import { useHealthReports } from '@/hooks/useHealthReports';
 import { chartColor } from '@/lib/chartColors';
 import { formatDobDisplay } from '@/lib/date';
+import { cn } from '@/lib/utils';
+import type { HealthStatusStudent } from '@/types/health';
 
 const SEVERITY_COLORS: Record<string, string> = {
   normal: '#16a34a',
@@ -52,11 +57,58 @@ function ChartTooltip({
   );
 }
 
+function StatusStudentList({
+  students,
+  emptyLabel,
+  fromPath,
+}: {
+  students: HealthStatusStudent[];
+  emptyLabel: string;
+  fromPath: string;
+}) {
+  if (students.length === 0) {
+    return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
+  }
+
+  return (
+    <ul className="divide-y rounded-lg border">
+      {students.map((student) => (
+        <li key={student.id}>
+          <Link
+            to={`/health/students/${student.id}`}
+            state={{ from: fromPath }}
+            className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm transition-colors hover:bg-muted/50"
+          >
+            <span className="font-medium">
+              {[student.firstName, student.lastName].filter(Boolean).join(' ')}
+              <span className="ml-2 font-mono text-xs text-muted-foreground">
+                {student.admissionNumber}
+              </span>
+            </span>
+            <span className="flex items-center gap-2">
+              {student.standard && (
+                <span className="text-xs text-muted-foreground">{student.standard}</span>
+              )}
+              <HealthStatusBadge status={student.healthStatus} />
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function HealthReportsPage() {
   const { t } = useTranslation('health');
+  const location = useLocation();
+  const fromPath = `${location.pathname}${location.search}`;
+  const [days, setDays] = useState('30');
+  const [statusList, setStatusList] = useState<'sick' | 'recovering' | null>('sick');
   const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
+
+  const daysNum = days ? Number(days) : undefined;
   const { data: dash, isLoading: dashLoading, isError: dashError } = useHealthDashboardStats();
-  const { data, isLoading, isError } = useHealthReports();
+  const { data, isLoading, isError } = useHealthReports(daysNum);
   const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
   const severityChartData =
@@ -84,9 +136,27 @@ export function HealthReportsPage() {
       shortDate: formatDobDisplay(row.date).slice(0, 5),
     })) ?? [];
 
+  const listStudents =
+    statusList === 'sick'
+      ? (dash?.sickStudents ?? [])
+      : statusList === 'recovering'
+        ? (dash?.recoveringStudents ?? [])
+        : [];
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
+        <div className="w-40">
+          <label className="mb-1 block text-xs text-muted-foreground">{t('reports.period')}</label>
+          <Select value={days} onChange={(e) => setDays(e.target.value)}>
+            <option value="7">{t('reports.periodOptions.7')}</option>
+            <option value="30">{t('reports.periodOptions.30')}</option>
+            <option value="90">{t('reports.periodOptions.90')}</option>
+            <option value="">{t('reports.periodOptions.all')}</option>
+          </Select>
+        </div>
+      </div>
 
       {dashError && <p className="text-destructive">{t('dashboard.error')}</p>}
       {isError && (
@@ -94,23 +164,43 @@ export function HealthReportsPage() {
       )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <ModuleStatCard
-          title={t('dashboard.kpis.sickToday')}
-          value={dashLoading ? '…' : (dash?.sickToday ?? 0)}
-          icon={Activity}
-          accent="saffron"
-        />
+        <button
+          type="button"
+          className={cn(
+            'rounded-xl text-left transition ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            statusList === 'sick' && 'ring-2 ring-rose-400',
+          )}
+          onClick={() => setStatusList((v) => (v === 'sick' ? null : 'sick'))}
+        >
+          <ModuleStatCard
+            title={t('dashboard.kpis.currentlySick')}
+            value={dashLoading ? '…' : (dash?.currentlySick ?? 0)}
+            description={t('dashboard.kpis.clickToList')}
+            icon={Activity}
+            accent="rose"
+          />
+        </button>
+        <button
+          type="button"
+          className={cn(
+            'rounded-xl text-left transition ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            statusList === 'recovering' && 'ring-2 ring-amber-400',
+          )}
+          onClick={() => setStatusList((v) => (v === 'recovering' ? null : 'recovering'))}
+        >
+          <ModuleStatCard
+            title={t('dashboard.kpis.currentlyRecovering')}
+            value={dashLoading ? '…' : (dash?.currentlyRecovering ?? 0)}
+            description={t('dashboard.kpis.clickToList')}
+            icon={Stethoscope}
+            accent="saffron"
+          />
+        </button>
         <ModuleStatCard
           title={t('dashboard.kpis.urgentWeek')}
           value={dashLoading ? '…' : (dash?.urgentCount ?? 0)}
           icon={AlertTriangle}
           accent="rose"
-        />
-        <ModuleStatCard
-          title={t('dashboard.kpis.visitsWeek')}
-          value={dashLoading ? '…' : (dash?.visitsThisWeek ?? 0)}
-          icon={Stethoscope}
-          accent="emerald"
         />
         <ModuleStatCard
           title={t('dashboard.kpis.totalStudents')}
@@ -119,6 +209,25 @@ export function HealthReportsPage() {
           accent="sky"
         />
       </section>
+
+      {statusList && (
+        <ModuleSectionCard
+          title={
+            statusList === 'sick'
+              ? t('dashboard.sickListTitle')
+              : t('dashboard.recoveringListTitle')
+          }
+          description={t('dashboard.statusListHelp')}
+        >
+          <StatusStudentList
+            students={listStudents}
+            emptyLabel={
+              statusList === 'sick' ? t('dashboard.noSick') : t('dashboard.noRecovering')
+            }
+            fromPath={fromPath}
+          />
+        </ModuleSectionCard>
+      )}
 
       <section className="grid gap-6 lg:grid-cols-2">
         <ModuleSectionCard
@@ -187,7 +296,7 @@ export function HealthReportsPage() {
 
       {!isError && (
         <>
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <ModuleStatCard
               title={t('reports.kpis.totalVisits')}
               value={isLoading ? '…' : (data?.totalVisits ?? 0)}
@@ -200,12 +309,6 @@ export function HealthReportsPage() {
               value={isLoading ? '…' : (data?.visitsThisMonth ?? 0)}
               icon={TrendingUp}
               accent="indigo"
-            />
-            <ModuleStatCard
-              title={t('reports.kpis.visitsWeek')}
-              value={isLoading ? '…' : (data?.visitsThisWeek ?? 0)}
-              icon={Activity}
-              accent="saffron"
             />
             <ModuleStatCard
               title={t('reports.kpis.uniqueStudents')}

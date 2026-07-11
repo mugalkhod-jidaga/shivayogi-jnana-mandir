@@ -23,8 +23,8 @@ export type HealthStatusBreakdown = {
 export type HealthReportSummary = {
   totalVisits: number;
   visitsThisMonth: number;
-  visitsThisWeek: number;
   uniqueStudentsVisited: number;
+  rangeDays: number | null;
   visitsBySeverity: SeverityBreakdown[];
   visitsByDay: DayBreakdown[];
   topIssueTypes: CountBreakdown[];
