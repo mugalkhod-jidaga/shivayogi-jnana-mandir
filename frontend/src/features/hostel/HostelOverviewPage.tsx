@@ -1,5 +1,5 @@
 import { AlertTriangle, BedDouble, CheckCircle2, ClipboardCheck, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { HostelSectionCard } from '@/features/hostel/components/HostelSectionCard';
@@ -8,6 +8,8 @@ import { useHostelOverview } from '@/hooks/useHostel';
 
 export function HostelOverviewPage() {
   const { t } = useTranslation('hostel');
+  const location = useLocation();
+  const fromPath = `${location.pathname}${location.search}`;
   const { data, isLoading } = useHostelOverview();
 
   const unallocated = data?.unallocatedStudents;
@@ -30,7 +32,7 @@ export function HostelOverviewPage() {
             <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto text-sm text-amber-900/90 dark:text-amber-200/90">
               {unallocated.students.slice(0, 10).map((s) => (
                 <li key={s.id}>
-                  <Link to={`/students/${s.id}`} className="hover:underline">
+                  <Link to={`/students/${s.id}`} state={{ from: fromPath }} className="hover:underline">
                     {s.admissionNumber} — {[s.firstName, s.lastName].filter(Boolean).join(' ')}
                   </Link>
                 </li>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { RequirePermission } from '@/components/RequirePermission';
 import { StudentSearchPicker } from '@/components/students/StudentSearchPicker';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,8 @@ function formatBedOption(bed: {
 
 export function HostelAllocationsPage() {
   const { t } = useTranslation('hostel');
+  const location = useLocation();
+  const fromPath = `${location.pathname}${location.search}`;
   const [studentId, setStudentId] = useState('');
   const [bedId, setBedId] = useState('');
   const [fromDate, setFromDate] = useState(new Date().toISOString().slice(0, 10));
@@ -163,7 +165,11 @@ export function HostelAllocationsPage() {
               {allocations.map((row) => (
                 <tr key={row.id} className="border-t">
                   <td className="px-3 py-2">
-                    <Link className="text-primary hover:underline" to={`/students/${row.student.id}`}>
+                    <Link
+                      className="text-primary hover:underline"
+                      to={`/students/${row.student.id}`}
+                      state={{ from: fromPath }}
+                    >
                       {formatName(row.student.firstName, row.student.lastName)}
                     </Link>
                     <div className="text-xs text-muted-foreground">{row.student.admissionNumber}</div>

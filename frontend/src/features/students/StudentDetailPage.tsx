@@ -35,6 +35,9 @@ function resolveBackNav(from: string | undefined, t: (key: string) => string) {
   if (from?.startsWith('/remarks')) {
     return { to: from, label: t('detail.actions.backToRemarks') };
   }
+  if (from?.startsWith('/hostel')) {
+    return { to: from, label: t('detail.actions.backToHostel') };
+  }
   return { to: from && from.startsWith('/') ? from : '/students', label: t('detail.actions.backToStudents') };
 }
 
