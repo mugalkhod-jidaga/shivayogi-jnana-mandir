@@ -139,7 +139,7 @@ export function RecordVisitPage() {
     setTreatedBy('');
     setNotes('');
     setTemperature('');
-    setBloodPressure('');
+    // setBloodPressure('');
     setOxygenLevel('');
     setMedicines([
       {
