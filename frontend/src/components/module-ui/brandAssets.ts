@@ -28,7 +28,8 @@ export const BRAND = {
   favicon: '/favicon.png',
   /** Designed wide institutional banner (Kannada title + Guruji + students) */
   banner: '/assets/optimized/banner-1024.jpg',
-  bannerImage: responsive('banner', [640, 1024, 1600], '(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1600px'),
+  /** Cap at 1024w — login/dashboard don't need 1600px for a background strip */
+  bannerImage: responsive('banner', [640, 1024], '(max-width: 640px) 100vw, 1024px'),
 } as const;
 
 /**
@@ -37,14 +38,14 @@ export const BRAND = {
  */
 export const MODULE_BANNER_IMAGES = {
   temple: BRAND.bannerImage,
-  students: responsive('students-guruji', [640, 1024, 1600], '(max-width: 768px) 100vw, 1200px'),
-  health: responsive('students-pooja', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  documents: responsive('hero-campus', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  staff: responsive('hero-slider', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  remarks: responsive('hero-gallery', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  import: responsive('hero-campus', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  audit: responsive('hero-slider', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
-  lookups: responsive('hero-gallery', [640, 1024], '(max-width: 768px) 100vw, 1200px'),
+  students: responsive('students-guruji', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  health: responsive('students-pooja', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  documents: responsive('hero-campus', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  staff: responsive('hero-slider', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  remarks: responsive('hero-gallery', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  import: responsive('hero-campus', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  audit: responsive('hero-slider', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
+  lookups: responsive('hero-gallery', [640, 1024], '(max-width: 768px) 100vw, 1024px'),
 } as const;
 
 export type ModuleBannerKey = keyof typeof MODULE_BANNER_IMAGES;

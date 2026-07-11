@@ -116,7 +116,7 @@ export function ModuleHeroBanner({
       <BannerPicture
         image={photo}
         alt={isBrandBanner ? t('appName') : ''}
-        priority={module === 'temple'}
+        priority={false}
         className={cn(
           'absolute inset-0 size-full',
           isBrandBanner

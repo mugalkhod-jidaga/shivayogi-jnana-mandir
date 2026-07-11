@@ -2,10 +2,10 @@ import { supabase } from '../../../config/supabase';
 import { AppError } from '../../../utils/AppError';
 import { generateTempPassword } from '../../../utils/password';
 import type { CreateStaffInput, UpdateStaffInput } from '../schemas/user.schemas';
+import { staffAppMetadata } from '../utils/authMetadata';
 import { roleRepository } from '../repositories/role.repository';
 import { usersRepository } from '../repositories/users.repository';
 import type { UserProfileRow } from '../repositories/userProfile.repository';
-import { permissionService } from './permission.service';
 
 function serializeStaff(
   profile: UserProfileRow,
@@ -29,19 +29,22 @@ function serializeStaff(
 }
 
 export const userService = {
-  async getMe(userId: string, tenantId: number) {
-    const profile = await usersRepository.findById(userId, tenantId);
+  async getMe(userId: string, tenantId: number, cachedProfile?: UserProfileRow) {
+    const [profile, rolesAndPermissions, assignedStandardIds] = await Promise.all([
+      cachedProfile
+        ? Promise.resolve(cachedProfile)
+        : usersRepository.findById(userId, tenantId),
+      usersRepository.findRolesAndPermissions(userId),
+      usersRepository.findAssignedStandardIds(userId),
+    ]);
+
     if (!profile) {
       throw new AppError(404, 'User profile not found');
     }
 
-    const roles = await usersRepository.findRoles(userId);
-    const permissions = await permissionService.getUserPermissions(userId);
-    const assignedStandardIds = await usersRepository.findAssignedStandardIds(userId);
-
     return {
-      ...serializeStaff(profile, roles, assignedStandardIds),
-      permissions,
+      ...serializeStaff(profile, rolesAndPermissions.roles, assignedStandardIds),
+      permissions: rolesAndPermissions.permissions,
     };
   },
 
@@ -83,6 +86,7 @@ export const userService = {
       phone: input.phone,
       password: tempPassword,
       phone_confirm: true,
+      app_metadata: staffAppMetadata(tenantId, 'Active'),
     });
 
     if (authError) {
@@ -181,7 +185,7 @@ export const userService = {
     }
 
     if (!profile.must_reset_password) {
-      return this.getMe(userId, tenantId);
+      return this.getMe(userId, tenantId, profile);
     }
 
     const updated = (await usersRepository.update(
@@ -191,12 +195,14 @@ export const userService = {
       userId,
     )) as UserProfileRow;
 
-    const roles = await usersRepository.findRoles(userId);
-    const permissions = await permissionService.getUserPermissions(userId);
+    const [rolesAndPermissions, assignedStandardIds] = await Promise.all([
+      usersRepository.findRolesAndPermissions(userId),
+      usersRepository.findAssignedStandardIds(userId),
+    ]);
 
     return {
-      ...serializeStaff(updated, roles),
-      permissions,
+      ...serializeStaff(updated, rolesAndPermissions.roles, assignedStandardIds),
+      permissions: rolesAndPermissions.permissions,
     };
   },
 
@@ -223,6 +229,7 @@ export const userService = {
 
     const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
       ban_duration: '876000h',
+      app_metadata: staffAppMetadata(tenantId, 'Inactive'),
     });
 
     if (authError) {
