@@ -19,6 +19,7 @@ async function bootstrap(): Promise<void> {
     phone: ADMIN_PHONE,
     password: ADMIN_PASSWORD,
     phone_confirm: true,
+    app_metadata: { tenant_id: TENANT_ID, status: 'Active' },
   });
   if (error) throw error;
 

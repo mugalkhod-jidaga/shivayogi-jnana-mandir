@@ -22,7 +22,7 @@ function paramId(req: Request): string {
 export const userController = {
   async getMe(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
-    const data = await userService.getMe(profileId, tenantId);
+    const data = await userService.getMe(profileId, tenantId, req.userProfile);
     res.json({ success: true, data });
   },
 

@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { clearMeCache } from '@/lib/meCache';
 import { supabase } from '@/lib/supabase';
 
 type AuthContextValue = {
@@ -47,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    clearMeCache();
     await supabase.auth.signOut();
   }, []);
 

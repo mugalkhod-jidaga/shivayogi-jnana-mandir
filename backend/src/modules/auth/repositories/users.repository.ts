@@ -35,20 +35,59 @@ export class UsersRepository extends BaseRepository {
   }
 
   async findRoles(userId: string): Promise<{ id: number; name: string }[]> {
+    const { roles } = await this.findRolesAndPermissions(userId);
+    return roles;
+  }
+
+  /** One round-trip for roles + permission actions (used by getMe). */
+  async findRolesAndPermissions(userId: string): Promise<{
+    roles: { id: number; name: string }[];
+    permissions: string[];
+  }> {
     const { data, error } = await supabase
       .from('user_roles')
-      .select('role_id, roles(id, name)')
+      .select('roles(id, name, role_permissions(permissions(action)))')
       .eq('user_id', userId);
 
     if (error) throw new AppError(500, error.message);
 
-    return (data ?? [])
-      .map((row) => {
-        const roles = row.roles;
-        if (Array.isArray(roles)) return roles[0] ?? null;
-        return roles as { id: number; name: string } | null;
-      })
-      .filter((role): role is { id: number; name: string } => role !== null);
+    const roles: { id: number; name: string }[] = [];
+    const actions = new Set<string>();
+
+    for (const row of data ?? []) {
+      const roleRaw = row.roles;
+      const role = (
+        Array.isArray(roleRaw) ? roleRaw[0] : roleRaw
+      ) as {
+        id: number;
+        name: string;
+        role_permissions:
+          | { permissions: { action: string } | { action: string }[] | null }
+          | { permissions: { action: string } | { action: string }[] | null }[]
+          | null;
+      } | null;
+
+      if (!role) continue;
+      roles.push({ id: role.id, name: role.name });
+
+      const rpList = Array.isArray(role.role_permissions)
+        ? role.role_permissions
+        : role.role_permissions
+          ? [role.role_permissions]
+          : [];
+
+      for (const rp of rpList) {
+        const permission = rp.permissions;
+        if (!permission) continue;
+        if (Array.isArray(permission)) {
+          permission.forEach((p) => actions.add(p.action));
+        } else {
+          actions.add(permission.action);
+        }
+      }
+    }
+
+    return { roles, permissions: [...actions] };
   }
 
   async findAssignedStandardIds(userId: string): Promise<number[]> {
