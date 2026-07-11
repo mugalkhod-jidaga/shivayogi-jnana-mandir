@@ -53,7 +53,10 @@ export function StudentMedicalTab({ studentId }: Props) {
     <div className="space-y-4">
       <p className="rounded-md border bg-muted/40 px-4 py-3 text-sm">
         {t('healthProfileHint')}{' '}
-        <Link to={`/health/students/${studentId}`} className="font-medium text-primary hover:underline">
+        <Link
+          to={`/students/${studentId}?tab=health`}
+          className="font-medium text-primary hover:underline"
+        >
           {t('healthProfileLink')}
         </Link>
       </p>

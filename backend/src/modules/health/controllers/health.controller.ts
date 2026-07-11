@@ -7,6 +7,7 @@ import type {
 } from '../schemas/health.schemas';
 import {
   attachmentPresignSchema,
+  healthReportsQuerySchema,
   healthVisitListQuerySchema,
   medicineCatalogSuggestQuerySchema,
   recentVisitsQuerySchema,
@@ -71,7 +72,8 @@ export const healthController = {
 
   async getReports(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
-    const data = await healthService.getReports(tenantId, profileId);
+    const query = healthReportsQuerySchema.parse(req.query);
+    const data = await healthService.getReports(tenantId, profileId, query.days);
     res.json({ success: true, data });
   },
 

@@ -4,6 +4,10 @@
     "description": "Track positive, negative, and observation notes for students.",
     "tagline": "Guidance · Notes · Progress"
   },
+  "nav": {
+    "log": "Log",
+    "reports": "Reports"
+  },
   "title": "Student Remarks",
   "description": "Track positive, negative, and observation notes for students.",
   "loading": "Loading remarks…",
@@ -19,16 +23,27 @@
   "filters": {
     "allTypes": "All types",
     "allCategories": "All categories",
+    "allDays": "All time",
     "last7Days": "Last 7 days",
     "last30Days": "Last 30 days",
-    "last90Days": "Last 90 days"
+    "last90Days": "Last 90 days",
+    "resolvedStatus": "Status",
+    "open": "Open",
+    "resolved": "Resolved",
+    "allResolved": "All statuses"
   },
   "columns": {
     "date": "Date",
     "student": "Student",
     "type": "Type",
     "category": "Category",
-    "title": "Title"
+    "title": "Title",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "open": "Open",
+    "resolved": "Resolved"
   },
   "actions": {
     "downloadPdf": "Download PDF",
@@ -52,6 +67,26 @@
     "selectCategory": "Select category",
     "selectSeverity": "Select severity"
   },
+  "addDialog": {
+    "title": "Add remark",
+    "description": "Select a student and record a new remark.",
+    "student": "Student",
+    "studentPlaceholder": "Search by name or admission number…",
+    "success": "Remark added successfully"
+  },
+  "editDialog": {
+    "title": "Edit remark",
+    "description": "Update the remark details.",
+    "success": "Remark updated successfully"
+  },
+  "reports": {
+    "description": "Remark analytics by type for the selected period.",
+    "empty": "No remarks in this period yet.",
+    "byType": {
+      "title": "Remarks by type",
+      "description": "Positive, negative, and observation counts."
+    }
+  },
   "severity": {
     "low": "Low",
     "medium": "Medium",
@@ -61,7 +96,8 @@
   "byAuthor": "By {{name}}",
   "pagination": "Page {{page}} of {{totalPages}} ({{total}} total)",
   "errors": {
-    "createFailed": "Failed to create remark"
+    "createFailed": "Failed to create remark",
+    "updateFailed": "Failed to update remark"
   },
   "detail": {
     "tabs": {

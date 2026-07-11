@@ -8,7 +8,7 @@
   "empty": "No medical records for this student yet.",
   "ongoing": "Ongoing",
   "healthProfileHint": "For infirmary visits, medicines, and visit photos, see the",
-  "healthProfileLink": "health profile",
+  "healthProfileLink": "Health visits tab",
   "list": {
     "title": "Medical Records",
     "description": "View and filter student medical records across the school.",

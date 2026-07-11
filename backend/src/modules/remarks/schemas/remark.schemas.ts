@@ -21,6 +21,8 @@ export const createRemarkSchema = z
 
 export const updateRemarkSchema = z
   .object({
+    remarkTypeId: z.number().int().positive().optional(),
+    categoryId: z.number().int().positive().optional(),
     title: z.string().trim().min(10).max(255).optional(),
     description: z.string().trim().min(10).max(1000).optional(),
     severity: severitySchema.nullable().optional(),
@@ -38,10 +40,11 @@ export const remarkListQuerySchema = paginationSchema.extend({
   categoryId: z.coerce.number().int().positive().optional(),
   days: z.coerce.number().int().min(1).max(365).optional(),
   studentId: z.string().uuid().optional(),
+  resolvedStatus: z.enum(['open', 'resolved', 'all']).optional(),
 });
 
 export const remarkStatsQuerySchema = z.object({
-  days: z.coerce.number().int().min(1).max(365).default(7),
+  days: z.coerce.number().int().min(1).max(365).optional(),
 });
 
 export type CreateRemarkInput = z.infer<typeof createRemarkSchema>;

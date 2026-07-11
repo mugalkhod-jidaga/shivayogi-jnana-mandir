@@ -328,14 +328,14 @@ class HealthRepository extends BaseRepository {
     };
   }
 
-  async getReports(tenantId: number, assignedStandardIds?: number[]) {
+  async getReports(tenantId: number, assignedStandardIds?: number[], days?: number) {
     const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
     if (scopedIds && scopedIds.length === 0) {
       return {
         totalVisits: 0,
         visitsThisMonth: 0,
-        visitsThisWeek: 0,
         uniqueStudentsVisited: 0,
+        rangeDays: days ?? null,
         visitsBySeverity: [],
         visitsByDay: [],
         topIssueTypes: [],
@@ -346,29 +346,43 @@ class HealthRepository extends BaseRepository {
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const weekAgoStr = weekAgo.toISOString().slice(0, 10);
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 89);
-    const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().slice(0, 10);
+    const rangeDays = days && days > 0 ? days : null;
+    const rangeStart = rangeDays
+      ? (() => {
+          const d = new Date();
+          d.setDate(d.getDate() - (rangeDays - 1));
+          return d.toISOString().slice(0, 10);
+        })()
+      : null;
+
+    const trendDays = Math.min(rangeDays ?? 90, 90);
+
+    let visitsQuery = supabase
+      .from('health_visits')
+      .select(
+        'id, student_id, visit_date, issue_type, severity_id, severity:lookup_health_severities!inner(id, code, value)',
+      )
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null);
+
+    if (rangeStart) {
+      visitsQuery = visitsQuery.gte('visit_date', rangeStart);
+    }
+
+    let medicinesQuery = supabase
+      .from('health_visit_medicines')
+      .select('medicine_name, health_visit_id, health_visits!inner(tenant_id, visit_date, deleted_at)')
+      .eq('health_visits.tenant_id', tenantId)
+      .is('deleted_at', null);
+
+    if (rangeStart) {
+      medicinesQuery = medicinesQuery.gte('health_visits.visit_date', rangeStart);
+    }
 
     const [severitiesRes, visitsRes, medicinesRes, studentsRes] = await Promise.all([
       supabase.from('lookup_health_severities').select('id, code, value, sort_order').order('sort_order'),
-      supabase
-        .from('health_visits')
-        .select(
-          'id, student_id, visit_date, issue_type, severity_id, severity:lookup_health_severities!inner(id, code, value)',
-        )
-        .eq('tenant_id', tenantId)
-        .is('deleted_at', null)
-        .gte('visit_date', ninetyDaysAgoStr),
-      supabase
-        .from('health_visit_medicines')
-        .select('medicine_name, health_visit_id, health_visits!inner(tenant_id, visit_date, deleted_at)')
-        .eq('health_visits.tenant_id', tenantId)
-        .is('deleted_at', null)
-        .gte('health_visits.visit_date', ninetyDaysAgoStr),
+      visitsQuery,
+      medicinesQuery,
       supabase
         .from('students')
         .select('health_status')
@@ -395,7 +409,6 @@ class HealthRepository extends BaseRepository {
 
     const totalVisits = visitRows.length;
     const visitsThisMonth = visitRows.filter((v) => v.visit_date >= monthStart).length;
-    const visitsThisWeek = visitRows.filter((v) => v.visit_date >= weekAgoStr).length;
     const uniqueStudentsVisited = new Set(visitRows.map((v) => v.student_id)).size;
 
     const severityCounts = new Map<number, number>();
@@ -411,9 +424,9 @@ class HealthRepository extends BaseRepository {
     }));
 
     const dayCounts = new Map<string, number>();
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < trendDays; i++) {
       const d = new Date();
-      d.setDate(d.getDate() - (29 - i));
+      d.setDate(d.getDate() - (trendDays - 1 - i));
       dayCounts.set(d.toISOString().slice(0, 10), 0);
     }
     for (const row of visitRows) {
@@ -471,8 +484,8 @@ class HealthRepository extends BaseRepository {
     return {
       totalVisits,
       visitsThisMonth,
-      visitsThisWeek,
       uniqueStudentsVisited,
+      rangeDays,
       visitsBySeverity,
       visitsByDay,
       topIssueTypes,
@@ -487,10 +500,14 @@ class HealthRepository extends BaseRepository {
       return {
         totalStudents: 0,
         sickToday: 0,
+        currentlySick: 0,
+        currentlyRecovering: 0,
         urgentCount: 0,
         visitsThisWeek: 0,
         urgentAlerts: [],
         recentEntries: [],
+        sickStudents: [],
+        recoveringStudents: [],
       };
     }
 
@@ -501,18 +518,28 @@ class HealthRepository extends BaseRepository {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const [activeStudentsRes, urgentSeverityRes, visitsRes] = await Promise.all([
+    let statusStudentsQuery = supabase
+      .from('students')
+      .select(
+        'id, first_name, last_name, admission_number, health_status, current_enrollment:student_enrollments!left(is_current, deleted_at, standard:lookup_standards(value))',
+      )
+      .eq('tenant_id', tenantId)
+      .eq('status', 'Active')
+      .is('deleted_at', null)
+      .in('health_status', ['sick', 'recovering']);
+
+    if (scopedIds) {
+      statusStudentsQuery = statusStudentsQuery.in('id', scopedIds);
+    }
+
+    const [activeStudentsRes, urgentSeverityRes, visitsRes, statusStudentsRes] = await Promise.all([
       supabase
         .from('students')
         .select('id', { count: 'exact', head: true })
         .eq('tenant_id', tenantId)
         .eq('status', 'Active')
         .is('deleted_at', null),
-      supabase
-        .from('lookup_health_severities')
-        .select('id')
-        .eq('code', 'urgent')
-        .single(),
+      supabase.from('lookup_health_severities').select('id').eq('code', 'urgent').single(),
       supabase
         .from('health_visits')
         .select(VISIT_SELECT)
@@ -521,11 +548,13 @@ class HealthRepository extends BaseRepository {
         .gte('visit_date', weekAgoStr)
         .order('visit_date', { ascending: false })
         .order('created_at', { ascending: false }),
+      statusStudentsQuery,
     ]);
 
     if (activeStudentsRes.error) throw new AppError(500, activeStudentsRes.error.message);
     if (urgentSeverityRes.error) throw new AppError(500, urgentSeverityRes.error.message);
     if (visitsRes.error) throw new AppError(500, visitsRes.error.message);
+    if (statusStudentsRes.error) throw new AppError(500, statusStudentsRes.error.message);
 
     let visitRows = (visitsRes.data ?? []) as unknown as VisitRow[];
     if (scopedIds) {
@@ -538,9 +567,7 @@ class HealthRepository extends BaseRepository {
 
     const urgentSeverityId = urgentSeverityRes.data?.id as number;
     const urgentVisits = visitRows.filter((v) => v.severity.id === urgentSeverityId);
-    const urgentIn7Days = urgentVisits.filter(
-      (v) => new Date(v.visit_date) >= sevenDaysAgo,
-    );
+    const urgentIn7Days = urgentVisits.filter((v) => new Date(v.visit_date) >= sevenDaysAgo);
 
     const recentRows = visitRows.slice(0, 5);
     const urgentAlertRows = urgentIn7Days.slice(0, 5);
@@ -549,13 +576,52 @@ class HealthRepository extends BaseRepository {
       this.enrichVisits(urgentAlertRows, tenantId),
     ]);
 
+    type StatusStudentRow = {
+      id: string;
+      first_name: string;
+      last_name: string | null;
+      admission_number: string;
+      health_status: string | null;
+      current_enrollment:
+        | Array<{
+            is_current: boolean;
+            deleted_at: string | null;
+            standard: { value: string } | null;
+          }>
+        | null;
+    };
+
+    const mapStatusStudent = (row: StatusStudentRow) => {
+      const enrollment = (row.current_enrollment ?? []).find(
+        (e) => e.is_current && e.deleted_at == null,
+      );
+      return {
+        id: row.id,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        admissionNumber: row.admission_number,
+        healthStatus: (row.health_status as 'sick' | 'recovering') ?? 'sick',
+        standard: enrollment?.standard?.value ?? null,
+      };
+    };
+
+    const statusRows = (statusStudentsRes.data ?? []) as unknown as StatusStudentRow[];
+    const sickStudents = statusRows.filter((r) => r.health_status === 'sick').map(mapStatusStudent);
+    const recoveringStudents = statusRows
+      .filter((r) => r.health_status === 'recovering')
+      .map(mapStatusStudent);
+
     return {
       totalStudents: activeStudentsRes.count ?? 0,
       sickToday: todayStudentIds.size,
+      currentlySick: sickStudents.length,
+      currentlyRecovering: recoveringStudents.length,
       urgentCount: urgentIn7Days.length,
       visitsThisWeek: visitRows.length,
       urgentAlerts,
       recentEntries,
+      sickStudents,
+      recoveringStudents,
     };
   }
 

@@ -19,8 +19,13 @@ import { formatDobDisplay } from '@/lib/date';
 import { genderLabel } from '@/lib/enumLabels';
 
 function resolveBackNav(from: string | undefined, studentId: string, t: (key: string) => string) {
-  if (from?.startsWith('/health/visits') || from?.startsWith('/health/recent')) {
-    return { to: from, label: t('profile.backToVisits') };
+  if (
+    from === '/health' ||
+    from?.startsWith('/health?') ||
+    from?.startsWith('/health/visits') ||
+    from?.startsWith('/health/recent')
+  ) {
+    return { to: from && from.startsWith('/') ? from.replace(/^\/health\/(visits|recent)/, '/health') : '/health', label: t('profile.backToVisits') };
   }
   if (from?.startsWith('/health')) {
     return { to: from, label: t('profile.backToHealth') };
@@ -46,7 +51,7 @@ export function StudentHealthProfilePage() {
   });
   const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
-  if (!studentId) return <Navigate to="/health/visits" replace />;
+  if (!studentId) return <Navigate to="/health" replace />;
 
   if (studentLoading) {
     return <p className="text-muted-foreground">{t('loading')}</p>;
@@ -107,6 +112,11 @@ export function StudentHealthProfilePage() {
           )}
           <Button asChild className="bg-teal-600 hover:bg-teal-700">
             <Link to={`/health/record-visit?studentId=${student.id}`}>{t('profile.recordVisit')}</Link>
+          </Button>
+          <Button asChild variant="outline" className="border-white/40 bg-white/15 text-white hover:bg-white/25">
+            <Link to={`/students/${student.id}?tab=health`} state={{ from: `${location.pathname}${location.search}` }}>
+              {t('profile.fullStudentProfile')}
+            </Link>
           </Button>
         </div>
       </ModuleHeroBanner>

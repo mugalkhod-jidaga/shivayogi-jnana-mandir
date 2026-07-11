@@ -2,6 +2,8 @@ import type { TenantLookupOption } from '@/types/lookup';
 
 export type RemarkSeverity = 'low' | 'medium' | 'high';
 
+export type RemarkResolvedStatus = 'open' | 'resolved' | 'all';
+
 export type RemarkSummary = {
   id: string;
   studentId: string;
@@ -48,6 +50,7 @@ export type RemarkListFilters = {
   categoryId?: number;
   days?: number;
   studentId?: string;
+  resolvedStatus?: RemarkResolvedStatus;
 };
 
 export type CreateRemarkInput = {

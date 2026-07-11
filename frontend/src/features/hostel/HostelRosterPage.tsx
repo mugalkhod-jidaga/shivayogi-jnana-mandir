@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,8 @@ function countForFilter(roster: HostelDailyReportRow[], filterValue: string): nu
 
 export function HostelRosterPage() {
   const { t } = useTranslation('hostel');
+  const location = useLocation();
+  const fromPath = `${location.pathname}${location.search}`;
   const { date, blockFilter, status, search, sessionPeriod, setFilters } = useHostelDateFilters();
   const { hostelAttendanceStatuses } = usePhase2Lookups();
   const { data: daily, isLoading } = useHostelDailyReport(date, blockFilter, sessionPeriod);
@@ -165,6 +167,7 @@ export function HostelRosterPage() {
                       <td className="px-3 py-2">
                         <Link
                           to={`/students/${row.studentId}`}
+                          state={{ from: fromPath }}
                           className="font-mono text-primary underline underline-offset-2 hover:text-primary/80"
                         >
                           {row.admissionNumber}

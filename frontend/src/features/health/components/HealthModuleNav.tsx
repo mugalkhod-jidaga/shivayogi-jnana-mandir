@@ -1,23 +1,22 @@
-import { Activity, BarChart3, HeartPulse, History } from 'lucide-react';
+import { BarChart3, HeartPulse, History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ModuleNav } from '@/components/module-ui/ModuleNav';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const tabs = [
-  { to: '/health', labelKey: 'nav.dashboard', icon: Activity, end: true, permission: 'medical:read' },
+  {
+    to: '/health',
+    labelKey: 'nav.visits',
+    icon: History,
+    end: true,
+    permission: 'medical:read',
+  },
   {
     to: '/health/record-visit',
     labelKey: 'nav.recordVisit',
     icon: HeartPulse,
     end: false,
     permission: 'medical:create',
-  },
-  {
-    to: '/health/visits',
-    labelKey: 'nav.visits',
-    icon: History,
-    end: false,
-    permission: 'medical:read',
   },
   {
     to: '/health/reports',

@@ -1,11 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiFetchPaginated } from '@/lib/api';
-import type { CreateRemarkInput, RemarkListFilters, RemarkStats, RemarkSummary } from '@/types/remark';
+import type {
+  CreateRemarkInput,
+  RemarkListFilters,
+  RemarkSeverity,
+  RemarkStats,
+  RemarkSummary,
+} from '@/types/remark';
 
 export type UpdateRemarkInput = {
+  remarkTypeId?: number;
+  categoryId?: number;
   title?: string;
   description?: string;
-  severity?: RemarkSummary['severity'] | null;
+  severity?: RemarkSeverity | null;
   tags?: string[];
   isFlagged?: boolean;
   followUpNote?: string;
@@ -15,7 +23,7 @@ export type UpdateRemarkInput = {
 export const remarkKeys = {
   all: ['remarks'] as const,
   list: (filters: RemarkListFilters) => [...remarkKeys.all, 'list', filters] as const,
-  stats: (days: number) => [...remarkKeys.all, 'stats', days] as const,
+  stats: (days?: number) => [...remarkKeys.all, 'stats', days ?? 'all'] as const,
   byStudent: (studentId: string, filters: RemarkListFilters) =>
     [...remarkKeys.all, 'student', studentId, filters] as const,
 };
@@ -28,8 +36,9 @@ function buildQuery(filters: RemarkListFilters) {
   if (filters.search) params.set('search', filters.search);
   if (filters.typeId) params.set('typeId', String(filters.typeId));
   if (filters.categoryId) params.set('categoryId', String(filters.categoryId));
-  if (filters.days) params.set('days', String(filters.days));
+  if (filters.days !== undefined) params.set('days', String(filters.days));
   if (filters.studentId) params.set('studentId', filters.studentId);
+  if (filters.resolvedStatus) params.set('resolvedStatus', filters.resolvedStatus);
   return params.toString();
 }
 
@@ -54,17 +63,20 @@ export function useStudentRemarks(studentId: string | undefined, filters: Remark
   });
 }
 
-export function useRemarkStats(days = 7) {
+export function useRemarkStats(days?: number) {
   return useQuery({
     queryKey: remarkKeys.stats(days),
-    queryFn: () => apiFetch<RemarkStats>(`/remarks/stats?days=${days}`),
+    queryFn: () =>
+      apiFetch<RemarkStats>(
+        days !== undefined ? `/remarks/stats?days=${days}` : '/remarks/stats',
+      ),
   });
 }
 
-export function useCreateRemark(studentId: string) {
+export function useCreateRemark() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateRemarkInput) =>
+    mutationFn: ({ studentId, input }: { studentId: string; input: CreateRemarkInput }) =>
       apiFetch<RemarkSummary>(`/students/${studentId}/remarks`, {
         method: 'POST',
         body: JSON.stringify(input),

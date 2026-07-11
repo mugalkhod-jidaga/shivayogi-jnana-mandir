@@ -46,13 +46,26 @@ export type HealthStaffOption = {
   status: string;
 };
 
+export type HealthStatusStudent = {
+  id: string;
+  firstName: string;
+  lastName: string | null;
+  admissionNumber: string;
+  healthStatus: 'sick' | 'recovering';
+  standard: string | null;
+};
+
 export type HealthDashboardStats = {
   totalStudents: number;
   sickToday: number;
+  currentlySick: number;
+  currentlyRecovering: number;
   urgentCount: number;
   visitsThisWeek: number;
   urgentAlerts: HealthVisit[];
   recentEntries: HealthVisit[];
+  sickStudents: HealthStatusStudent[];
+  recoveringStudents: HealthStatusStudent[];
 };
 
 export type VisitAttachmentInput = {

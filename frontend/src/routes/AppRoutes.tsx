@@ -17,13 +17,14 @@ import { HostelReportsLayout } from '@/features/hostel/HostelReportsLayout';
 import { HostelSetupPage } from '@/features/hostel/HostelSetupPage';
 import { LookupsPage } from '@/features/lookups/LookupsPage';
 import { MedicalRecordsPage } from '@/features/medical/MedicalRecordsPage';
-import { HealthDashboardPage } from '@/features/health/HealthDashboardPage';
 import { HealthLayout } from '@/features/health/HealthLayout';
 import { HealthReportsPage } from '@/features/health/HealthReportsPage';
 import { RecordVisitPage } from '@/features/health/RecordVisitPage';
 import { VisitsPage } from '@/features/health/VisitsPage';
 import { StudentHealthProfilePage } from '@/features/health/StudentHealthProfilePage';
+import { RemarksLayout } from '@/features/remarks/RemarksLayout';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
+import { RemarksReportsPage } from '@/features/remarks/RemarksReportsPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
 import { StudentFormPage } from '@/features/students/StudentFormPage';
@@ -91,10 +92,13 @@ export function AppRoutes() {
             path="/remarks"
             element={
               <PermissionRoute permission="remarks:read">
-                <RemarksPage />
+                <RemarksLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<RemarksPage />} />
+            <Route path="reports" element={<RemarksReportsPage />} />
+          </Route>
           <Route
             path="/health/students/:studentId"
             element={
@@ -105,7 +109,7 @@ export function AppRoutes() {
           />
           <Route
             path="/health/dashboard"
-            element={<Navigate to="/health" replace />}
+            element={<Navigate to="/health/reports" replace />}
           />
           <Route
             path="/health"
@@ -115,7 +119,7 @@ export function AppRoutes() {
               </PermissionRoute>
             }
           >
-            <Route index element={<HealthDashboardPage />} />
+            <Route index element={<VisitsPage />} />
             <Route
               path="record-visit"
               element={
@@ -124,8 +128,8 @@ export function AppRoutes() {
                 </PermissionRoute>
               }
             />
-            <Route path="visits" element={<VisitsPage />} />
-            <Route path="recent" element={<Navigate to="/health/visits" replace />} />
+            <Route path="visits" element={<Navigate to="/health" replace />} />
+            <Route path="recent" element={<Navigate to="/health" replace />} />
             <Route path="reports" element={<HealthReportsPage />} />
           </Route>
           <Route

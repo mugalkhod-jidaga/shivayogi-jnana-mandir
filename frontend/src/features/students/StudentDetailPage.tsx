@@ -7,19 +7,21 @@ import { RequirePermission } from '@/components/RequirePermission';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { StudentDocumentsTab } from '@/features/documents/StudentDocumentsTab';
+import { StudentHealthVisitsTab } from '@/features/health/StudentHealthVisitsTab';
 import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
 import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
+import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useStudent } from '@/hooks/useStudent';
+import { useStudent, useStudentAvatarUrl } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
 import { genderLabel, parentStatusLabel, satsStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
 
 import { pdfExports } from '@/lib/pdfDownload';
 
-type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'medical';
+type TabKey = 'profile' | 'documents' | 'avatar' | 'remarks' | 'health' | 'medical';
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -30,22 +32,37 @@ function DetailField({ label, value }: { label: string; value: string | null | u
   );
 }
 
+function resolveBackNav(from: string | undefined, t: (key: string) => string) {
+  if (from?.startsWith('/remarks')) {
+    return { to: from, label: t('detail.actions.backToRemarks') };
+  }
+  if (from?.startsWith('/hostel')) {
+    return { to: from, label: t('detail.actions.backToHostel') };
+  }
+  if (from?.startsWith('/health')) {
+    return { to: from, label: t('detail.actions.backToHealth') };
+  }
+  return { to: from && from.startsWith('/') ? from : '/students', label: t('detail.actions.backToStudents') };
+}
+
 export function StudentDetailPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const backToStudents =
-    (location.state as { from?: string } | null)?.from ?? '/students';
+  const from = (location.state as { from?: string } | null)?.from;
+  const back = resolveBackNav(from, t);
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
+  const { data: avatarData } = useStudentAvatarUrl(id ?? '', Boolean(student?.photoUrl));
   const tabParam = searchParams.get('tab');
   const [tab, setTab] = useState<TabKey>(() => {
     if (
       tabParam === 'documents' ||
       tabParam === 'avatar' ||
       tabParam === 'remarks' ||
+      tabParam === 'health' ||
       tabParam === 'medical'
     ) {
       return tabParam;
@@ -54,6 +71,7 @@ export function StudentDetailPage() {
   });
   const { t: tRemarks } = useTranslation('remarks');
   const { t: tMedical } = useTranslation('medical');
+  const { t: tHealth } = useTranslation('health');
   const [pdfLoading, setPdfLoading] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
 
@@ -63,6 +81,7 @@ export function StudentDetailPage() {
       tabParam === 'avatar' ||
       tabParam === 'profile' ||
       tabParam === 'remarks' ||
+      tabParam === 'health' ||
       tabParam === 'medical'
     ) {
       setTab(tabParam);
@@ -82,6 +101,7 @@ export function StudentDetailPage() {
   const displayName = [student.firstName, student.lastName].filter(Boolean).join(' ');
   const enrollment = student.currentEnrollment;
   const emergencyContact = student.emergencyContacts[0];
+  const avatarUrl = avatarData?.downloadUrl;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'profile', label: t('detail.tabs.profile') },
@@ -92,7 +112,10 @@ export function StudentDetailPage() {
       ? [{ key: 'remarks' as const, label: tRemarks('detail.tabs.remarks') }]
       : []),
     ...(hasPermission('medical:read')
-      ? [{ key: 'medical' as const, label: tMedical('detail.tabs.medical') }]
+      ? [
+          { key: 'health' as const, label: tHealth('detail.tabs.health') },
+          { key: 'medical' as const, label: tMedical('detail.tabs.medical') },
+        ]
       : []),
     { key: 'avatar', label: t('detail.tabs.photo') },
   ];
@@ -100,9 +123,9 @@ export function StudentDetailPage() {
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
-        <Link to={backToStudents}>
+        <Link to={back.to}>
           <ArrowLeft className="size-4" />
-          {t('detail.actions.backToStudents')}
+          {back.label}
         </Link>
       </Button>
 
@@ -112,6 +135,18 @@ export function StudentDetailPage() {
         tagline={t('hero.tagline')}
         icon={GraduationCap}
         module="students"
+        logoSlot={
+          avatarUrl ? (
+            <img src={avatarUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <StudentInitialsAvatar
+              firstName={student.firstName}
+              lastName={student.lastName}
+              size="lg"
+              className="size-full rounded-none border-0 text-base sm:text-lg"
+            />
+          )
+        }
       >
         <div className="flex flex-wrap gap-2">
           <StatusBadge status={student.status} />
@@ -125,7 +160,7 @@ export function StudentDetailPage() {
           </RequirePermission>
           <RequirePermission permission="medical:read">
             <Button asChild variant="secondary" size="sm" className="bg-white/20 text-white hover:bg-white/30">
-              <Link to={`/health/students/${student.id}`}>
+              <Link to={`/students/${student.id}?tab=health`}>
                 <HeartPulse className="size-4" />
                 {t('detail.actions.healthProfile')}
               </Link>
@@ -320,6 +355,10 @@ export function StudentDetailPage() {
 
       {tab === 'remarks' && hasPermission('remarks:read') && (
         <StudentRemarksTab studentId={student.id} />
+      )}
+
+      {tab === 'health' && hasPermission('medical:read') && (
+        <StudentHealthVisitsTab studentId={student.id} student={student} />
       )}
 
       {tab === 'medical' && hasPermission('medical:read') && (

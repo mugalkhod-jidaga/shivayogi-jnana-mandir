@@ -1,5 +1,7 @@
-import { Activity, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
+import { Activity, AlertTriangle, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Bar,
   BarChart,
@@ -17,9 +19,17 @@ import {
 import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
 import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
+import { Select } from '@/components/ui/select';
+import { HealthStatusBadge } from '@/features/health/components/HealthStatusBadge';
+import { SeverityBadge } from '@/features/health/components/SeverityBadge';
+import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
+import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
+import { useHealthDashboardStats, useHealthVisit } from '@/hooks/useHealth';
 import { useHealthReports } from '@/hooks/useHealthReports';
 import { chartColor } from '@/lib/chartColors';
 import { formatDobDisplay } from '@/lib/date';
+import { cn } from '@/lib/utils';
+import type { HealthStatusStudent } from '@/types/health';
 
 const SEVERITY_COLORS: Record<string, string> = {
   normal: '#16a34a',
@@ -47,9 +57,59 @@ function ChartTooltip({
   );
 }
 
+function StatusStudentList({
+  students,
+  emptyLabel,
+  fromPath,
+}: {
+  students: HealthStatusStudent[];
+  emptyLabel: string;
+  fromPath: string;
+}) {
+  if (students.length === 0) {
+    return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
+  }
+
+  return (
+    <ul className="divide-y rounded-lg border">
+      {students.map((student) => (
+        <li key={student.id}>
+          <Link
+            to={`/health/students/${student.id}`}
+            state={{ from: fromPath }}
+            className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm transition-colors hover:bg-muted/50"
+          >
+            <span className="font-medium">
+              {[student.firstName, student.lastName].filter(Boolean).join(' ')}
+              <span className="ml-2 font-mono text-xs text-muted-foreground">
+                {student.admissionNumber}
+              </span>
+            </span>
+            <span className="flex items-center gap-2">
+              {student.standard && (
+                <span className="text-xs text-muted-foreground">{student.standard}</span>
+              )}
+              <HealthStatusBadge status={student.healthStatus} />
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function HealthReportsPage() {
   const { t } = useTranslation('health');
-  const { data, isLoading, isError } = useHealthReports();
+  const location = useLocation();
+  const fromPath = `${location.pathname}${location.search}`;
+  const [days, setDays] = useState('30');
+  const [statusList, setStatusList] = useState<'sick' | 'recovering' | null>('sick');
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
+
+  const daysNum = days ? Number(days) : undefined;
+  const { data: dash, isLoading: dashLoading, isError: dashError } = useHealthDashboardStats();
+  const { data, isLoading, isError } = useHealthReports(daysNum);
+  const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
   const severityChartData =
     data?.visitsBySeverity
@@ -76,17 +136,167 @@ export function HealthReportsPage() {
       shortDate: formatDobDisplay(row.date).slice(0, 5),
     })) ?? [];
 
+  const listStudents =
+    statusList === 'sick'
+      ? (dash?.sickStudents ?? [])
+      : statusList === 'recovering'
+        ? (dash?.recoveringStudents ?? [])
+        : [];
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
+        <div className="w-40">
+          <label className="mb-1 block text-xs text-muted-foreground">{t('reports.period')}</label>
+          <Select value={days} onChange={(e) => setDays(e.target.value)}>
+            <option value="7">{t('reports.periodOptions.7')}</option>
+            <option value="30">{t('reports.periodOptions.30')}</option>
+            <option value="90">{t('reports.periodOptions.90')}</option>
+            <option value="">{t('reports.periodOptions.all')}</option>
+          </Select>
+        </div>
+      </div>
 
+      {dashError && <p className="text-destructive">{t('dashboard.error')}</p>}
       {isError && (
         <PlaceholderPanel title={t('reports.errorTitle')} description={t('reports.errorDescription')} />
       )}
 
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <button
+          type="button"
+          className={cn(
+            'rounded-xl text-left transition ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            statusList === 'sick' && 'ring-2 ring-rose-400',
+          )}
+          onClick={() => setStatusList((v) => (v === 'sick' ? null : 'sick'))}
+        >
+          <ModuleStatCard
+            title={t('dashboard.kpis.currentlySick')}
+            value={dashLoading ? '…' : (dash?.currentlySick ?? 0)}
+            description={t('dashboard.kpis.clickToList')}
+            icon={Activity}
+            accent="rose"
+          />
+        </button>
+        <button
+          type="button"
+          className={cn(
+            'rounded-xl text-left transition ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            statusList === 'recovering' && 'ring-2 ring-amber-400',
+          )}
+          onClick={() => setStatusList((v) => (v === 'recovering' ? null : 'recovering'))}
+        >
+          <ModuleStatCard
+            title={t('dashboard.kpis.currentlyRecovering')}
+            value={dashLoading ? '…' : (dash?.currentlyRecovering ?? 0)}
+            description={t('dashboard.kpis.clickToList')}
+            icon={Stethoscope}
+            accent="saffron"
+          />
+        </button>
+        <ModuleStatCard
+          title={t('dashboard.kpis.urgentWeek')}
+          value={dashLoading ? '…' : (dash?.urgentCount ?? 0)}
+          icon={AlertTriangle}
+          accent="rose"
+        />
+        <ModuleStatCard
+          title={t('dashboard.kpis.totalStudents')}
+          value={dashLoading ? '…' : (dash?.totalStudents ?? 0)}
+          icon={Users}
+          accent="sky"
+        />
+      </section>
+
+      {statusList && (
+        <ModuleSectionCard
+          title={
+            statusList === 'sick'
+              ? t('dashboard.sickListTitle')
+              : t('dashboard.recoveringListTitle')
+          }
+          description={t('dashboard.statusListHelp')}
+        >
+          <StatusStudentList
+            students={listStudents}
+            emptyLabel={
+              statusList === 'sick' ? t('dashboard.noSick') : t('dashboard.noRecovering')
+            }
+            fromPath={fromPath}
+          />
+        </ModuleSectionCard>
+      )}
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <ModuleSectionCard
+          title={t('dashboard.urgentAlerts')}
+          headerClassName="from-rose-50/90 to-pink-50/60 dark:from-rose-950/25 dark:to-pink-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md">
+              <AlertTriangle className="size-5" />
+            </div>
+          }
+        >
+          {!dashLoading && (dash?.urgentAlerts.length ?? 0) === 0 && (
+            <p className="text-sm text-muted-foreground">{t('dashboard.noUrgent')}</p>
+          )}
+          <div className="space-y-3">
+            {(dash?.urgentAlerts ?? []).map((visit) => (
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-lg border border-rose-100 bg-rose-50/50 p-3 text-left text-sm transition-colors hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{formatStudentName(visit)}</span>
+                  <span className="text-muted-foreground">{visit.visitDate}</span>
+                  <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
+                </div>
+                <p className="mt-1">{visit.issueType}</p>
+                <p className="line-clamp-2 text-muted-foreground">{visit.symptoms}</p>
+              </button>
+            ))}
+          </div>
+        </ModuleSectionCard>
+
+        <ModuleSectionCard
+          title={t('dashboard.recentEntries')}
+          headerClassName="from-teal-50/90 to-emerald-50/60 dark:from-teal-950/25 dark:to-emerald-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-md">
+              <Stethoscope className="size-5" />
+            </div>
+          }
+        >
+          {!dashLoading && (dash?.recentEntries.length ?? 0) === 0 && (
+            <p className="text-sm text-muted-foreground">{t('dashboard.noRecent')}</p>
+          )}
+          <div className="space-y-3">
+            {(dash?.recentEntries ?? []).map((visit) => (
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-lg border p-3 text-left text-sm transition-colors hover:bg-teal-50/50 dark:hover:bg-teal-950/20"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{formatStudentName(visit)}</span>
+                  <span className="text-muted-foreground">{visit.visitDate}</span>
+                  <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
+                </div>
+                <p className="mt-1">{visit.issueType}</p>
+              </button>
+            ))}
+          </div>
+        </ModuleSectionCard>
+      </section>
+
       {!isError && (
         <>
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <ModuleStatCard
               title={t('reports.kpis.totalVisits')}
               value={isLoading ? '…' : (data?.totalVisits ?? 0)}
@@ -99,12 +309,6 @@ export function HealthReportsPage() {
               value={isLoading ? '…' : (data?.visitsThisMonth ?? 0)}
               icon={TrendingUp}
               accent="indigo"
-            />
-            <ModuleStatCard
-              title={t('reports.kpis.visitsWeek')}
-              value={isLoading ? '…' : (data?.visitsThisWeek ?? 0)}
-              icon={Activity}
-              accent="saffron"
             />
             <ModuleStatCard
               title={t('reports.kpis.uniqueStudents')}
@@ -277,7 +481,14 @@ export function HealthReportsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={medicineChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                        <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={64} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 10 }}
+                          interval={0}
+                          angle={-20}
+                          textAnchor="end"
+                          height={64}
+                        />
                         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={28} />
                         <Tooltip content={<ChartTooltip />} />
                         <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={40}>
@@ -312,6 +523,12 @@ export function HealthReportsPage() {
           </section>
         </>
       )}
+
+      <VisitDetailModal
+        visit={selectedVisit ?? null}
+        open={Boolean(selectedVisitId && selectedVisit)}
+        onClose={() => setSelectedVisitId(null)}
+      />
     </div>
   );
 }
