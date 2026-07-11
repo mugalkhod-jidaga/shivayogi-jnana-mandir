@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { HeartPulse, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
@@ -10,7 +10,11 @@ import { Select } from '@/components/ui/select';
 import { SeverityBadge } from '@/features/health/components/SeverityBadge';
 import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
 import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
-import { useHealthVisit, useHealthVisitsList } from '@/hooks/useHealth';
+import {
+  useHealthVisit,
+  useHealthVisitsList,
+  useUpdateStudentHealthStatus,
+} from '@/hooks/useHealth';
 import { useHealthLookups } from '@/hooks/useHealthLookups';
 
 export function VisitsPage() {
@@ -20,6 +24,9 @@ export function VisitsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { severities } = useHealthLookups();
   const returnTo = `${location.pathname}${location.search}`;
+  const updateHealthStatus = useUpdateStudentHealthStatus();
+  const [recoveringId, setRecoveringId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const page = Number(searchParams.get('page') ?? '1');
   const searchParam = searchParams.get('search') ?? '';
@@ -88,15 +95,37 @@ export function VisitsPage() {
     setSearchParams(next);
   };
 
+  const handleMarkRecovered = async (studentId: string) => {
+    setActionError(null);
+    setRecoveringId(studentId);
+    try {
+      await updateHealthStatus.mutateAsync({ studentId, healthStatus: 'healthy' });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : t('profile.markRecoveredFailed'));
+    } finally {
+      setRecoveringId(null);
+    }
+  };
+
+  const recordVisitButton = (
+    <RequirePermission permission="medical:create">
+      <Button asChild size="lg" className="bg-teal-600 shadow-md hover:bg-teal-700">
+        <Link to="/health/record-visit" className="gap-2">
+          <HeartPulse className="size-5" />
+          {t('visits.recordVisit')}
+        </Link>
+      </Button>
+    </RequirePermission>
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{t('visits.description')}</p>
-        <RequirePermission permission="medical:create">
-          <Button asChild className="bg-teal-600 hover:bg-teal-700">
-            <Link to="/health/record-visit">{t('visits.recordVisit')}</Link>
-          </Button>
-        </RequirePermission>
+    <div className="space-y-6 pb-24 sm:pb-0">
+      <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-3 border-b border-teal-100/80 bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:border-teal-900/40">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">{t('visits.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('visits.description')}</p>
+        </div>
+        <div className="hidden sm:block">{recordVisitButton}</div>
       </div>
 
       <form
@@ -154,6 +183,7 @@ export function VisitsPage() {
       </form>
 
       {isError && <p className="text-sm text-destructive">{t('visits.error')}</p>}
+      {actionError && <p className="text-sm text-destructive">{actionError}</p>}
 
       <div className="overflow-x-auto rounded-xl border border-teal-100 shadow-sm dark:border-teal-900/30">
         <table className="w-full min-w-[720px] text-sm">
@@ -164,7 +194,7 @@ export function VisitsPage() {
               <th className="px-4 py-3 font-medium">{t('visits.columns.severity')}</th>
               <th className="px-4 py-3 font-medium">{t('visits.columns.issue')}</th>
               <th className="px-4 py-3 font-medium">{t('visits.columns.medicines')}</th>
-              <th className="px-4 py-3 font-medium">{t('visits.columns.photos')}</th>
+              <th className="px-4 py-3 font-medium">{t('visits.columns.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -193,7 +223,10 @@ export function VisitsPage() {
 
             {visits.map((visit) => {
               const medicineSummary = visit.medicines.map((m) => m.medicineName).join(', ');
-              const photoCount = visit.attachments?.length ?? 0;
+              const canRecover =
+                visit.student.healthStatus === 'sick' || visit.student.healthStatus === 'recovering';
+              const isRecovering = recoveringId === visit.studentId;
+
               return (
                 <tr
                   key={visit.id}
@@ -203,15 +236,22 @@ export function VisitsPage() {
                   <td className="whitespace-nowrap px-4 py-3">{visit.visitDate}</td>
                   <td className="px-4 py-3">
                     <Link
-                      to={`/health/students/${visit.studentId}`}
+                      to={`/students/${visit.studentId}?tab=health`}
                       state={{ from: returnTo }}
                       className="font-medium text-primary hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {formatStudentName(visit)}
                     </Link>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {visit.student.admissionNumber}
+                    <p className="mt-0.5">
+                      <Link
+                        to={`/health/students/${visit.studentId}`}
+                        state={{ from: returnTo }}
+                        className="font-mono text-xs text-muted-foreground hover:text-primary hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {visit.student.admissionNumber}
+                      </Link>
                     </p>
                   </td>
                   <td className="px-4 py-3">
@@ -226,8 +266,24 @@ export function VisitsPage() {
                       {medicineSummary || '—'}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {photoCount > 0 ? t('visits.photoCount', { count: photoCount }) : '—'}
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    {canRecover ? (
+                      <RequirePermission permission="medical:create">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isRecovering || updateHealthStatus.isPending}
+                          onClick={() => void handleMarkRecovered(visit.studentId)}
+                        >
+                          {isRecovering
+                            ? t('profile.markingRecovered')
+                            : t('profile.markRecovered')}
+                        </Button>
+                      </RequirePermission>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               );
@@ -267,6 +323,10 @@ export function VisitsPage() {
           </div>
         </div>
       )}
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-teal-200/60 bg-background/95 p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur sm:hidden dark:border-teal-900/50">
+        <div className="[&_a]:w-full [&_button]:w-full">{recordVisitButton}</div>
+      </div>
 
       <VisitDetailModal
         visit={selectedVisit ?? null}

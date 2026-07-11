@@ -83,6 +83,7 @@
   "visits": {
     "title": "Visits",
     "description": "All infirmary visits, newest first. Filter by student, severity, class, or date.",
+    "title": "Visits",
     "recordVisit": "Record visit",
     "searchPlaceholder": "Search student, admission #, issue, or symptoms…",
     "allSeverities": "All severities",
@@ -101,7 +102,7 @@
       "severity": "Severity",
       "issue": "Issue",
       "medicines": "Medicines",
-      "photos": "Photos"
+      "actions": "Actions"
     }
   },
   "dashboard": {
