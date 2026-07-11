@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { LogOut } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,7 +38,7 @@ export function Layout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
         <div className="border-b px-6 py-5">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 rounded-lg outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring">
             <img
               src="/assets/logo.png"
               alt={t('appName')}
@@ -50,7 +50,7 @@ export function Layout() {
               <p className="text-sm font-semibold leading-tight">{t('appName')}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">{t('appSubtitle')}</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
@@ -77,7 +77,10 @@ export function Layout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b bg-card px-4 py-3 md:px-6">
-          <div className="flex min-w-0 items-center gap-2 md:hidden">
+          <Link
+            to="/"
+            className="flex min-w-0 items-center gap-2 rounded-md outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+          >
             <img
               src="/assets/logo.png"
               alt=""
@@ -86,12 +89,9 @@ export function Layout() {
               height={32}
             />
             <p className="truncate text-sm font-semibold">{t('appName')}</p>
-          </div>
+          </Link>
 
           <div className="ml-auto flex items-center gap-3">
-            {/* <img
-              src="/assets/banner.jpg"
-            /> */}
             <LanguageToggle />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">{displayName}</p>

@@ -92,7 +92,7 @@ class RemarkRepository extends BaseRepository {
     query: RemarkListQuery,
     assignedStandardIds?: number[],
   ) {
-    const { page, limit, search, typeId, categoryId, days, studentId } = query;
+    const { page, limit, search, typeId, categoryId, days, studentId, resolvedStatus } = query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
 
@@ -116,6 +116,11 @@ class RemarkRepository extends BaseRepository {
       const since = new Date();
       since.setDate(since.getDate() - days);
       dbQuery = dbQuery.gte('created_at', since.toISOString());
+    }
+    if (resolvedStatus === 'open') {
+      dbQuery = dbQuery.is('resolved_at', null);
+    } else if (resolvedStatus === 'resolved') {
+      dbQuery = dbQuery.not('resolved_at', 'is', null);
     }
     if (search) {
       dbQuery = dbQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
@@ -179,10 +184,7 @@ class RemarkRepository extends BaseRepository {
     return row;
   }
 
-  async stats(tenantId: number, days: number, assignedStandardIds?: number[]) {
-    const since = new Date();
-    since.setDate(since.getDate() - days);
-
+  async stats(tenantId: number, days: number | undefined, assignedStandardIds?: number[]) {
     const scopedIds = await this.scopedStudentIds(tenantId, assignedStandardIds);
     if (scopedIds && scopedIds.length === 0) {
       return { total: 0, positive: 0, negative: 0, observation: 0 };
@@ -192,8 +194,13 @@ class RemarkRepository extends BaseRepository {
       .from('student_remarks')
       .select(`id, lookup_remark_types!inner ( value )`)
       .eq('tenant_id', tenantId)
-      .is('deleted_at', null)
-      .gte('created_at', since.toISOString());
+      .is('deleted_at', null);
+
+    if (days) {
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+      dbQuery = dbQuery.gte('created_at', since.toISOString());
+    }
 
     if (scopedIds) dbQuery = dbQuery.in('student_id', scopedIds);
 

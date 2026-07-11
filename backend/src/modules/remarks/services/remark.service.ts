@@ -40,7 +40,7 @@ export const remarkService = {
     return { data: serialized, meta };
   },
 
-  async stats(tenantId: number, days: number, userId: string) {
+  async stats(tenantId: number, days: number | undefined, userId: string) {
     const assignedStandardIds = await resolveStandardScope(userId);
     return remarkRepository.stats(tenantId, days, assignedStandardIds);
   },
@@ -90,23 +90,54 @@ export const remarkService = {
 
     await assertStudentIdAccess(existing.student_id, tenantId, userId);
 
-    const isOwner = existing.created_by === userId;
+    const canEdit = permissions.includes('remarks:edit');
     const canManage = permissions.includes('remarks:manage');
-    if (!canManage && !isOwner) throw new AppError(403, 'Permission denied');
-    if (!canManage && isOwner) {
-      const created = new Date(existing.created_at).getTime();
-      if (Date.now() - created > 24 * 60 * 60 * 1000) {
-        throw new AppError(403, 'Edit window expired');
+    const isOwner = existing.created_by === userId;
+
+    const keys = Object.keys(input);
+    const isResolveOnly = keys.every((key) => key === 'resolved' || key === 'followUpNote');
+
+    if (isResolveOnly && input.resolved !== undefined) {
+      if (!canEdit && !canManage) throw new AppError(403, 'Permission denied');
+    } else {
+      if (!canManage && !isOwner) throw new AppError(403, 'Permission denied');
+      if (!canManage && isOwner) {
+        if (!canEdit) throw new AppError(403, 'Permission denied');
+        const created = new Date(existing.created_at).getTime();
+        if (Date.now() - created > 24 * 60 * 60 * 1000) {
+          throw new AppError(403, 'Edit window expired');
+        }
+      }
+    }
+
+    let nextTypeId = input.remarkTypeId ?? existing.remark_type_id;
+    let nextCategoryId = input.categoryId ?? existing.category_id;
+    let nextSeverity = input.severity !== undefined ? input.severity : existing.severity;
+
+    if (input.remarkTypeId !== undefined || input.categoryId !== undefined || input.severity !== undefined) {
+      const remarkType = await validateRemarkLookups(tenantId, nextTypeId, nextCategoryId);
+      if (remarkType.value === 'Negative') {
+        if (!nextSeverity) throw new AppError(400, 'Severity is required for negative remarks');
+      } else {
+        nextSeverity = null;
       }
     }
 
     const changes: Record<string, unknown> = {};
+    if (input.remarkTypeId !== undefined) changes.remark_type_id = nextTypeId;
+    if (input.categoryId !== undefined) changes.category_id = nextCategoryId;
     if (input.title !== undefined) changes.title = input.title;
     if (input.description !== undefined) changes.description = input.description;
     if (input.tags !== undefined) changes.tags = input.tags;
     if (input.isFlagged !== undefined) changes.is_flagged = input.isFlagged;
     if (input.followUpNote !== undefined) changes.follow_up_note = input.followUpNote;
-    if (input.severity !== undefined) changes.severity = input.severity;
+    if (
+      input.severity !== undefined ||
+      input.remarkTypeId !== undefined ||
+      input.categoryId !== undefined
+    ) {
+      changes.severity = nextSeverity;
+    }
     if (input.resolved === true) changes.resolved_at = new Date().toISOString();
     if (input.resolved === false) changes.resolved_at = null;
 

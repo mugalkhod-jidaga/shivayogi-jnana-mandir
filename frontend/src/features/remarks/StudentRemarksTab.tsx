@@ -16,8 +16,14 @@ function formatName(firstName: string, lastName: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
 }
 
-function canEditRemark(remark: RemarkSummary, profileId: string | undefined, canManage: boolean) {
+function canEditRemark(
+  remark: RemarkSummary,
+  profileId: string | undefined,
+  canManage: boolean,
+  canEditPerm: boolean,
+) {
   if (canManage) return true;
+  if (!canEditPerm) return false;
   if (!profileId || remark.createdBy.id !== profileId) return false;
   const created = new Date(remark.createdAt).getTime();
   return Date.now() - created <= 24 * 60 * 60 * 1000;
@@ -33,8 +39,10 @@ export function StudentRemarksTab({ studentId }: Props) {
   const { data: me } = useMe();
   const { hasPermission } = usePermissions();
   const canManage = hasPermission('remarks:manage');
+  const canEditPerm = hasPermission('remarks:edit');
+  const canResolve = canEditPerm || canManage;
   const { data, isLoading } = useStudentRemarks(studentId);
-  const createRemark = useCreateRemark(studentId);
+  const createRemark = useCreateRemark();
   const updateRemark = useUpdateRemark();
 
   const [showForm, setShowForm] = useState(false);
@@ -80,6 +88,8 @@ export function StudentRemarksTab({ studentId }: Props) {
         await updateRemark.mutateAsync({
           id: editingId,
           input: {
+            remarkTypeId: Number(remarkTypeId),
+            categoryId: Number(categoryId),
             title,
             description,
             severity: selectedType?.value === 'Negative' ? severity || null : null,
@@ -91,11 +101,14 @@ export function StudentRemarksTab({ studentId }: Props) {
       }
 
       await createRemark.mutateAsync({
-        remarkTypeId: Number(remarkTypeId),
-        categoryId: Number(categoryId),
-        title,
-        description,
-        severity: selectedType?.value === 'Negative' && severity ? severity : undefined,
+        studentId,
+        input: {
+          remarkTypeId: Number(remarkTypeId),
+          categoryId: Number(categoryId),
+          title,
+          description,
+          severity: selectedType?.value === 'Negative' && severity ? severity : undefined,
+        },
       });
       setShowForm(false);
       resetForm();
@@ -132,32 +145,30 @@ export function StudentRemarksTab({ studentId }: Props) {
 
       {(showForm || editingId) && (
         <form className="space-y-4 rounded-lg border p-4" onSubmit={(e) => void handleSubmit(e)}>
-          {!editingId && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label>{t('form.type')}</Label>
-                <Select value={remarkTypeId} onChange={(e) => setRemarkTypeId(e.target.value)} required>
-                  <option value="">{t('form.selectType')}</option>
-                  {remarkTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.value}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <Label>{t('form.category')}</Label>
-                <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-                  <option value="">{t('form.selectCategory')}</option>
-                  {remarkCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.value}
-                    </option>
-                  ))}
-                </Select>
-              </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label>{t('form.type')}</Label>
+              <Select value={remarkTypeId} onChange={(e) => setRemarkTypeId(e.target.value)} required>
+                <option value="">{t('form.selectType')}</option>
+                {remarkTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.value}
+                  </option>
+                ))}
+              </Select>
             </div>
-          )}
+            <div>
+              <Label>{t('form.category')}</Label>
+              <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+                <option value="">{t('form.selectCategory')}</option>
+                {remarkCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.value}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
           {selectedType?.value === 'Negative' && (
             <div>
               <Label>{t('form.severity')}</Label>
@@ -218,13 +229,13 @@ export function StudentRemarksTab({ studentId }: Props) {
                 )}
               </div>
               <div className="flex gap-1">
-                {canEditRemark(remark, me?.id, canManage) && hasPermission('remarks:edit') && (
+                {canEditRemark(remark, me?.id, canManage, canEditPerm) && (
                   <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(remark)}>
                     <Pencil className="size-4" />
                     {t('actions.edit')}
                   </Button>
                 )}
-                {canManage && (
+                {canResolve && (
                   <Button
                     type="button"
                     variant="ghost"

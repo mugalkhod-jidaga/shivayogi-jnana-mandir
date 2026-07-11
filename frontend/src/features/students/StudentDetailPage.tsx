@@ -11,8 +11,9 @@ import { StudentMedicalTab } from '@/features/medical/StudentMedicalTab';
 import { StudentRemarksTab } from '@/features/remarks/StudentRemarksTab';
 import { DeactivateStudentDialog } from '@/features/students/components/DeactivateStudentDialog';
 import { StudentAvatarPanel } from '@/features/students/components/StudentAvatarPanel';
+import { StudentInitialsAvatar } from '@/features/students/components/StudentInitialsAvatar';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useStudent } from '@/hooks/useStudent';
+import { useStudent, useStudentAvatarUrl } from '@/hooks/useStudent';
 import { formatDobDisplay } from '@/lib/date';
 import { genderLabel, parentStatusLabel, satsStatusLabel } from '@/lib/enumLabels';
 import { cn } from '@/lib/utils';
@@ -30,16 +31,24 @@ function DetailField({ label, value }: { label: string; value: string | null | u
   );
 }
 
+function resolveBackNav(from: string | undefined, t: (key: string) => string) {
+  if (from?.startsWith('/remarks')) {
+    return { to: from, label: t('detail.actions.backToRemarks') };
+  }
+  return { to: from && from.startsWith('/') ? from : '/students', label: t('detail.actions.backToStudents') };
+}
+
 export function StudentDetailPage() {
   const { t } = useTranslation('students');
   const { t: tc } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const backToStudents =
-    (location.state as { from?: string } | null)?.from ?? '/students';
+  const from = (location.state as { from?: string } | null)?.from;
+  const back = resolveBackNav(from, t);
   const { hasPermission } = usePermissions();
   const { data: student, isLoading, isError } = useStudent(id);
+  const { data: avatarData } = useStudentAvatarUrl(id ?? '', Boolean(student?.photoUrl));
   const tabParam = searchParams.get('tab');
   const [tab, setTab] = useState<TabKey>(() => {
     if (
@@ -82,6 +91,7 @@ export function StudentDetailPage() {
   const displayName = [student.firstName, student.lastName].filter(Boolean).join(' ');
   const enrollment = student.currentEnrollment;
   const emergencyContact = student.emergencyContacts[0];
+  const avatarUrl = avatarData?.downloadUrl;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'profile', label: t('detail.tabs.profile') },
@@ -100,9 +110,9 @@ export function StudentDetailPage() {
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit gap-1.5 px-2">
-        <Link to={backToStudents}>
+        <Link to={back.to}>
           <ArrowLeft className="size-4" />
-          {t('detail.actions.backToStudents')}
+          {back.label}
         </Link>
       </Button>
 
@@ -112,6 +122,18 @@ export function StudentDetailPage() {
         tagline={t('hero.tagline')}
         icon={GraduationCap}
         module="students"
+        logoSlot={
+          avatarUrl ? (
+            <img src={avatarUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <StudentInitialsAvatar
+              firstName={student.firstName}
+              lastName={student.lastName}
+              size="lg"
+              className="size-full rounded-none border-0 text-base sm:text-lg"
+            />
+          )
+        }
       >
         <div className="flex flex-wrap gap-2">
           <StatusBadge status={student.status} />

@@ -23,6 +23,8 @@ type ModuleHeroBannerProps = {
   gradientClassName?: string;
   imageSrc?: string | ResponsiveImage;
   logoSrc?: string;
+  /** Replaces the default brand logo square (e.g. student photo / initials). */
+  logoSlot?: ReactNode;
   showInstitution?: boolean;
   /**
    * `brand` = designed institutional banner (lighter overlay, taller crop).
@@ -85,6 +87,7 @@ export function ModuleHeroBanner({
   gradientClassName,
   imageSrc,
   logoSrc = BRAND.logo,
+  logoSlot,
   showInstitution,
   variant,
 }: ModuleHeroBannerProps) {
@@ -98,6 +101,7 @@ export function ModuleHeroBanner({
     photoSrc === BRAND.banner ||
     (variant !== 'photo' && BRAND_BANNER_MODULES.has(module));
   const showName = showInstitution ?? !isBrandBanner;
+  const showLogoBox = Boolean(Icon || logoSlot);
 
   return (
     <div
@@ -134,15 +138,17 @@ export function ModuleHeroBanner({
 
       <div className="relative flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6">
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-          {Icon && (
-            <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-1.5 shadow-md ring-1 ring-white/40 sm:size-14">
-              <img
-                src={logoSrc}
-                alt={t('appName')}
-                className="size-full object-contain"
-                width={48}
-                height={48}
-              />
+          {showLogoBox && (
+            <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/95 shadow-md ring-1 ring-white/40 sm:size-14">
+              {logoSlot ?? (
+                <img
+                  src={logoSrc}
+                  alt={t('appName')}
+                  className="size-full object-contain p-1.5"
+                  width={48}
+                  height={48}
+                />
+              )}
             </div>
           )}
           <div className="min-w-0">

@@ -23,7 +23,9 @@ import { HealthReportsPage } from '@/features/health/HealthReportsPage';
 import { RecordVisitPage } from '@/features/health/RecordVisitPage';
 import { VisitsPage } from '@/features/health/VisitsPage';
 import { StudentHealthProfilePage } from '@/features/health/StudentHealthProfilePage';
+import { RemarksLayout } from '@/features/remarks/RemarksLayout';
 import { RemarksPage } from '@/features/remarks/RemarksPage';
+import { RemarksReportsPage } from '@/features/remarks/RemarksReportsPage';
 import { StaffPage } from '@/features/staff/StaffPage';
 import { StudentDetailPage } from '@/features/students/StudentDetailPage';
 import { StudentFormPage } from '@/features/students/StudentFormPage';
@@ -91,10 +93,13 @@ export function AppRoutes() {
             path="/remarks"
             element={
               <PermissionRoute permission="remarks:read">
-                <RemarksPage />
+                <RemarksLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<RemarksPage />} />
+            <Route path="reports" element={<RemarksReportsPage />} />
+          </Route>
           <Route
             path="/health/students/:studentId"
             element={
