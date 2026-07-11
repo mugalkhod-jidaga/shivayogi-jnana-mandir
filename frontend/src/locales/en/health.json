@@ -151,7 +151,7 @@
   },
   "reports": {
     "title": "Health reports",
-    "description": "Infirmary analytics — visit trends, severity, common issues, and medicines (last 90 days).",
+    "description": "Live infirmary overview and analytics — alerts, trends, severity, issues, and medicines.",
     "errorTitle": "Could not load reports",
     "errorDescription": "Check that the backend is running and try again.",
     "empty": "No visit data yet.",

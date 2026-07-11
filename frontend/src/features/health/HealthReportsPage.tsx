@@ -1,4 +1,5 @@
-import { Activity, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
+import { Activity, AlertTriangle, Pill, Stethoscope, TrendingUp, Users } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bar,
@@ -17,6 +18,10 @@ import {
 import { ModuleSectionCard } from '@/components/module-ui/ModuleSectionCard';
 import { ModuleStatCard } from '@/components/module-ui/ModuleStatCard';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
+import { SeverityBadge } from '@/features/health/components/SeverityBadge';
+import { VisitDetailModal } from '@/features/health/components/VisitDetailModal';
+import { formatStudentName } from '@/features/health/components/VisitHistoryPanel';
+import { useHealthDashboardStats, useHealthVisit } from '@/hooks/useHealth';
 import { useHealthReports } from '@/hooks/useHealthReports';
 import { chartColor } from '@/lib/chartColors';
 import { formatDobDisplay } from '@/lib/date';
@@ -49,7 +54,10 @@ function ChartTooltip({
 
 export function HealthReportsPage() {
   const { t } = useTranslation('health');
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
+  const { data: dash, isLoading: dashLoading, isError: dashError } = useHealthDashboardStats();
   const { data, isLoading, isError } = useHealthReports();
+  const { data: selectedVisit } = useHealthVisit(selectedVisitId ?? undefined);
 
   const severityChartData =
     data?.visitsBySeverity
@@ -80,9 +88,102 @@ export function HealthReportsPage() {
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
 
+      {dashError && <p className="text-destructive">{t('dashboard.error')}</p>}
       {isError && (
         <PlaceholderPanel title={t('reports.errorTitle')} description={t('reports.errorDescription')} />
       )}
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ModuleStatCard
+          title={t('dashboard.kpis.sickToday')}
+          value={dashLoading ? '…' : (dash?.sickToday ?? 0)}
+          icon={Activity}
+          accent="saffron"
+        />
+        <ModuleStatCard
+          title={t('dashboard.kpis.urgentWeek')}
+          value={dashLoading ? '…' : (dash?.urgentCount ?? 0)}
+          icon={AlertTriangle}
+          accent="rose"
+        />
+        <ModuleStatCard
+          title={t('dashboard.kpis.visitsWeek')}
+          value={dashLoading ? '…' : (dash?.visitsThisWeek ?? 0)}
+          icon={Stethoscope}
+          accent="emerald"
+        />
+        <ModuleStatCard
+          title={t('dashboard.kpis.totalStudents')}
+          value={dashLoading ? '…' : (dash?.totalStudents ?? 0)}
+          icon={Users}
+          accent="sky"
+        />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <ModuleSectionCard
+          title={t('dashboard.urgentAlerts')}
+          headerClassName="from-rose-50/90 to-pink-50/60 dark:from-rose-950/25 dark:to-pink-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md">
+              <AlertTriangle className="size-5" />
+            </div>
+          }
+        >
+          {!dashLoading && (dash?.urgentAlerts.length ?? 0) === 0 && (
+            <p className="text-sm text-muted-foreground">{t('dashboard.noUrgent')}</p>
+          )}
+          <div className="space-y-3">
+            {(dash?.urgentAlerts ?? []).map((visit) => (
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-lg border border-rose-100 bg-rose-50/50 p-3 text-left text-sm transition-colors hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{formatStudentName(visit)}</span>
+                  <span className="text-muted-foreground">{visit.visitDate}</span>
+                  <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
+                </div>
+                <p className="mt-1">{visit.issueType}</p>
+                <p className="line-clamp-2 text-muted-foreground">{visit.symptoms}</p>
+              </button>
+            ))}
+          </div>
+        </ModuleSectionCard>
+
+        <ModuleSectionCard
+          title={t('dashboard.recentEntries')}
+          headerClassName="from-teal-50/90 to-emerald-50/60 dark:from-teal-950/25 dark:to-emerald-950/20"
+          icon={
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-md">
+              <Stethoscope className="size-5" />
+            </div>
+          }
+        >
+          {!dashLoading && (dash?.recentEntries.length ?? 0) === 0 && (
+            <p className="text-sm text-muted-foreground">{t('dashboard.noRecent')}</p>
+          )}
+          <div className="space-y-3">
+            {(dash?.recentEntries ?? []).map((visit) => (
+              <button
+                key={visit.id}
+                type="button"
+                className="w-full rounded-lg border p-3 text-left text-sm transition-colors hover:bg-teal-50/50 dark:hover:bg-teal-950/20"
+                onClick={() => setSelectedVisitId(visit.id)}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{formatStudentName(visit)}</span>
+                  <span className="text-muted-foreground">{visit.visitDate}</span>
+                  <SeverityBadge code={visit.severity.code} label={visit.severity.value} />
+                </div>
+                <p className="mt-1">{visit.issueType}</p>
+              </button>
+            ))}
+          </div>
+        </ModuleSectionCard>
+      </section>
 
       {!isError && (
         <>
@@ -277,7 +378,14 @@ export function HealthReportsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={medicineChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                        <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={64} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 10 }}
+                          interval={0}
+                          angle={-20}
+                          textAnchor="end"
+                          height={64}
+                        />
                         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={28} />
                         <Tooltip content={<ChartTooltip />} />
                         <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={40}>
@@ -312,6 +420,12 @@ export function HealthReportsPage() {
           </section>
         </>
       )}
+
+      <VisitDetailModal
+        visit={selectedVisit ?? null}
+        open={Boolean(selectedVisitId && selectedVisit)}
+        onClose={() => setSelectedVisitId(null)}
+      />
     </div>
   );
 }
