@@ -99,7 +99,9 @@ export function VisitDetailModal({ visit, open, onClose }: Props) {
           <dl>
             <DetailRow label={t('record.treatedBy')} value={visit.treatedBy} />
             <DetailRow label={t('record.temperature')} value={visit.temperature} />
+            {/* Blood pressure temporarily hidden
             <DetailRow label={t('record.bloodPressure')} value={visit.bloodPressure} />
+            */}
             <DetailRow label={t('record.oxygenLevel')} value={visit.oxygenLevel} />
             <DetailRow label={t('record.notes')} value={visit.notes} />
           </dl>

@@ -28,6 +28,7 @@
     "issueType": "Type of issue",
     "customIssue": "Other issue (optional)",
     "symptoms": "Investigation / symptoms",
+    "symptomsOptional": "Optional — describe findings if needed",
     "showVitals": "Show optional vitals",
     "hideVitals": "Hide vitals",
     "temperature": "Temperature",
@@ -51,7 +52,10 @@
     "medicineNotes": "Medicine notes",
     "takePhoto": "Take photo",
     "chooseFromGallery": "Choose from gallery",
+    "uploadFile": "Upload file (PDF / image)",
     "photoCount": "{{count}} / {{max}} photos",
+    "attachmentCount": "{{count}} / {{max}} files",
+    "attachmentHelp": "Photos, prescriptions, lab reports (CBC/TSH), or scans — images or PDF, up to 25MB each.",
     "saveVisit": "Save visit",
     "saving": "Saving…",
     "successTitle": "Visit saved",
@@ -64,7 +68,8 @@
       "findStudent": "1. Find student",
       "visitDetails": "2. Visit details",
       "treatment": "3. Treatment",
-      "photos": "4. Reference photos (optional)"
+      "photos": "4. Reference photos (optional)",
+      "attachments": "4. Photos & documents (optional)"
     },
     "schedule": {
       "morning": "Morning",
@@ -88,6 +93,7 @@
     "searchPlaceholder": "Search student, admission #, issue, or symptoms…",
     "allSeverities": "All severities",
     "allClasses": "All classes",
+    "filterClass": "Class",
     "fromDate": "From date",
     "toDate": "To date",
     "clearFilters": "Clear filters",
@@ -162,6 +168,7 @@
   "visitDetail": {
     "close": "Close",
     "photos": "Reference photos",
+    "attachments": "Photos & documents",
     "viewProfile": "View student health profile",
     "photoLightbox": "Photo preview"
   },

@@ -9,6 +9,7 @@
   "ongoing": "Ongoing",
   "healthProfileHint": "For infirmary visits, medicines, and visit photos, see the",
   "healthProfileLink": "Health visits tab",
+  "eyeTestHint": "Record eye / vision screening here as type “Eye test” (not as an infirmary visit).",
   "list": {
     "title": "Medical Records",
     "description": "View and filter student medical records across the school.",

@@ -189,7 +189,8 @@ BEGIN
     (NEW.id, 'Chronic Condition', '{"en":"Chronic Condition","kn":"ದೀರ್ಘಕಾಲಿಕ ಸ್ಥಿತಿ"}'::jsonb),
     (NEW.id, 'Vaccination', '{"en":"Vaccination","kn":"ಲಸಿಕೆ"}'::jsonb),
     (NEW.id, 'Incident', '{"en":"Incident","kn":"ಘಟನೆ"}'::jsonb),
-    (NEW.id, 'Medication', '{"en":"Medication","kn":"ಔಷಧ"}'::jsonb)
+    (NEW.id, 'Medication', '{"en":"Medication","kn":"ಔಷಧ"}'::jsonb),
+    (NEW.id, 'Eye test', '{"en":"Eye test","kn":"ಕಣ್ಣಿನ ಪರೀಕ್ಷೆ"}'::jsonb)
   ON CONFLICT (tenant_id, value) DO NOTHING;
 
   INSERT INTO lookup_health_issue_types (tenant_id, value, labels) VALUES

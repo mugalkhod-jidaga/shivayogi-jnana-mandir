@@ -73,6 +73,10 @@ export const lookupService = {
     return lookupRepository.listHealthSeverities(locale);
   },
 
+  listHealthAttachmentKinds(locale: SupportedLocale = 'en') {
+    return lookupRepository.listHealthAttachmentKinds(locale);
+  },
+
   listHealthIssueTypes(tenantId: number, locale: SupportedLocale = 'en') {
     return lookupRepository.listHealthIssueTypes(tenantId, locale);
   },

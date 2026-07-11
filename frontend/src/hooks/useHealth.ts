@@ -177,6 +177,7 @@ export function useHealthStaffSearch(query: string) {
 export async function uploadHealthAttachment(
   studentId: string,
   file: File,
+  attachmentKindId: number,
 ): Promise<VisitAttachmentInput> {
   const contentType = file.type || 'application/octet-stream';
   const presign = await apiFetch<{ uploadUrl: string; key: string }>('/health/attachments/presign', {
@@ -191,7 +192,7 @@ export async function uploadHealthAttachment(
   });
 
   if (!uploadResponse.ok) {
-    throw new Error(`Photo upload failed (${uploadResponse.status})`);
+    throw new Error(`Attachment upload failed (${uploadResponse.status})`);
   }
 
   return {
@@ -199,6 +200,7 @@ export async function uploadHealthAttachment(
     fileName: file.name,
     mimeType: contentType,
     sizeBytes: file.size,
+    attachmentKindId,
   };
 }
 
@@ -208,7 +210,7 @@ export async function uploadPendingPhotos(
 ): Promise<VisitAttachmentInput[]> {
   const results: VisitAttachmentInput[] = [];
   for (const photo of photos) {
-    results.push(await uploadHealthAttachment(studentId, photo.file));
+    results.push(await uploadHealthAttachment(studentId, photo.file, photo.attachmentKindId));
   }
   return results;
 }

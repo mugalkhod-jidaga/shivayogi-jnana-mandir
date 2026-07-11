@@ -195,6 +195,12 @@ lookupRoutes.get(
 );
 
 lookupRoutes.get(
+  '/health-attachment-kinds',
+  extractTenantMiddleware,
+  asyncHandler(lookupController.listHealthAttachmentKinds),
+);
+
+lookupRoutes.get(
   '/health-issue-types',
   extractTenantMiddleware,
   asyncHandler(lookupController.listHealthIssueTypes),

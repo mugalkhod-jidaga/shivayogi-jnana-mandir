@@ -136,6 +136,13 @@ export const lookupController = {
     res.json({ success: true, data });
   },
 
+  async listHealthAttachmentKinds(req: Request, res: Response): Promise<void> {
+    requireAuthContext(req);
+    const locale = lookupService.localeFromRequest(req);
+    const data = await lookupService.listHealthAttachmentKinds(locale);
+    res.json({ success: true, data });
+  },
+
   async listHealthIssueTypes(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const locale = lookupService.localeFromRequest(req);

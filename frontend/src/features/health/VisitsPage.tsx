@@ -154,31 +154,58 @@ export function VisitsPage() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
-            <option value="">{t('visits.allSeverities')}</option>
-            {severities.map((s) => (
-              <option key={s.id} value={String(s.id)}>
-                {s.value}
-              </option>
-            ))}
-          </Select>
-          <AcademicStandardSelect
-            value={standardFilter}
-            onChange={setStandardFilter}
-            placeholder={t('visits.allClasses')}
-          />
-          <Input
-            type="date"
-            value={fromFilter}
-            onChange={(e) => setFromFilter(e.target.value)}
-            aria-label={t('visits.fromDate')}
-          />
-          <Input
-            type="date"
-            value={toFilter}
-            onChange={(e) => setToFilter(e.target.value)}
-            aria-label={t('visits.toDate')}
-          />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground" htmlFor="visits-severity">
+              {t('visits.columns.severity')}
+            </label>
+            <Select
+              id="visits-severity"
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+            >
+              <option value="">{t('visits.allSeverities')}</option>
+              {severities.map((s) => (
+                <option key={s.id} value={String(s.id)}>
+                  {s.value}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground" htmlFor="visits-class">
+              {t('visits.filterClass')}
+            </label>
+            <AcademicStandardSelect
+              id="visits-class"
+              value={standardFilter}
+              onChange={setStandardFilter}
+              placeholder={t('visits.allClasses')}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground" htmlFor="visits-from">
+              {t('visits.fromDate')}
+            </label>
+            <Input
+              id="visits-from"
+              type="date"
+              value={fromFilter}
+              onChange={(e) => setFromFilter(e.target.value)}
+              aria-label={t('visits.fromDate')}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground" htmlFor="visits-to">
+              {t('visits.toDate')}
+            </label>
+            <Input
+              id="visits-to"
+              type="date"
+              value={toFilter}
+              onChange={(e) => setToFilter(e.target.value)}
+              aria-label={t('visits.toDate')}
+            />
+          </div>
         </div>
       </form>
 
