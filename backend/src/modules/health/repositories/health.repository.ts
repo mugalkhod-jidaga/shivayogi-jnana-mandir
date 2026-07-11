@@ -521,7 +521,7 @@ class HealthRepository extends BaseRepository {
     let statusStudentsQuery = supabase
       .from('students')
       .select(
-        'id, first_name, last_name, admission_number, health_status, current_enrollment:student_enrollments!left(is_current, deleted_at, standard:lookup_standards(value))',
+        'id, first_name, last_name, admission_number, health_status, current_enrollment:student_enrollments!left(is_current, deleted_at, standard:lookup_academic_standards(value))',
       )
       .eq('tenant_id', tenantId)
       .eq('status', 'Active')
@@ -648,7 +648,7 @@ class HealthRepository extends BaseRepository {
         student_id: input.studentId,
         visit_date: input.visitDate,
         issue_type: input.issueType,
-        symptoms: input.symptoms,
+        symptoms: input.symptoms ?? '',
         severity_id: input.severityId,
         treated_by: input.treatedBy ?? null,
         notes: input.notes ?? null,

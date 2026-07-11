@@ -1,56 +1,88 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, ImageIcon } from 'lucide-react';
+import { Camera, FileText, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { PendingPhoto } from '@/types/health';
+import { Select } from '@/components/ui/select';
+import type { HealthLookupOption, PendingAttachment } from '@/types/health';
 
-export const MAX_PHOTOS_PER_VISIT = 4;
+export const MAX_ATTACHMENTS_PER_VISIT = 8;
+export const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 
-function newPhotoId() {
-  return globalThis.crypto?.randomUUID?.() ?? `photo-${Date.now()}`;
+const ALLOWED_IMAGE = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ALLOWED_PDF = 'application/pdf';
+
+function newAttachmentId() {
+  return globalThis.crypto?.randomUUID?.() ?? `att-${Date.now()}`;
+}
+
+function isAllowedFile(file: File) {
+  const mime = (file.type || '').toLowerCase();
+  return ALLOWED_IMAGE.includes(mime) || mime === ALLOWED_PDF;
 }
 
 type Props = {
-  photos: PendingPhoto[];
-  onChange: (photos: PendingPhoto[]) => void;
+  attachments: PendingAttachment[];
+  onChange: (attachments: PendingAttachment[]) => void;
+  kinds: (HealthLookupOption & { code: string })[];
   disabled?: boolean;
 };
 
-export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
+export function PhotoCapture({ attachments, onChange, kinds, disabled = false }: Props) {
   const { t } = useTranslation('health');
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  function handleFiles(fileList: FileList | null) {
-    const files = Array.from(fileList ?? []).filter((f) => f.type.startsWith('image/'));
+  const defaultKindId =
+    kinds.find((k) => k.code === 'photo')?.id ?? kinds[0]?.id ?? 0;
+
+  function addFiles(fileList: FileList | null, preferKindCode?: string) {
+    const files = Array.from(fileList ?? []).filter(isAllowedFile);
     if (!files.length) return;
 
-    const remaining = MAX_PHOTOS_PER_VISIT - photos.length;
+    const remaining = MAX_ATTACHMENTS_PER_VISIT - attachments.length;
     const toAdd = files.slice(0, remaining);
+    const kindId =
+      kinds.find((k) => k.code === preferKindCode)?.id ??
+      defaultKindId;
 
     onChange([
-      ...photos,
-      ...toAdd.map((file) => ({
-        id: newPhotoId(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      })),
+      ...attachments,
+      ...toAdd.map((file) => {
+        const isPdf = (file.type || '').toLowerCase() === ALLOWED_PDF;
+        return {
+          id: newAttachmentId(),
+          file,
+          previewUrl: isPdf ? null : URL.createObjectURL(file),
+          attachmentKindId: isPdf
+            ? (kinds.find((k) => k.code === 'lab_report')?.id ??
+              kinds.find((k) => k.code === 'prescription')?.id ??
+              kindId)
+            : kindId,
+          isPdf,
+        };
+      }),
     ]);
   }
 
-  function removePhoto(id: string) {
-    const target = photos.find((p) => p.id === id);
+  function removeAttachment(id: string) {
+    const target = attachments.find((a) => a.id === id);
     if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
-    onChange(photos.filter((p) => p.id !== id));
+    onChange(attachments.filter((a) => a.id !== id));
   }
 
-  const atLimit = photos.length >= MAX_PHOTOS_PER_VISIT;
-  const inputDisabled = disabled || atLimit;
+  function setKind(id: string, attachmentKindId: number) {
+    onChange(
+      attachments.map((a) => (a.id === id ? { ...a, attachmentKindId } : a)),
+    );
+  }
+
+  const atLimit = attachments.length >= MAX_ATTACHMENTS_PER_VISIT;
+  const inputDisabled = disabled || atLimit || !defaultKindId;
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        {/* Camera — capture attribute opens the rear camera on mobile */}
         <input
           ref={cameraRef}
           type="file"
@@ -59,11 +91,10 @@ export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
           className="hidden"
           disabled={inputDisabled}
           onChange={(e) => {
-            handleFiles(e.target.files);
+            addFiles(e.target.files, 'photo');
             e.target.value = '';
           }}
         />
-        {/* Gallery — no capture attribute so the OS file picker / photo library opens */}
         <input
           ref={galleryRef}
           type="file"
@@ -72,7 +103,19 @@ export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
           className="hidden"
           disabled={inputDisabled}
           onChange={(e) => {
-            handleFiles(e.target.files);
+            addFiles(e.target.files, 'photo');
+            e.target.value = '';
+          }}
+        />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
+          multiple
+          className="hidden"
+          disabled={inputDisabled}
+          onChange={(e) => {
+            addFiles(e.target.files);
             e.target.value = '';
           }}
         />
@@ -94,32 +137,77 @@ export function PhotoCapture({ photos, onChange, disabled = false }: Props) {
           <ImageIcon className="size-4" />
           {t('record.chooseFromGallery')}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={inputDisabled}
+          onClick={() => fileRef.current?.click()}
+        >
+          <FileText className="size-4" />
+          {t('record.uploadFile')}
+        </Button>
         <span className="text-sm text-muted-foreground">
-          {t('record.photoCount', { count: photos.length, max: MAX_PHOTOS_PER_VISIT })}
+          {t('record.attachmentCount', {
+            count: attachments.length,
+            max: MAX_ATTACHMENTS_PER_VISIT,
+          })}
         </span>
       </div>
+      <p className="text-xs text-muted-foreground">{t('record.attachmentHelp')}</p>
 
-      {photos.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {photos.map((photo) => (
-            <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg border">
-              <img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
-              <button
+      {attachments.length > 0 && (
+        <ul className="space-y-2">
+          {attachments.map((item) => (
+            <li
+              key={item.id}
+              className="flex flex-wrap items-center gap-3 rounded-lg border p-2"
+            >
+              {item.isPdf ? (
+                <div className="flex size-14 items-center justify-center rounded-md bg-muted">
+                  <FileText className="size-6 text-muted-foreground" />
+                </div>
+              ) : (
+                <img
+                  src={item.previewUrl ?? ''}
+                  alt=""
+                  className="size-14 rounded-md object-cover"
+                />
+              )}
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="truncate text-sm font-medium">{item.file.name}</p>
+                <Select
+                  value={String(item.attachmentKindId)}
+                  onChange={(e) => setKind(item.id, Number(e.target.value))}
+                  disabled={disabled}
+                >
+                  {kinds.map((k) => (
+                    <option key={k.id} value={String(k.id)}>
+                      {k.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <Button
                 type="button"
-                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white"
-                onClick={() => removePhoto(photo.id)}
+                variant="ghost"
+                size="sm"
+                onClick={() => removeAttachment(item.id)}
                 disabled={disabled}
               >
                 ✕
-              </button>
-            </div>
+              </Button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
 }
 
-export function emptyPendingPhotos(): PendingPhoto[] {
+export function emptyPendingPhotos(): PendingAttachment[] {
+  return [];
+}
+
+export function emptyPendingAttachments(): PendingAttachment[] {
   return [];
 }

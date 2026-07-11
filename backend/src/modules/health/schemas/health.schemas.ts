@@ -23,13 +23,27 @@ export const visitAttachmentSchema = z.object({
   fileName: z.string().trim().min(1).max(255),
   mimeType: z.string().trim().max(100).optional(),
   sizeBytes: z.coerce.number().int().nonnegative().optional(),
+  attachmentKindId: z.coerce.number().int().positive(),
 });
+
+const ALLOWED_ATTACHMENT_MIMES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+] as const;
+
+export function isAllowedHealthAttachmentMime(mimeType: string | undefined): boolean {
+  if (!mimeType) return false;
+  return (ALLOWED_ATTACHMENT_MIMES as readonly string[]).includes(mimeType.toLowerCase());
+}
 
 export const createHealthVisitSchema = z.object({
   studentId: z.string().uuid(),
   visitDate: dateInputSchema,
   issueType: z.string().trim().min(1).max(500),
-  symptoms: z.string().trim().min(1).max(5000),
+  symptoms: z.string().trim().max(5000).optional().default(''),
   severityId: z.coerce.number().int().positive(),
   healthStatus: z.enum(['healthy', 'sick', 'recovering']),
   treatedBy: z.string().trim().max(255).optional(),
@@ -38,7 +52,7 @@ export const createHealthVisitSchema = z.object({
   bloodPressure: z.string().trim().max(20).optional(),
   oxygenLevel: z.string().trim().max(20).optional(),
   medicines: z.array(medicineRowSchema).min(1).max(10),
-  attachments: z.array(visitAttachmentSchema).max(4).optional(),
+  attachments: z.array(visitAttachmentSchema).max(8).optional(),
 });
 
 export const updateStudentHealthStatusSchema = z.object({

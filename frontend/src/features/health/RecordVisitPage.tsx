@@ -51,8 +51,15 @@ export function RecordVisitPage() {
   const [searchParams] = useSearchParams();
   const presetStudentId = searchParams.get('studentId');
   const { data: presetStudent } = useStudent(presetStudentId ?? undefined);
-  const { severities, issueTypes, doseUnits, foodTimings, schedulePresets, isLoading: lookupsLoading } =
-    useHealthLookups();
+  const {
+    severities,
+    attachmentKinds,
+    issueTypes,
+    doseUnits,
+    foodTimings,
+    schedulePresets,
+    isLoading: lookupsLoading,
+  } = useHealthLookups();
   const createVisit = useCreateHealthVisit();
 
   const [studentId, setStudentId] = useState('');
@@ -68,7 +75,8 @@ export function RecordVisitPage() {
   const [treatedBy, setTreatedBy] = useState('');
   const [notes, setNotes] = useState('');
   const [temperature, setTemperature] = useState('');
-  const [bloodPressure, setBloodPressure] = useState('');
+  // Blood pressure field temporarily disabled in UI
+  // const [bloodPressure, setBloodPressure] = useState('');
   const [oxygenLevel, setOxygenLevel] = useState('');
   const [showVitals, setShowVitals] = useState(false);
   const [medicines, setMedicines] = useState<MedicineRowInput[]>([emptyMedicine()]);
@@ -131,7 +139,7 @@ export function RecordVisitPage() {
     setTreatedBy('');
     setNotes('');
     setTemperature('');
-    setBloodPressure('');
+    // setBloodPressure('');
     setOxygenLevel('');
     setMedicines([
       {
@@ -161,10 +169,6 @@ export function RecordVisitPage() {
       setError(t('record.errors.issueRequired'));
       return;
     }
-    if (!symptoms.trim()) {
-      setError(t('record.errors.symptomsRequired'));
-      return;
-    }
 
     if (!resolvedSeverityId) {
       setError(t('record.errors.severityRequired'));
@@ -186,7 +190,7 @@ export function RecordVisitPage() {
         treatedBy: treatedBy.trim() || undefined,
         notes: notes.trim() || undefined,
         temperature: temperature.trim() || undefined,
-        bloodPressure: bloodPressure.trim() || undefined,
+        // bloodPressure: bloodPressure.trim() || undefined,
         oxygenLevel: oxygenLevel.trim() || undefined,
         attachments,
         medicines: medicines.map((m) => ({
@@ -331,7 +335,12 @@ export function RecordVisitPage() {
 
           <div>
             <Label>{t('record.symptoms')}</Label>
-            <Textarea value={symptoms} onChange={(e) => setSymptoms(e.target.value)} required rows={3} />
+            <Textarea
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              rows={3}
+              placeholder={t('record.symptomsOptional')}
+            />
           </div>
 
           <button
@@ -343,15 +352,17 @@ export function RecordVisitPage() {
           </button>
 
           {showVitals && (
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label>{t('record.temperature')}</Label>
                 <Input value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="101°F" />
               </div>
+              {/* Blood pressure temporarily hidden
               <div>
                 <Label>{t('record.bloodPressure')}</Label>
                 <Input value={bloodPressure} onChange={(e) => setBloodPressure(e.target.value)} placeholder="120/80" />
               </div>
+              */}
               <div>
                 <Label>{t('record.oxygenLevel')}</Label>
                 <Input value={oxygenLevel} onChange={(e) => setOxygenLevel(e.target.value)} placeholder="98%" />
@@ -404,10 +415,11 @@ export function RecordVisitPage() {
         </section>
 
         <section className="space-y-4 rounded-lg border p-4">
-          <h2 className="font-semibold">{t('record.sections.photos')}</h2>
+          <h2 className="font-semibold">{t('record.sections.attachments')}</h2>
           <PhotoCapture
-            photos={pendingPhotos}
+            attachments={pendingPhotos}
             onChange={setPendingPhotos}
+            kinds={attachmentKinds}
             disabled={!studentId || uploading || createVisit.isPending}
           />
         </section>

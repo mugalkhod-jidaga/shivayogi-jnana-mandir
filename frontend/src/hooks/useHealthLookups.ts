@@ -10,6 +10,7 @@ const STALE = 30 * 60 * 1000;
 
 export const healthLookupKeys = {
   severities: ['lookups', 'health-severities'] as const,
+  attachmentKinds: ['lookups', 'health-attachment-kinds'] as const,
   issueTypes: ['lookups', 'health-issue-types'] as const,
   foodTimings: ['lookups', 'medicine-food-timings'] as const,
   doseUnits: ['lookups', 'medicine-dose-units'] as const,
@@ -25,6 +26,14 @@ export function useHealthLookups() {
   const severities = useQuery({
     queryKey: [...healthLookupKeys.severities, localeKey],
     queryFn: () => apiFetch<(HealthLookupOption & { code: string })[]>('/lookups/health-severities'),
+    enabled,
+    staleTime: STALE,
+  });
+
+  const attachmentKinds = useQuery({
+    queryKey: [...healthLookupKeys.attachmentKinds, localeKey],
+    queryFn: () =>
+      apiFetch<(HealthLookupOption & { code: string })[]>('/lookups/health-attachment-kinds'),
     enabled,
     staleTime: STALE,
   });
@@ -60,12 +69,14 @@ export function useHealthLookups() {
 
   return {
     severities: severities.data ?? [],
+    attachmentKinds: attachmentKinds.data ?? [],
     issueTypes: issueTypes.data ?? [],
     foodTimings: foodTimings.data ?? [],
     doseUnits: doseUnits.data ?? [],
     schedulePresets: schedulePresets.data ?? [],
     isLoading:
       severities.isLoading ||
+      attachmentKinds.isLoading ||
       issueTypes.isLoading ||
       foodTimings.isLoading ||
       doseUnits.isLoading ||

@@ -59,6 +59,7 @@ export function StudentMedicalTab({ studentId }: Props) {
         >
           {t('healthProfileLink')}
         </Link>
+        . {t('eyeTestHint')}
       </p>
 
       <div className="flex justify-end">

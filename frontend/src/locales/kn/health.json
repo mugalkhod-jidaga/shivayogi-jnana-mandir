@@ -28,6 +28,7 @@
     "issueType": "ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ",
     "customIssue": "ಇತರ ಸಮಸ್ಯೆ (ಐಚ್ಛಿಕ)",
     "symptoms": "ಲಕ್ಷಣಗಳು / ವಿವರಣೆ",
+    "symptomsOptional": "ಐಚ್ಛಿಕ — ಅಗತ್ಯವಿದ್ದರೆ ವಿವರಿಸಿ",
     "showVitals": "ವೈಟಲ್ಸ್ ತೋರಿಸಿ",
     "hideVitals": "ವೈಟಲ್ಸ್ ಮರೆಮಾಡಿ",
     "temperature": "ತಾಪಮಾನ",
@@ -51,7 +52,10 @@
     "medicineNotes": "ಔಷಧಿ ಟಿಪ್ಪಣಿಗಳು",
     "takePhoto": "ಫೋಟೋ ತೆಗೆಯಿರಿ",
     "chooseFromGallery": "ಗ್ಯಾಲರಿಯಿಂದ ಆಯ್ಕೆಮಾಡಿ",
+    "uploadFile": "ಫೈಲ್ ಅಪ್‌ಲೋಡ್ (PDF / ಚಿತ್ರ)",
     "photoCount": "{{count}} / {{max}} ಫೋಟೋಗಳು",
+    "attachmentCount": "{{count}} / {{max}} ಫೈಲ್‌ಗಳು",
+    "attachmentHelp": "ಫೋಟೋ, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್, ಲ್ಯಾಬ್ ವರದಿ (CBC/TSH) ಅಥವಾ ಸ್ಕ್ಯಾನ್ — ಚಿತ್ರ ಅಥವಾ PDF, ಪ್ರತಿ 25MB ವರೆಗೆ.",
     "saveVisit": "ಭೇಟಿ ಉಳಿಸಿ",
     "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
     "successTitle": "ಭೇಟಿ ಉಳಿಸಲಾಗಿದೆ",
@@ -64,7 +68,8 @@
       "findStudent": "1. ವಿದ್ಯಾರ್ಥಿ ಹುಡುಕಿ",
       "visitDetails": "2. ಭೇಟಿ ವಿವರಗಳು",
       "treatment": "3. ಚಿಕಿತ್ಸೆ",
-      "photos": "4. ಫೋಟೋಗಳು (ಐಚ್ಛಿಕ)"
+      "photos": "4. ಫೋಟೋಗಳು (ಐಚ್ಛಿಕ)",
+      "attachments": "4. ಫೋಟೋ ಮತ್ತು ದಾಖಲೆಗಳು (ಐಚ್ಛಿಕ)"
     },
     "schedule": {
       "morning": "ಬೆಳಿಗ್ಗೆ",
@@ -87,6 +92,7 @@
     "searchPlaceholder": "ವಿದ್ಯಾರ್ಥಿ, ಪ್ರವೇಶ ಸಂಖ್ಯೆ, ಸಮಸ್ಯೆ ಅಥವಾ ಲಕ್ಷಣಗಳು…",
     "allSeverities": "ಎಲ್ಲಾ ತೀವ್ರತೆಗಳು",
     "allClasses": "ಎಲ್ಲಾ ತರಗತಿಗಳು",
+    "filterClass": "ತರಗತಿ",
     "fromDate": "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
     "toDate": "ಅಂತ್ಯ ದಿನಾಂಕ",
     "clearFilters": "ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
@@ -161,6 +167,7 @@
   "visitDetail": {
     "close": "ಮುಚ್ಚಿ",
     "photos": "ಉಲ್ಲೇಖ ಫೋಟೋಗಳು",
+    "attachments": "ಫೋಟೋ ಮತ್ತು ದಾಖಲೆಗಳು",
     "viewProfile": "ವಿದ್ಯಾರ್ಥಿ ಆರೋಗ್ಯ ಪ್ರೊಫೈಲ್ ನೋಡಿ",
     "photoLightbox": "ಫೋಟೋ ಪೂರ್ವಾವಲೋಕನ"
   },

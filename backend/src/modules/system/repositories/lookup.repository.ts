@@ -632,6 +632,21 @@ class LookupRepository {
     }));
   }
 
+  async listHealthAttachmentKinds(locale: SupportedLocale = 'en') {
+    const { data, error } = await supabase
+      .from('lookup_health_attachment_kinds')
+      .select('id, code, value, labels, sort_order, is_active')
+      .eq('is_active', true)
+      .order('sort_order');
+    if (error) throw new AppError(500, error.message);
+    return (data ?? []).map((row) => ({
+      id: row.id as number,
+      code: row.code as string,
+      value: resolveLocalizedLabel(row.labels as Record<string, string> | null, row.value as string, locale),
+      labels: (row.labels as Record<string, string> | null) ?? { en: row.value as string },
+    }));
+  }
+
   async listHealthIssueTypes(tenantId: number, locale: SupportedLocale = 'en') {
     const { data, error } = await supabase
       .from('lookup_health_issue_types')

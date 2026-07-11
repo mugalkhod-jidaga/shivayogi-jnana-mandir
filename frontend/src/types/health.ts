@@ -23,6 +23,7 @@ export type HealthVisitAttachment = {
   mimeType: string | null;
   sizeBytes: number | null;
   uploadStatus: string;
+  kind: { id: number; code: string; value: string } | null;
 };
 
 export type MedicineCatalogItem = {
@@ -73,13 +74,19 @@ export type VisitAttachmentInput = {
   fileName: string;
   mimeType?: string;
   sizeBytes?: number;
+  attachmentKindId: number;
 };
 
-export type PendingPhoto = {
+export type PendingAttachment = {
   id: string;
   file: File;
-  previewUrl: string;
+  previewUrl: string | null;
+  attachmentKindId: number;
+  isPdf: boolean;
 };
+
+/** @deprecated use PendingAttachment */
+export type PendingPhoto = PendingAttachment;
 
 export type HealthVisitMedicine = {
   id: string;

@@ -14,6 +14,7 @@ import type {
   RecentVisitsQuery,
   StaffSearchQuery,
 } from '../schemas/health.schemas';
+import { isAllowedHealthAttachmentMime } from '../schemas/health.schemas';
 import {
   assertHealthAttachmentKey,
   healthAttachmentRepository,
@@ -67,6 +68,10 @@ async function validateLookups(tenantId: number, input: CreateHealthVisitInput) 
   if (input.attachments?.length) {
     for (const attachment of input.attachments) {
       assertHealthAttachmentKey(attachment.key, tenantId, input.studentId);
+      if (!isAllowedHealthAttachmentMime(attachment.mimeType)) {
+        throw new AppError(400, `Unsupported attachment type: ${attachment.fileName}`);
+      }
+      await healthAttachmentRepository.assertKindExists(attachment.attachmentKindId);
     }
   }
 
@@ -134,6 +139,9 @@ export const healthService = {
 
   async presignAttachment(tenantId: number, input: AttachmentPresignInput, userId: string) {
     await assertStudentIdAccess(input.studentId, tenantId, userId);
+    if (input.mimeType && !isAllowedHealthAttachmentMime(input.mimeType)) {
+      throw new AppError(400, 'Unsupported file type. Use JPEG, PNG, WebP, or PDF.');
+    }
     return getUploadUrl(
       tenantId,
       input.studentId,
@@ -185,6 +193,7 @@ export const healthService = {
           fileUrl: a.key,
           mimeType: a.mimeType,
           sizeBytes: a.sizeBytes,
+          attachmentKindId: a.attachmentKindId,
         })),
       );
     }

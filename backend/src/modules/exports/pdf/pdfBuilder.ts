@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import PDFDocument from 'pdfkit';
 import type { Response } from 'express';
 
@@ -21,11 +23,30 @@ const PAGE_MARGIN = 48;
 const ROW_HEIGHT = 20;
 const HEADER_BG = '#f3f4f6';
 
+/** Single embedded family covering Latin + Kannada (Noto Sans Kannada). */
+const PDF_FONT = 'AppSans';
+const PDF_FONT_BOLD = 'AppSans-Bold';
+
+function fontPath(filename: string) {
+  return path.join(__dirname, '../../../../assets/fonts', filename);
+}
+
+function ensurePdfFonts(doc: PDFKit.PDFDocument) {
+  const regular = fontPath('NotoSansKannada.ttf');
+  if (!fs.existsSync(regular)) {
+    throw new Error(`PDF font missing: ${regular}`);
+  }
+  // One family file covers EN + KN; bold alias uses the same face.
+  doc.registerFont(PDF_FONT, regular);
+  doc.registerFont(PDF_FONT_BOLD, regular);
+}
+
 export function createPdfBuffer(
   build: (doc: PDFKit.PDFDocument) => void,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: PAGE_MARGIN, size: 'A4' });
+    ensurePdfFonts(doc);
     const chunks: Buffer[] = [];
     doc.on('data', (chunk: Buffer) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
@@ -36,10 +57,10 @@ export function createPdfBuffer(
 }
 
 export function writePdfHeader(doc: PDFKit.PDFDocument, meta: PdfDocumentMeta) {
-  doc.fontSize(18).font('Helvetica-Bold').text(meta.title, { align: 'left' });
+  doc.fontSize(18).font(PDF_FONT_BOLD).text(meta.title, { align: 'left' });
   if (meta.subtitle) {
     doc.moveDown(0.3);
-    doc.fontSize(11).font('Helvetica').fillColor('#4b5563').text(meta.subtitle);
+    doc.fontSize(11).font(PDF_FONT).fillColor('#4b5563').text(meta.subtitle);
   }
   const generated = meta.generatedAt ?? new Date();
   const localeTag = meta.locale === 'kn' ? 'kn-IN' : 'en-IN';
@@ -47,6 +68,7 @@ export function writePdfHeader(doc: PDFKit.PDFDocument, meta: PdfDocumentMeta) {
   doc.moveDown(0.3);
   doc
     .fontSize(9)
+    .font(PDF_FONT)
     .fillColor('#6b7280')
     .text(`${generatedLabel}: ${generated.toLocaleString(localeTag)}`, { align: 'left' });
   if (meta.tenantName) {
@@ -67,7 +89,7 @@ export function writePdfTable(
 
   const drawHeader = () => {
     let x = startX;
-    doc.font('Helvetica-Bold').fontSize(9);
+    doc.font(PDF_FONT_BOLD).fontSize(9);
     doc.rect(startX, y, tableWidth, ROW_HEIGHT).fill(HEADER_BG);
     doc.fillColor('#111827');
     for (const col of columns) {
@@ -84,12 +106,13 @@ export function writePdfTable(
 
   drawHeader();
 
-  doc.font('Helvetica').fontSize(9);
+  doc.font(PDF_FONT).fontSize(9);
   for (const row of rows) {
     if (y + ROW_HEIGHT > doc.page.height - doc.page.margins.bottom) {
       doc.addPage();
       y = doc.page.margins.top;
       drawHeader();
+      doc.font(PDF_FONT).fontSize(9);
     }
 
     let x = startX;
@@ -119,10 +142,10 @@ export function writePdfKeyValues(
   doc: PDFKit.PDFDocument,
   pairs: Array<{ label: string; value: string }>,
 ) {
-  doc.fontSize(10).font('Helvetica-Bold');
+  doc.fontSize(10).font(PDF_FONT_BOLD);
   for (const pair of pairs) {
-    doc.font('Helvetica-Bold').text(`${pair.label}: `, { continued: true });
-    doc.font('Helvetica').text(pair.value || '—');
+    doc.font(PDF_FONT_BOLD).text(`${pair.label}: `, { continued: true });
+    doc.font(PDF_FONT).text(pair.value || '—');
   }
   doc.moveDown(0.5);
 }
@@ -132,7 +155,7 @@ const PHOTO_HEIGHT = 120;
 
 export function writePdfSectionTitle(doc: PDFKit.PDFDocument, title: string) {
   doc.moveDown(0.3);
-  doc.fontSize(12).font('Helvetica-Bold').fillColor('#111827').text(title);
+  doc.fontSize(12).font(PDF_FONT_BOLD).fillColor('#111827').text(title);
   doc.moveDown(0.4);
   doc.fillColor('#000000');
 }
@@ -159,8 +182,8 @@ export function writePdfKeyValueGrid(
       x = startX;
     }
 
-    doc.font('Helvetica-Bold').fillColor('#374151').text(pair.label, x, y, { width: colWidth - 12 });
-    doc.font('Helvetica').fillColor('#111827').text(pair.value || '—', x, y + 12, {
+    doc.font(PDF_FONT_BOLD).fillColor('#374151').text(pair.label, x, y, { width: colWidth - 12 });
+    doc.font(PDF_FONT).fillColor('#111827').text(pair.value || '—', x, y + 12, {
       width: colWidth - 12,
     });
 
@@ -194,13 +217,13 @@ export function writePdfProfileHeader(doc: PDFKit.PDFDocument, options: PdfProfi
   const textWidth = contentWidth - PHOTO_WIDTH - 16;
   const photoX = doc.page.margins.left + contentWidth - PHOTO_WIDTH;
 
-  doc.fontSize(16).font('Helvetica-Bold').text(options.name, doc.page.margins.left, startY, {
+  doc.fontSize(16).font(PDF_FONT_BOLD).text(options.name, doc.page.margins.left, startY, {
     width: textWidth,
   });
 
   if (options.subtitle) {
     doc.moveDown(0.2);
-    doc.fontSize(11).font('Helvetica').fillColor('#4b5563').text(options.subtitle, {
+    doc.fontSize(11).font(PDF_FONT).fillColor('#4b5563').text(options.subtitle, {
       width: textWidth,
     });
     doc.fillColor('#000000');
@@ -238,7 +261,7 @@ function writePdfPhotoPlaceholder(
   doc.rect(x, y, PHOTO_WIDTH, PHOTO_HEIGHT).fillAndStroke('#f9fafb', '#d1d5db');
   doc
     .fontSize(8)
-    .font('Helvetica')
+    .font(PDF_FONT)
     .fillColor('#6b7280')
     .text(label, x + 4, y + PHOTO_HEIGHT / 2 - 6, {
       width: PHOTO_WIDTH - 8,
