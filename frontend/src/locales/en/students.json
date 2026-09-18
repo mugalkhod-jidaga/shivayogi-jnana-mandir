@@ -127,6 +127,7 @@
     "loadingStudent": "Loading student…",
     "nextAdmissionNumber": "Admission number",
     "nextAdmissionHelp": "Enter manually or use the suggested SJM number. Must be unique within your school.",
+    "nameEnglishHelp": "Optional English/Roman-script name — helps search find the student when the name above is entered in Kannada.",
     "admissionNumberLoading": "Loading…",
     "sections": {
       "basic": "Basic information",
@@ -144,6 +145,7 @@
     "fields": {
       "firstName": "First name",
       "lastName": "Last name",
+      "nameEnglish": "English / Search name",
       "dob": "Date of birth",
       "dobPlaceholder": "DD/MM/YYYY",
       "admissionDate": "Admission date",

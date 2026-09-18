@@ -43,6 +43,7 @@ export interface StudentRow {
   admission_number: string;
   first_name: string;
   last_name: string | null;
+  name_english: string | null;
   dob: string;
   gender: string;
   photo_url: string | null;
@@ -230,8 +231,12 @@ export class StudentsRepository extends BaseRepository {
     }
 
     if (search) {
+      // Bilingual search: first_name/last_name are often entered in Kannada
+      // script, so name_english (a Roman-script alias, see migration 019)
+      // is checked alongside them — a search for "Ramesh" or "ರಮೇಶ್" should
+      // both find the same student.
       dbQuery = dbQuery.or(
-        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,admission_number.ilike.%${search}%`,
+        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,name_english.ilike.%${search}%,admission_number.ilike.%${search}%`,
       );
     }
 

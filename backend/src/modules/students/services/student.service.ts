@@ -117,6 +117,7 @@ function serializeStudent(student: StudentRow, _permissions: string[], includeFa
     admissionNumber: student.admission_number,
     firstName: student.first_name,
     lastName: student.last_name,
+    nameEnglish: student.name_english,
     dob: student.dob,
     gender: student.gender,
     photoUrl: student.photo_url,
@@ -289,6 +290,7 @@ export const studentService = {
         admission_number: admissionNumber,
         first_name: input.firstName,
         last_name: input.lastName ?? null,
+        name_english: input.nameEnglish ?? null,
         dob: input.dob,
         gender: input.gender,
         blood_group_id: input.bloodGroupId ?? null,
@@ -340,6 +342,7 @@ export const studentService = {
     const changes: Record<string, unknown> = { updated_by: userId };
     if (input.firstName !== undefined) changes.first_name = input.firstName;
     if (input.lastName !== undefined) changes.last_name = input.lastName;
+    if (input.nameEnglish !== undefined) changes.name_english = input.nameEnglish;
     if (input.dob !== undefined) changes.dob = input.dob;
     if (input.gender !== undefined) changes.gender = input.gender;
     if (input.bloodGroupId !== undefined) changes.blood_group_id = input.bloodGroupId;

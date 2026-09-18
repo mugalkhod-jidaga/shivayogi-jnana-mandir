@@ -84,6 +84,8 @@ export const createStudentSchema = z.object({
   admissionNumber: z.string().trim().min(1).max(100).optional(),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().max(100).optional(),
+  /** English/Roman-script full name — optional search alias when firstName/lastName are in Kannada. */
+  nameEnglish: z.string().trim().max(255).optional(),
   dob: dobInputSchema,
   gender: genderEnum.default('Male'),
   bloodGroupId: z.number().int().positive().optional(),
@@ -103,6 +105,7 @@ export const updateStudentSchema = z
   .object({
     firstName: z.string().trim().min(1).max(100).optional(),
     lastName: z.string().trim().max(100).nullable().optional(),
+    nameEnglish: z.string().trim().max(255).nullable().optional(),
     dob: dobInputSchema.optional(),
     gender: genderEnum.optional(),
     bloodGroupId: z.number().int().positive().nullable().optional(),

@@ -77,6 +77,15 @@ export function DemographicsFields({
         {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="nameEnglish">{t('form.fields.nameEnglish')}</Label>
+        <Input id="nameEnglish" {...register('nameEnglish')} />
+        {errors.nameEnglish && (
+          <p className="text-sm text-destructive">{errors.nameEnglish.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">{t('form.nameEnglishHelp')}</p>
+      </div>
+
       <DateField
         control={control}
         name="dob"

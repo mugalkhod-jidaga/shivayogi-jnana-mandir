@@ -42,6 +42,7 @@ export type StudentSummary = {
   admissionNumber: string;
   firstName: string;
   lastName: string | null;
+  nameEnglish: string | null;
   dob: string;
   gender: Gender;
   photoUrl: string | null;
@@ -106,6 +107,7 @@ export type CreateStudentPayload = {
   admissionNumber?: string;
   firstName: string;
   lastName?: string;
+  nameEnglish?: string;
   dob: string;
   gender: Gender;
   bloodGroupId?: number;
@@ -124,6 +126,7 @@ export type CreateStudentPayload = {
 export type UpdateStudentPayload = {
   firstName?: string;
   lastName?: string | null;
+  nameEnglish?: string | null;
   dob?: string;
   gender?: Gender;
   bloodGroupId?: number | null;
