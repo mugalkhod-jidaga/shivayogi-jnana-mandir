@@ -30,6 +30,7 @@ import { StudentDetailPage } from '@/features/students/StudentDetailPage';
 import { StudentFormPage } from '@/features/students/StudentFormPage';
 import { StudentListPage } from '@/features/students/StudentListPage';
 import { StudentReportsPage } from '@/features/students/StudentReportsPage';
+import { PromoteStudentsPage } from '@/features/students/PromoteStudentsPage';
 import { StudentsLayout } from '@/features/students/StudentsLayout';
 import { PermissionRoute } from '@/routes/PermissionRoute';
 import { ProtectedRoute, PublicOnlyRoute } from '@/routes/ProtectedRoute';
@@ -71,6 +72,14 @@ export function AppRoutes() {
           >
             <Route index element={<StudentListPage />} />
             <Route path="reports" element={<StudentReportsPage />} />
+            <Route
+              path="promotions"
+              element={
+                <PermissionRoute permission="students:promote">
+                  <PromoteStudentsPage />
+                </PermissionRoute>
+              }
+            />
           </Route>
           <Route
             path="/students/:id/edit"

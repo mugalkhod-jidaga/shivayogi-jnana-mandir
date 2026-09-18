@@ -17,8 +17,11 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 13. `013_medical_staff_role.sql` — Medical Staff role (infirmary-only: medical + student read)
 14. `014_hostel_beds.sql` — `hostel_beds` table, `room_allocations.bed_id`, backfill beds from room capacity
 15. `015_hostel_session_period.sql` — morning/evening `session_period`; deduplicates existing same-day sessions before unique index (safe to re-run if index step failed)
+16. `016_health_attachment_kinds.sql` — health visit attachment kind lookup, eye test medical record type
+17. `017_enrollment_type.sql` — adds `student_enrollments.enrollment_type` (`NEW` / `PROMOTED` / `TRANSFERRED` / `REPEATED`), backfills existing rows to `NEW`, deduplicates and enforces one enrollment per student per academic year (`idx_student_enrollments_student_year`).
+18. `018_promote_students.sql` — adds `students:promote` permission (granted to Super Admin, backfilled onto existing tenants) and the `promote_students()` RPC: atomically advances every active, currently-enrolled student in a source standard to a target academic year/standard, with per-student holdback (→ `REPEATED`, stays in the source standard) and exclude lists, skips departed students and already-promoted students, and supports a `dryRun` preview.
 
-Apply migrations through `015` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+Apply migrations through `018` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 
 **Note on `015`:** If a previous run failed on `idx_hostel_attendance_session_unique`, the `session_period` column may already exist. Re-run the full `015` script — it is idempotent and will merge duplicate same-day sessions (keep oldest two as morning/evening, soft-delete extras, re-point attendance records) before creating the index.
 

@@ -5,6 +5,8 @@ const parentStatusEnum = z.enum(['Both Alive', 'Single Mother', 'Orphan']);
 const studentStatusEnum = z.enum(['Active', 'Alumni', 'Discontinued']);
 const genderEnum = z.enum(['Male', 'Female', 'Other']);
 const satsTransferStatusEnum = z.enum(['Pending', 'Transferred', 'NotApplicable']);
+/** 'NEW' is set automatically on first admission — never accepted from a client. */
+const enrollmentTypeEnum = z.enum(['PROMOTED', 'TRANSFERRED', 'REPEATED']);
 
 export const socialDetailsSchema = z.object({
   religionId: z.number().int().positive().optional(),
@@ -56,7 +58,16 @@ export const academicPlacementSchema = z.object({
   enrolledAt: dateInputSchema.optional(),
 });
 
-/** PATCH allows null to clear optional enrollment fields (e.g. section). */
+/**
+ * PATCH allows null to clear optional enrollment fields (e.g. section).
+ *
+ * `academicYearId` moving to a DIFFERENT year than the student's current
+ * enrollment is a year transition, not an in-place edit — the repository
+ * closes out the old enrollment row and inserts a new one so history is
+ * preserved (see `students.repository.ts#updateEnrollment`). `enrollmentType`
+ * is required in that case so the transition is recorded as PROMOTED /
+ * TRANSFERRED / REPEATED rather than guessed after the fact.
+ */
 export const updateAcademicPlacementSchema = z.object({
   academicYearId: z.number().int().positive().optional(),
   standardId: z.number().int().positive().optional(),
@@ -66,6 +77,7 @@ export const updateAcademicPlacementSchema = z.object({
   previousSchoolAddress: z.string().trim().max(2000).nullable().optional(),
   lastClassStudied: z.string().trim().max(100).nullable().optional(),
   enrolledAt: dateInputSchema.optional(),
+  enrollmentType: enrollmentTypeEnum.optional(),
 });
 
 export const createStudentSchema = z.object({
@@ -127,6 +139,42 @@ export const studentListQuerySchema = z.object({
   socialCategoryId: z.coerce.number().int().positive().optional(),
 });
 
+const uuidArray = z.array(z.string().uuid());
+
+/**
+ * Batch year-end promotion. Two ways to pick the population:
+ *   - `studentIds` omitted → every currently-enrolled Active student in
+ *     `sourceStandardId` (minus `excludeStudentIds`).
+ *   - `studentIds` provided → only those students (still filtered to
+ *     `sourceStandardId` + Active by the RPC, as a safety net).
+ * `holdbackStudentIds` marks students who repeat `sourceStandardId` instead
+ * of advancing to `targetStandardId` — they still move to
+ * `targetAcademicYearId`, just with `enrollment_type = 'REPEATED'`.
+ * `excludeStudentIds` are skipped entirely (handled separately later).
+ */
+export const promoteStudentsSchema = z
+  .object({
+    targetAcademicYearId: z.number().int().positive(),
+    sourceStandardId: z.number().int().positive(),
+    targetStandardId: z.number().int().positive(),
+    studentIds: uuidArray.min(1).optional(),
+    excludeStudentIds: uuidArray.default([]),
+    holdbackStudentIds: uuidArray.default([]),
+    dryRun: z.boolean().default(false),
+  })
+  .refine(
+    (data) => !data.studentIds || data.excludeStudentIds.every((id) => !data.studentIds!.includes(id)),
+    { message: 'A student cannot be in both studentIds and excludeStudentIds', path: ['excludeStudentIds'] },
+  )
+  .refine(
+    (data) => !data.studentIds || data.holdbackStudentIds.every((id) => data.studentIds!.includes(id)),
+    { message: 'holdbackStudentIds must be a subset of studentIds when studentIds is provided', path: ['holdbackStudentIds'] },
+  )
+  .refine((data) => data.holdbackStudentIds.every((id) => !data.excludeStudentIds.includes(id)), {
+    message: 'A student cannot be in both holdbackStudentIds and excludeStudentIds',
+    path: ['holdbackStudentIds'],
+  });
+
 export const avatarPresignSchema = z.object({
   filename: z.string().trim().min(1).max(255),
   contentType: z.string().trim().min(1).max(100).optional(),
@@ -145,4 +193,19 @@ export type AcademicPlacementInput = z.infer<typeof academicPlacementSchema>;
 export type UpdateAcademicPlacementInput = z.infer<typeof updateAcademicPlacementSchema>;
 export type SocialDetailsInput = z.infer<typeof socialDetailsSchema>;
 export type UpdateSocialDetailsInput = z.infer<typeof updateSocialDetailsSchema>;
+/**
+ * GET /students/reports/enrollment-stats — defaults to the tenant's current
+ * academic year. `status` is opt-in: omitted means the historical count for
+ * that year regardless of what happened to the student since (the default
+ * described to the user); passing it narrows to students whose CURRENT
+ * status matches (e.g. `?status=Active` to hide since-departed students).
+ */
+export const enrollmentStatsQuerySchema = z.object({
+  academicYearId: z.coerce.number().int().positive().optional(),
+  standardId: z.coerce.number().int().positive().optional(),
+  status: studentStatusEnum.optional(),
+});
+
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
+export type PromoteStudentsInput = z.infer<typeof promoteStudentsSchema>;
+export type EnrollmentStatsQuery = z.infer<typeof enrollmentStatsQuerySchema>;

@@ -146,6 +146,8 @@ function mapEnrollmentToDb(input: AcademicPlacementInput, admissionDate: string)
     previous_school_address: input.previousSchoolAddress ?? null,
     last_class_studied: input.lastClassStudied ?? null,
     is_current: true,
+    // This path only runs from create() — a student's very first enrollment.
+    enrollment_type: 'NEW',
     enrolled_at: input.enrolledAt ?? admissionDate,
   };
 }
@@ -383,6 +385,17 @@ export class StudentsRepository extends BaseRepository {
     return full;
   }
 
+  /**
+   * Edits the student's academic placement — OR, if `changes.academicYearId`
+   * names a different year than their current enrollment, advances them into
+   * a new enrollment row for that year (a "promotion" in the general sense:
+   * PROMOTED / TRANSFERRED / REPEATED). Those are deliberately different
+   * operations: an in-year edit (roll number fix, section change) mutates
+   * the existing row, but a year change must never overwrite the outgoing
+   * year's row — it closes it out (`is_current = false`) and inserts a new
+   * one, so `student_enrollments` keeps one row per student per year and the
+   * fresh-joinee-vs-promoted report has real history to query.
+   */
   async updateEnrollment(
     studentId: string,
     changes: UpdateAcademicPlacementInput,
@@ -392,7 +405,7 @@ export class StudentsRepository extends BaseRepository {
 
     const { data: current, error: currentError } = await supabase
       .from('student_enrollments')
-      .select('id')
+      .select('id, academic_year_id')
       .eq('student_id', studentId)
       .eq('is_current', true)
       .is('deleted_at', null)
@@ -400,12 +413,17 @@ export class StudentsRepository extends BaseRepository {
 
     if (currentError) throw new AppError(500, currentError.message);
 
-    let enrollmentId = current?.id;
+    let enrollmentId = current?.id as string | undefined;
+    let currentAcademicYearId = current?.academic_year_id as number | undefined;
 
     if (!enrollmentId) {
+      // No row flagged current (data-repair case, e.g. a prior manual DB
+      // edit) — reactivate the most recent non-deleted row in place rather
+      // than treating this as a year transition, since we can't tell
+      // whether its year stamp is even trustworthy.
       const { data: latest, error: latestError } = await supabase
         .from('student_enrollments')
-        .select('id')
+        .select('id, academic_year_id')
         .eq('student_id', studentId)
         .is('deleted_at', null)
         .order('enrolled_at', { ascending: false })
@@ -416,22 +434,24 @@ export class StudentsRepository extends BaseRepository {
 
       if (latest) {
         enrollmentId = latest.id;
+        currentAcademicYearId = latest.academic_year_id;
         await supabase
           .from('student_enrollments')
           .update({ is_current: false, updated_at: now })
           .eq('student_id', studentId)
           .is('deleted_at', null);
 
-        const { error: promoteError } = await supabase
+        const { error: reactivateError } = await supabase
           .from('student_enrollments')
           .update({ is_current: true, updated_at: now })
           .eq('id', enrollmentId);
 
-        if (promoteError) throw new AppError(500, promoteError.message);
+        if (reactivateError) throw new AppError(500, reactivateError.message);
       }
     }
 
     if (!enrollmentId) {
+      // No enrollment at all yet — this is effectively their first one.
       if (!changes.academicYearId || !changes.standardId || changes.rollNumber === undefined) {
         throw new AppError(
           400,
@@ -449,6 +469,7 @@ export class StudentsRepository extends BaseRepository {
         previous_school_address: changes.previousSchoolAddress ?? null,
         last_class_studied: changes.lastClassStudied ?? null,
         is_current: true,
+        enrollment_type: changes.enrollmentType ?? 'NEW',
         enrolled_at: changes.enrolledAt ?? admissionDate ?? now.slice(0, 10),
       });
 
@@ -456,8 +477,51 @@ export class StudentsRepository extends BaseRepository {
       return;
     }
 
+    const movingToNewYear =
+      changes.academicYearId !== undefined && changes.academicYearId !== currentAcademicYearId;
+
+    if (movingToNewYear) {
+      if (!changes.standardId || changes.rollNumber === undefined) {
+        throw new AppError(
+          400,
+          'Standard and roll number are required when moving to a new academic year',
+        );
+      }
+      if (!changes.enrollmentType) {
+        throw new AppError(
+          400,
+          'enrollmentType (PROMOTED, TRANSFERRED, or REPEATED) is required when moving to a new academic year',
+        );
+      }
+
+      const { error: closeOutError } = await supabase
+        .from('student_enrollments')
+        .update({ is_current: false, updated_at: now })
+        .eq('id', enrollmentId);
+
+      if (closeOutError) throw new AppError(500, closeOutError.message);
+
+      const { error: insertError } = await supabase.from('student_enrollments').insert({
+        student_id: studentId,
+        academic_year_id: changes.academicYearId,
+        standard_id: changes.standardId,
+        section_id: changes.sectionId ?? null,
+        roll_number: changes.rollNumber,
+        previous_school: changes.previousSchool ?? null,
+        previous_school_address: changes.previousSchoolAddress ?? null,
+        last_class_studied: changes.lastClassStudied ?? null,
+        is_current: true,
+        enrollment_type: changes.enrollmentType,
+        enrolled_at: changes.enrolledAt ?? now.slice(0, 10),
+      });
+
+      if (insertError) throw new AppError(500, insertError.message);
+      return;
+    }
+
+    // Same-year edit (roll number fix, section change, standard correction,
+    // etc.) — safe to update the existing row in place.
     const dbChanges: Record<string, unknown> = { updated_at: now };
-    if (changes.academicYearId !== undefined) dbChanges.academic_year_id = changes.academicYearId;
     if (changes.standardId !== undefined) dbChanges.standard_id = changes.standardId;
     if (changes.sectionId !== undefined) dbChanges.section_id = changes.sectionId;
     if (changes.rollNumber !== undefined) dbChanges.roll_number = changes.rollNumber;

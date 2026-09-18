@@ -4,9 +4,10 @@ import { permissionService } from '../../auth/services/permission.service';
 import type {
   CreateStudentInput,
   DeactivateStudentInput,
+  PromoteStudentsInput,
   UpdateStudentInput,
 } from '../schemas/student.schemas';
-import { studentListQuerySchema } from '../schemas/student.schemas';
+import { enrollmentStatsQuerySchema, studentListQuerySchema } from '../schemas/student.schemas';
 import { studentService } from '../services/student.service';
 
 function requireAuthContext(req: Request): { profileId: string; tenantId: number } {
@@ -44,6 +45,13 @@ export const studentController = {
   async getReports(req: Request, res: Response): Promise<void> {
     const { profileId, tenantId } = requireAuthContext(req);
     const data = await studentService.getReports(tenantId, profileId);
+    res.json({ success: true, data });
+  },
+
+  async getEnrollmentStats(req: Request, res: Response): Promise<void> {
+    const { profileId, tenantId } = requireAuthContext(req);
+    const query = enrollmentStatsQuerySchema.parse(req.query);
+    const data = await studentService.getEnrollmentStats(tenantId, profileId, query);
     res.json({ success: true, data });
   },
 
@@ -110,6 +118,12 @@ export const studentController = {
   async getAvatarDownload(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await studentService.getAvatarDownloadUrl(paramId(req), tenantId);
+    res.json({ success: true, data });
+  },
+
+  async promote(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const data = await studentService.promote(tenantId, req.body as PromoteStudentsInput);
     res.json({ success: true, data });
   },
 };

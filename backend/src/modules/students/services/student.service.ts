@@ -7,7 +7,10 @@ import type {
   CreateStudentInput,
   DeactivateStudentInput,
   EmergencyContactInput,
+  EnrollmentStatsQuery,
+  PromoteStudentsInput,
   StudentListQuery,
+  UpdateAcademicPlacementInput,
   UpdateStudentInput,
 } from '../schemas/student.schemas';
 import {
@@ -23,6 +26,13 @@ import {
 } from '../repositories/students.repository';
 
 const FULL_ACCESS_ROLES = new Set(['Super Admin', 'Admissions Clerk', 'Finance']);
+
+const ENROLLMENT_TYPES = ['NEW', 'PROMOTED', 'REPEATED', 'TRANSFERRED'] as const;
+type EnrollmentTypeCounts = Record<(typeof ENROLLMENT_TYPES)[number], number>;
+
+function emptyEnrollmentTypeCounts(): EnrollmentTypeCounts {
+  return { NEW: 0, PROMOTED: 0, REPEATED: 0, TRANSFERRED: 0 };
+}
 
 type GeoField = 'district' | 'taluk_mandal' | 'village_town';
 
@@ -168,9 +178,21 @@ async function validateTenantLookup(
   if (error || !data) throw new AppError(400, `Invalid ${label} for this tenant`);
 }
 
-async function validateAcademicPlacement(tenantId: number, placement: AcademicPlacementInput) {
-  await validateTenantLookup('lookup_academic_years', placement.academicYearId, tenantId, 'academic year');
-  await validateTenantLookup('lookup_academic_standards', placement.standardId, tenantId, 'standard');
+/**
+ * Accepts a partial placement (PATCH) too — only validates fields that are
+ * actually present, so a same-year edit that only touches e.g. rollNumber
+ * doesn't spuriously fail because academicYearId/standardId weren't sent.
+ */
+async function validateAcademicPlacement(
+  tenantId: number,
+  placement: AcademicPlacementInput | UpdateAcademicPlacementInput,
+) {
+  if (placement.academicYearId) {
+    await validateTenantLookup('lookup_academic_years', placement.academicYearId, tenantId, 'academic year');
+  }
+  if (placement.standardId) {
+    await validateTenantLookup('lookup_academic_standards', placement.standardId, tenantId, 'standard');
+  }
   if (placement.sectionId) {
     await validateTenantLookup('lookup_sections', placement.sectionId, tenantId, 'section');
   }
@@ -312,7 +334,7 @@ export const studentService = {
       await validateTenantLookup('lookup_languages', input.motherTongueId, tenantId, 'language');
     }
     if (input.academicPlacement) {
-      await validateAcademicPlacement(tenantId, input.academicPlacement as AcademicPlacementInput);
+      await validateAcademicPlacement(tenantId, input.academicPlacement);
     }
 
     const changes: Record<string, unknown> = { updated_by: userId };
@@ -407,6 +429,50 @@ export const studentService = {
     if (!student.photo_url) throw new AppError(404, 'No avatar uploaded');
 
     return getDownloadUrl(student.photo_url);
+  },
+
+  /**
+   * Batch year-end promotion — see `promote_students()` in
+   * supabase/migrations/018_promote_students.sql for the actual atomic
+   * logic. This is a thin RPC wrapper; the DB function owns validation of
+   * the year/standard lookups and the per-student skip/holdback rules so
+   * the whole batch commits or fails together.
+   */
+  async promote(tenantId: number, input: PromoteStudentsInput) {
+    const { data, error } = await supabase.rpc('promote_students', {
+      p_tenant_id: tenantId,
+      p_target_academic_year_id: input.targetAcademicYearId,
+      p_source_standard_id: input.sourceStandardId,
+      p_target_standard_id: input.targetStandardId,
+      p_student_ids: input.studentIds ?? null,
+      p_exclude_student_ids: input.excludeStudentIds,
+      p_holdback_student_ids: input.holdbackStudentIds,
+      p_dry_run: input.dryRun,
+    });
+
+    if (error) throw new AppError(500, error.message);
+
+    const result = data as {
+      success?: boolean;
+      error?: string;
+      dryRun?: boolean;
+      promoted?: number;
+      repeated?: number;
+      skipped?: Array<{ studentId: string; reason: string }>;
+      affected?: Array<{ studentId: string; enrollmentType: string; standardId: number }>;
+    };
+
+    if (!result?.success) {
+      throw new AppError(400, result?.error ?? 'Promotion failed');
+    }
+
+    return {
+      dryRun: result.dryRun ?? false,
+      promoted: result.promoted ?? 0,
+      repeated: result.repeated ?? 0,
+      skipped: result.skipped ?? [],
+      affected: result.affected ?? [],
+    };
   },
 
   async getReports(tenantId: number, userId: string) {
@@ -604,6 +670,112 @@ export const studentService = {
       studentsByDistrict,
       studentsByTaluk,
       topVillages,
+    };
+  },
+
+  /**
+   * Fresh-joinee vs. promoted (vs. transferred/repeated) breakdown per
+   * standard for a given academic year — the report the `enrollment_type`
+   * column (migration 017) and the promotion RPC (018) exist to answer.
+   *
+   * Deliberately NOT filtered to `students.status = 'Active'`: this is a
+   * historical record of who enrolled how in a given year, so a student who
+   * later left shouldn't silently disappear from a past year's counts.
+   */
+  async getEnrollmentStats(tenantId: number, userId: string, query: EnrollmentStatsQuery) {
+    const assignedStandardIds = await resolveStandardScope(userId);
+    const allowedStandardIds =
+      assignedStandardIds && assignedStandardIds.length > 0 ? new Set(assignedStandardIds) : null;
+
+    let academicYear: { id: number; label: string } | null = null;
+
+    if (query.academicYearId) {
+      const { data, error } = await supabase
+        .from('lookup_academic_years')
+        .select('id, label')
+        .eq('tenant_id', tenantId)
+        .eq('id', query.academicYearId)
+        .maybeSingle();
+      if (error) throw new AppError(500, error.message);
+      if (!data) throw new AppError(400, 'Invalid academic year for this tenant');
+      academicYear = data;
+    } else {
+      const { data, error } = await supabase
+        .from('lookup_academic_years')
+        .select('id, label')
+        .eq('tenant_id', tenantId)
+        .eq('is_current', true)
+        .maybeSingle();
+      if (error) throw new AppError(500, error.message);
+      if (!data) throw new AppError(400, 'No current academic year is configured for this tenant');
+      academicYear = data;
+    }
+
+    const [standardsRes, enrollmentsRes] = await Promise.all([
+      supabase
+        .from('lookup_academic_standards')
+        .select('id, value, sort_order')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true)
+        .neq('value', 'Unassigned')
+        .order('sort_order'),
+      (() => {
+        let q = supabase
+          .from('student_enrollments')
+          .select('standard_id, enrollment_type, students!inner(tenant_id, status)')
+          .eq('students.tenant_id', tenantId)
+          .eq('academic_year_id', academicYear.id)
+          .is('deleted_at', null)
+          .is('students.deleted_at', null);
+        if (query.standardId) q = q.eq('standard_id', query.standardId);
+        // Opt-in only — see enrollmentStatsQuerySchema for why this isn't the default.
+        if (query.status) q = q.eq('students.status', query.status);
+        return q;
+      })(),
+    ]);
+
+    if (standardsRes.error) throw new AppError(500, standardsRes.error.message);
+    if (enrollmentsRes.error) throw new AppError(500, enrollmentsRes.error.message);
+
+    const countsByStandard = new Map<number, EnrollmentTypeCounts>();
+    for (const row of enrollmentsRes.data ?? []) {
+      const standardId = row.standard_id as number;
+      const enrollmentType = row.enrollment_type as (typeof ENROLLMENT_TYPES)[number];
+      if (allowedStandardIds && !allowedStandardIds.has(standardId)) continue;
+
+      const counts = countsByStandard.get(standardId) ?? emptyEnrollmentTypeCounts();
+      counts[enrollmentType] = (counts[enrollmentType] ?? 0) + 1;
+      countsByStandard.set(standardId, counts);
+    }
+
+    const standards = (standardsRes.data ?? [])
+      .filter((standard) => !query.standardId || standard.id === query.standardId)
+      .filter((standard) => !allowedStandardIds || allowedStandardIds.has(standard.id))
+      .map((standard) => {
+        const byType = countsByStandard.get(standard.id) ?? emptyEnrollmentTypeCounts();
+        const total = ENROLLMENT_TYPES.reduce((sum, type) => sum + byType[type], 0);
+        return {
+          standardId: standard.id,
+          label: standard.value,
+          sortOrder: standard.sort_order,
+          total,
+          byType,
+        };
+      });
+
+    const totalsByType = emptyEnrollmentTypeCounts();
+    for (const standard of standards) {
+      for (const type of ENROLLMENT_TYPES) {
+        totalsByType[type] += standard.byType[type];
+      }
+    }
+    const total = ENROLLMENT_TYPES.reduce((sum, type) => sum + totalsByType[type], 0);
+
+    return {
+      academicYear,
+      statusFilter: query.status ?? null,
+      standards,
+      totals: { total, byType: totalsByType },
     };
   },
 };

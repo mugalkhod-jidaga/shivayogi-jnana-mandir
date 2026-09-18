@@ -6,7 +6,8 @@
   },
   "nav": {
     "directory": "Directory",
-    "reports": "Reports"
+    "reports": "Reports",
+    "promotions": "Promotions"
   },
   "list": {
     "title": "Students",
@@ -76,6 +77,46 @@
       "columnPlace": "Village / town",
       "columnDistrict": "District",
       "empty": "No address data for active students yet."
+    }
+  },
+  "promote": {
+    "description": "Year-end batch promotion — advance every active student in a standard to the next academic year and standard. This only affects one standard at a time; run it once per grade.",
+    "setup": {
+      "title": "1. Choose source and target",
+      "description": "Pick the standard you're promoting from, the standard students will move into, and the academic year they're moving to.",
+      "sourceStandard": "Promote from standard",
+      "targetStandard": "Promote to standard",
+      "targetYear": "Target academic year"
+    },
+    "roster": {
+      "title": "2. Review the roster",
+      "description": "Every active student currently in the source standard is included by default. Tick a box to change what happens to a specific student.",
+      "empty": "No active students are currently enrolled in this standard.",
+      "holdback": "Hold back (repeat)",
+      "exclude": "Exclude",
+      "help": "{{count}} will be promoted, {{holdback}} held back to repeat, {{exclude}} excluded from this batch."
+    },
+    "run": {
+      "title": "3. Preview and confirm",
+      "description": "Always preview first — it runs the same checks without saving anything, so you can catch mistakes before they're permanent.",
+      "preview": "Preview (no changes saved)",
+      "confirm": "Confirm & promote",
+      "previewFirst": "Run a preview before confirming.",
+      "previewSummary": "Preview: {{promoted}} would be promoted, {{repeated}} would repeat, {{skipped}} would be skipped."
+    },
+    "stats": {
+      "title": "Enrollment so far for the target year",
+      "description": "Fresh joinees vs. promoted/repeated/transferred, per standard.",
+      "empty": "No enrollments recorded for this year yet.",
+      "new": "New",
+      "promoted": "Promoted",
+      "repeated": "Repeated",
+      "transferred": "Transferred"
+    },
+    "success": "Promotion complete — {{promoted}} promoted, {{repeated}} repeated.",
+    "errors": {
+      "previewFailed": "Could not run the preview",
+      "promoteFailed": "Could not complete the promotion"
     }
   },
   "form": {

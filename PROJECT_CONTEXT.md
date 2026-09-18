@@ -554,6 +554,7 @@ students:read
 students:create
 students:edit
 students:soft_delete
+students:promote                -- year-end batch promotion (advance to next academic year/standard)
 students:view_sensitive_data   -- gates annual_income, parent_status, guardian info
 documents:upload
 documents:view
@@ -572,6 +573,7 @@ dashboard:view
 | students:read | ✓ | ✓ | ✓ | ✓ |
 | students:create | ✓ | ✓ | ✗ | ✗ |
 | students:edit | ✓ | ✓ | ✗ | ✗ |
+| students:promote | ✓ | ✗ | ✗ | ✗ |
 | students:view_sensitive_data | ✓ | ✓ | ✓ | ✗ |
 | documents:upload | ✓ | ✓ | ✗ | ✗ |
 | documents:view | ✓ | ✓ | ✓ (income/BPL only) | ✗ |
@@ -1033,6 +1035,8 @@ All routes except `GET /health` require `Authorization: Bearer <access_token>` a
 | PATCH | `/api/v1/students/:id/deactivate` | `students:soft_delete` | Soft delete; requires `status_reason` |
 | POST | `/api/v1/students/:id/avatar/presign` | `students:edit` | Presigned PUT URL for profile photo |
 | POST | `/api/v1/students/:id/avatar/confirm` | `students:edit` | Save `photo_url` after R2 upload |
+| POST | `/api/v1/students/promotions` | `students:promote` | Batch-advance every Active, currently-enrolled student in a source standard to a target academic year/standard (`promote_students` RPC, Section 15); supports `dryRun`, `holdbackStudentIds` (→ `REPEATED`), `excludeStudentIds` |
+| GET | `/api/v1/students/reports/enrollment-stats` | `students:read` | Fresh joinee vs. promoted/transferred/repeated counts per standard for an academic year (`?academicYearId` default current, `?standardId` optional, `?status` optional — `Active`/`Alumni`/`Discontinued` filters to students whose CURRENT status matches; omitted = full historical count for that year regardless of what happened since) |
 
 ### 16.5 Documents
 

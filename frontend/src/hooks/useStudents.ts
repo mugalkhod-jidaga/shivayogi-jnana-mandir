@@ -28,7 +28,7 @@ function buildQueryString(filters: StudentListFilters) {
   return params.toString();
 }
 
-export function useStudentsList(filters: StudentListFilters = {}) {
+export function useStudentsList(filters: StudentListFilters = {}, options: { enabled?: boolean } = {}) {
   const page = filters.page ?? 1;
   const limit = filters.limit ?? 20;
   const normalizedFilters = { ...filters, page, limit };
@@ -38,5 +38,6 @@ export function useStudentsList(filters: StudentListFilters = {}) {
     queryKey: studentKeys.list(normalizedFilters),
     queryFn: () => apiFetchPaginated<StudentSummary>(`/students?${queryString}`),
     placeholderData: (previous) => previous,
+    enabled: options.enabled ?? true,
   });
 }

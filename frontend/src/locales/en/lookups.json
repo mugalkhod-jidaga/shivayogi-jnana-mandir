@@ -13,6 +13,7 @@
   "tabs": {
     "standards": "Standards",
     "sections": "Sections",
+    "academicYears": "Academic years",
     "languages": "Languages",
     "categories": "Admission categories",
     "documentTypes": "Document types"
@@ -22,6 +23,11 @@
       "title": "Academic standards",
       "singular": "Standard",
       "description": "Class levels used for enrollment (e.g. 1–10, LKG, UKG)."
+    },
+    "academicYears": {
+      "title": "Academic years",
+      "singular": "Academic year",
+      "description": "Register each academic year here before it's used on student forms, imports, or year-end promotion."
     },
     "sections": {
       "title": "Sections",
@@ -84,5 +90,36 @@
     "description": "Deactivate \"{{value}}\"? It will no longer appear in dropdowns.",
     "success": "{{label}} deactivated",
     "error": "Could not deactivate {{label}}"
+  },
+  "academicYears": {
+    "addYear": "Add academic year",
+    "empty": "No academic years yet. Add one to start using it in student forms, imports, and promotion.",
+    "current": "Current",
+    "setCurrent": "Set as current",
+    "setCurrentSuccess": "{{label}} is now the current academic year",
+    "setCurrentError": "Could not set current academic year",
+    "columns": {
+      "label": "Label",
+      "startDate": "Start date",
+      "endDate": "End date"
+    },
+    "addDialog": {
+      "title": "Add academic year",
+      "description": "Register a new academic year (e.g. 2027-28) so it can be used on student forms, imports, and year-end promotion.",
+      "labelPlaceholder": "e.g. 2027-28",
+      "labelRequired": "Label is required",
+      "datesRequired": "Start and end dates are required",
+      "endAfterStart": "End date must be after the start date",
+      "setCurrent": "Set as the current academic year",
+      "setCurrentHelp": "Only one academic year can be current at a time — setting this one unsets any other.",
+      "success": "{{label}} added",
+      "error": "Could not add academic year"
+    },
+    "editDialog": {
+      "title": "Edit academic year",
+      "description": "Update the label or dates. This does not change which year is current — use \"Set as current\" for that.",
+      "success": "{{label}} updated",
+      "error": "Could not update academic year"
+    }
   }
 }

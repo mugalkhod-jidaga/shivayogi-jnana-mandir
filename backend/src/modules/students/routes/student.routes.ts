@@ -10,6 +10,7 @@ import {
   avatarPresignSchema,
   createStudentSchema,
   deactivateStudentSchema,
+  promoteStudentsSchema,
   updateStudentSchema,
 } from '../schemas/student.schemas';
 
@@ -27,6 +28,23 @@ studentRoutes.get(
   extractTenantMiddleware,
   requirePermission('students:read'),
   asyncHandler(studentController.getReports),
+);
+
+studentRoutes.get(
+  '/reports/enrollment-stats',
+  extractTenantMiddleware,
+  requirePermission('students:read'),
+  asyncHandler(studentController.getEnrollmentStats),
+);
+
+// Registered before `/:id` — otherwise Express would match `/promotions`
+// as an id param on the routes below.
+studentRoutes.post(
+  '/promotions',
+  extractTenantMiddleware,
+  requirePermission('students:promote'),
+  validateZod(promoteStudentsSchema),
+  asyncHandler(studentController.promote),
 );
 
 studentRoutes.get(

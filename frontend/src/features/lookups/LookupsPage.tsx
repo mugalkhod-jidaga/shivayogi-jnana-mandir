@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ModuleHeroBanner } from '@/components/module-ui/ModuleHeroBanner';
 import { PlaceholderPanel } from '@/components/PlaceholderPanel';
+import { AcademicYearAdminPanel } from '@/features/lookups/components/AcademicYearAdminPanel';
 import { LookupAdminPanel } from '@/features/lookups/components/LookupAdminPanel';
 import { useLookupAdminLists } from '@/hooks/useLookupAdminLists';
 import { cn } from '@/lib/utils';
@@ -12,7 +13,8 @@ type TabKey =
   | 'document-types'
   | 'standards'
   | 'sections'
-  | 'languages';
+  | 'languages'
+  | 'academic-years';
 
 export function LookupsPage() {
   const { t } = useTranslation('lookups');
@@ -30,6 +32,7 @@ export function LookupsPage() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'standards', label: t('tabs.standards') },
     { key: 'sections', label: t('tabs.sections') },
+    { key: 'academic-years', label: t('tabs.academicYears') },
     { key: 'languages', label: t('tabs.languages') },
     { key: 'categories', label: t('tabs.categories') },
     { key: 'document-types', label: t('tabs.documentTypes') },
@@ -104,6 +107,8 @@ export function LookupsPage() {
               supportsKannadaLabel
             />
           )}
+
+          {tab === 'academic-years' && <AcademicYearAdminPanel />}
 
           {tab === 'categories' && (
             <LookupAdminPanel
