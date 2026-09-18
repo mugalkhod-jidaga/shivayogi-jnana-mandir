@@ -20,8 +20,9 @@ Apply in order via the Supabase SQL Editor or Supabase CLI:
 16. `016_health_attachment_kinds.sql` — health visit attachment kind lookup, eye test medical record type
 17. `017_enrollment_type.sql` — adds `student_enrollments.enrollment_type` (`NEW` / `PROMOTED` / `TRANSFERRED` / `REPEATED`), backfills existing rows to `NEW`, deduplicates and enforces one enrollment per student per academic year (`idx_student_enrollments_student_year`).
 18. `018_promote_students.sql` — adds `students:promote` permission (granted to Super Admin, backfilled onto existing tenants) and the `promote_students()` RPC: atomically advances every active, currently-enrolled student in a source standard to a target academic year/standard, with per-student holdback (→ `REPEATED`, stays in the source standard) and exclude lists, skips departed students and already-promoted students, and supports a `dryRun` preview.
+19. `019_student_name_english.sql` — adds `students.name_english` (optional English/Roman-script name, since `first_name`/`last_name` are often entered in Kannada script) for bilingual search; adds `pg_trgm` GIN indexes on `first_name`, `last_name`, `name_english`, and `admission_number` so the existing `ILIKE '%term%'` search is actually index-backed (a plain btree index doesn't help a leading-wildcard `ILIKE`).
 
-Apply migrations through `018` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
+Apply migrations through `019` in the Supabase SQL Editor (or `supabase db push` if using the CLI) before testing Phase 2 APIs.
 
 **Note on `015`:** If a previous run failed on `idx_hostel_attendance_session_unique`, the `session_period` column may already exist. Re-run the full `015` script — it is idempotent and will merge duplicate same-day sessions (keep oldest two as morning/evening, soft-delete extras, re-point attendance records) before creating the index.
 
