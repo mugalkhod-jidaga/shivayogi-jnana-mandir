@@ -12,6 +12,7 @@ import {
   useUpsertAttendanceRecords,
 } from '@/hooks/useHostel';
 import { usePhase2Lookups } from '@/hooks/usePhase2Lookups';
+import { useLookups } from '@/hooks/useLookups';
 import { cn } from '@/lib/utils';
 
 function formatName(firstName: string, lastName: string | null) {
@@ -22,6 +23,7 @@ export function HostelAttendanceMarkPage() {
   const { t } = useTranslation('hostel');
   const { sessionId } = useParams();
   const { hostelAttendanceStatuses } = usePhase2Lookups();
+  const { academicStandards, sections } = useLookups();
   const { data: session, isLoading: sessionLoading } = useHostelAttendanceSession(sessionId);
   const { data: roster, isLoading: rosterLoading } = useHostelSessionRoster(sessionId);
   const { data: existingRecords } = useHostelAttendanceRecords(sessionId);
@@ -30,6 +32,27 @@ export function HostelAttendanceMarkPage() {
   const [statusByStudent, setStatusByStudent] = useState<Record<string, number>>({});
   const [search, setSearch] = useState('');
   const [showChangedOnly, setShowChangedOnly] = useState(false);
+  const [filterStandardId, setFilterStandardId] = useState('');
+  const [filterSectionId, setFilterSectionId]   = useState('');
+
+  // Derive which standards/sections are actually present in this roster
+  // so we only show relevant options.
+  const rosterStandardIds = useMemo(
+    () => new Set((roster ?? []).map((r) => r.standardId).filter(Boolean)),
+    [roster],
+  );
+  const rosterSectionIds = useMemo(
+    () => new Set((roster ?? []).map((r) => r.sectionId).filter(Boolean)),
+    [roster],
+  );
+  const availableStandards = useMemo(
+    () => academicStandards.filter((s) => rosterStandardIds.has(s.id)),
+    [academicStandards, rosterStandardIds],
+  );
+  const availableSections = useMemo(
+    () => sections.filter((s) => s.isActive && rosterSectionIds.has(s.id)),
+    [sections, rosterSectionIds],
+  );
 
   const presentStatusId = useMemo(
     () => hostelAttendanceStatuses.find((s) => s.value === 'Present')?.id,
@@ -49,6 +72,8 @@ export function HostelAttendanceMarkPage() {
   const filteredRoster = useMemo(() => {
     let rows = roster ?? [];
     const q = search.trim().toLowerCase();
+    if (filterStandardId) rows = rows.filter((r) => r.standardId === Number(filterStandardId));
+    if (filterSectionId)  rows = rows.filter((r) => r.sectionId  === Number(filterSectionId));
     if (q) {
       rows = rows.filter(
         (r) =>
@@ -61,7 +86,7 @@ export function HostelAttendanceMarkPage() {
       rows = rows.filter((r) => statusByStudent[r.studentId] !== presentStatusId);
     }
     return rows;
-  }, [roster, search, showChangedOnly, statusByStudent, presentStatusId]);
+  }, [roster, search, filterStandardId, filterSectionId, showChangedOnly, statusByStudent, presentStatusId]);
 
   if (!sessionId) return <Navigate to="/hostel/attendance" replace />;
 
@@ -109,6 +134,38 @@ export function HostelAttendanceMarkPage() {
       {!isLoading && (roster?.length ?? 0) > 0 && (
         <>
           <div className="flex flex-wrap items-end gap-3">
+            {availableStandards.length > 0 && (
+              <div>
+                <Label htmlFor="mark-standard">{t('attendance.standard')}</Label>
+                <select
+                  id="mark-standard"
+                  className="flex h-10 min-w-[130px] rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={filterStandardId}
+                  onChange={(e) => { setFilterStandardId(e.target.value); setFilterSectionId(''); }}
+                >
+                  <option value="">{t('attendance.allStandards')}</option>
+                  {availableStandards.map((s) => (
+                    <option key={s.id} value={s.id}>{s.value}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {availableSections.length > 0 && (
+              <div>
+                <Label htmlFor="mark-section">{t('attendance.section')}</Label>
+                <select
+                  id="mark-section"
+                  className="flex h-10 min-w-[110px] rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={filterSectionId}
+                  onChange={(e) => setFilterSectionId(e.target.value)}
+                >
+                  <option value="">{t('attendance.allSections')}</option>
+                  {availableSections.map((s) => (
+                    <option key={s.id} value={s.id}>{s.value}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="min-w-[200px] flex-1">
               <Label htmlFor="mark-search">{t('roster.search')}</Label>
               <Input

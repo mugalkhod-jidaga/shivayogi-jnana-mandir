@@ -161,6 +161,8 @@ export type HostelAttendanceRosterRow = {
   roomNumber: string | null;
   bedSlot: number | null;
   bedLabel: string | null;
+  standardId: number | null;
+  sectionId: number | null;
 };
 
 export type HostelDailyBoardSlot = {
