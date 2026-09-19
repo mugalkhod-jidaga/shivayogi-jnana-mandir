@@ -14,14 +14,12 @@ export type HostelAttendanceRosterRow = {
   bedLabel: string | null;
 };
 
-async function filterByClass(
+async function filterByEnrollment(
   rows: HostelAttendanceRosterRow[],
-  tenantId: number,
   standardId?: number | null,
   sectionId?: number | null,
 ): Promise<HostelAttendanceRosterRow[]> {
-  if (!standardId && !sectionId) return rows;
-
+  // Always scope to current-year enrollments; optionally narrow by standard/section.
   let q = supabase
     .from('student_enrollments')
     .select('student_id')
@@ -29,7 +27,7 @@ async function filterByClass(
     .is('deleted_at', null);
 
   if (standardId) q = q.eq('standard_id', standardId);
-  if (sectionId)  q = q.eq('section_id', sectionId);
+  if (sectionId)  q = q.eq('section_id',  sectionId);
 
   const { data, error } = await q;
   if (error) throw error;
@@ -75,7 +73,7 @@ export async function buildHostelAttendanceRoster(
     }
   }
 
-  const filtered = await filterByClass(rows, tenantId, standardId, sectionId);
+  const filtered = await filterByEnrollment(rows, standardId, sectionId);
   return filtered.sort((a, b) => a.admissionNumber.localeCompare(b.admissionNumber));
 }
 
