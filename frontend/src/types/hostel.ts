@@ -135,8 +135,12 @@ export type HostelAttendanceSession = {
   id: string;
   attendanceDate: string;
   blockId: number | null;
+  standardId: number | null;
+  sectionId: number | null;
   sessionPeriod: 'morning' | 'evening';
   block: { id: number; name: string } | null;
+  standard: { id: number; value: string } | null;
+  section: { id: number; value: string } | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -169,6 +173,8 @@ export type HostelDailyBoardSlot = {
 export type HostelDailyBoard = {
   date: string;
   blockId: number | null;
+  standardId: number | null;
+  sectionId: number | null;
   rosterCount: number;
   slots: {
     morning: HostelDailyBoardSlot;

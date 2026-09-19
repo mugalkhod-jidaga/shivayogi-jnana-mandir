@@ -90,8 +90,9 @@ export function HostelAttendanceMarkPage() {
           <span>{session.attendanceDate}</span>
           <span>·</span>
           <span>{periodLabel}</span>
-          <span>·</span>
-          <span>{session.block?.name ?? t('attendance.allBlocks')}</span>
+          {session.block && (<><span>·</span><span>{session.block.name}</span></>)}
+          {session.standard && (<><span>·</span><span>{t('attendance.stdLabel', { value: session.standard.value })}</span></>)}
+          {session.section && (<><span>·</span><span>{t('attendance.secLabel', { value: session.section.value })}</span></>)}
         </div>
       )}
 
