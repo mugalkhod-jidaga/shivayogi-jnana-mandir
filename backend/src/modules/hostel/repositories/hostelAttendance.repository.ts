@@ -7,6 +7,8 @@ type SessionRow = {
   tenant_id: number;
   attendance_date: string;
   block_id: number | null;
+  standard_id: number | null;
+  section_id: number | null;
   session_period: string;
   taken_by: string;
   notes: string | null;
@@ -14,6 +16,8 @@ type SessionRow = {
   updated_at: string;
   hostel_blocks: { id: number; name: string } | null;
   taker: { id: string; first_name: string; last_name: string | null };
+  standard: { id: number; value: string } | null;
+  section:  { id: number; value: string } | null;
 };
 
 type RecordRow = {
@@ -38,9 +42,11 @@ type RecordRow = {
 };
 
 const SESSION_SELECT = `
-  id, tenant_id, attendance_date, block_id, session_period, taken_by, notes, created_at, updated_at,
+  id, tenant_id, attendance_date, block_id, standard_id, section_id, session_period, taken_by, notes, created_at, updated_at,
   hostel_blocks ( id, name ),
-  taker:user_profiles!hostel_attendance_sessions_taken_by_fkey ( id, first_name, last_name )
+  taker:user_profiles!hostel_attendance_sessions_taken_by_fkey ( id, first_name, last_name ),
+  standard:lookup_academic_standards ( id, value ),
+  section:lookup_sections ( id, value )
 `;
 
 const RECORD_SELECT = `
@@ -54,8 +60,12 @@ function serializeSession(row: SessionRow) {
     id: row.id,
     attendanceDate: row.attendance_date,
     blockId: row.block_id,
+    standardId: row.standard_id,
+    sectionId: row.section_id,
     sessionPeriod: row.session_period as 'morning' | 'evening',
     block: row.hostel_blocks,
+    standard: row.standard,
+    section: row.section,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -91,7 +101,7 @@ function serializeRecord(row: RecordRow) {
 
 class HostelAttendanceRepository {
   async listSessions(tenantId: number, query: SessionListQuery) {
-    const { page, limit, search, attendanceDate, sessionPeriod, blockId } = query;
+    const { page, limit, search, attendanceDate, sessionPeriod, blockId, standardId, sectionId } = query;
     const cappedLimit = Math.min(limit, 100);
     const offset = (page - 1) * cappedLimit;
 
@@ -103,9 +113,11 @@ class HostelAttendanceRepository {
       .order('attendance_date', { ascending: false });
 
     if (attendanceDate) dbQuery = dbQuery.eq('attendance_date', attendanceDate);
-    if (sessionPeriod) dbQuery = dbQuery.eq('session_period', sessionPeriod);
-    if (blockId) dbQuery = dbQuery.eq('block_id', blockId);
-    if (search) dbQuery = dbQuery.ilike('notes', `%${search}%`);
+    if (sessionPeriod)  dbQuery = dbQuery.eq('session_period', sessionPeriod);
+    if (blockId)        dbQuery = dbQuery.eq('block_id', blockId);
+    if (standardId)     dbQuery = dbQuery.eq('standard_id', standardId);
+    if (sectionId)      dbQuery = dbQuery.eq('section_id', sectionId);
+    if (search)         dbQuery = dbQuery.ilike('notes', `%${search}%`);
 
     const { data, count, error } = await dbQuery.range(offset, offset + cappedLimit - 1);
     if (error) throw new AppError(500, error.message);
@@ -122,6 +134,8 @@ class HostelAttendanceRepository {
       attendance_date: string;
       session_period: string;
       block_id?: number | null;
+      standard_id?: number | null;
+      section_id?: number | null;
       notes?: string | null;
     },
   ) {
@@ -148,6 +162,8 @@ class HostelAttendanceRepository {
     attendanceDate: string,
     sessionPeriod: string,
     blockId: number | null,
+    standardId?: number | null,
+    sectionId?: number | null,
   ) {
     let dbQuery = supabase
       .from('hostel_attendance_sessions')
@@ -157,8 +173,14 @@ class HostelAttendanceRepository {
       .eq('session_period', sessionPeriod)
       .is('deleted_at', null);
 
-    if (blockId == null) dbQuery = dbQuery.is('block_id', null);
-    else dbQuery = dbQuery.eq('block_id', blockId);
+    if (blockId == null)    dbQuery = dbQuery.is('block_id', null);
+    else                    dbQuery = dbQuery.eq('block_id', blockId);
+
+    if (standardId == null) dbQuery = dbQuery.is('standard_id', null);
+    else                    dbQuery = dbQuery.eq('standard_id', standardId);
+
+    if (sectionId == null)  dbQuery = dbQuery.is('section_id', null);
+    else                    dbQuery = dbQuery.eq('section_id', sectionId);
 
     const { data, error } = await dbQuery.maybeSingle();
     if (error) throw new AppError(500, error.message);

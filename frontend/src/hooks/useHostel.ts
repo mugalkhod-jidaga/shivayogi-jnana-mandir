@@ -114,9 +114,11 @@ export function useHostelDailyReport(
   });
 }
 
-export function useHostelDailyBoard(date: string, blockId?: number) {
+export function useHostelDailyBoard(date: string, blockId?: number, standardId?: number, sectionId?: number) {
   const params = new URLSearchParams({ date });
-  if (blockId) params.set('blockId', String(blockId));
+  if (blockId)    params.set('blockId',    String(blockId));
+  if (standardId) params.set('standardId', String(standardId));
+  if (sectionId)  params.set('sectionId',  String(sectionId));
   return useQuery({
     queryKey: hostelKeys.dailyBoard(date, blockId),
     queryFn: () => apiFetch<HostelDailyBoard>(`/hostel-attendance/daily-board?${params}`),
@@ -240,6 +242,8 @@ export function useEnsureAttendanceSession() {
       attendanceDate: string;
       sessionPeriod: 'morning' | 'evening';
       blockId?: number;
+      standardId?: number;
+      sectionId?: number;
     }) =>
       apiFetch<HostelAttendanceSession>('/hostel-attendance/sessions/ensure', {
         method: 'POST',

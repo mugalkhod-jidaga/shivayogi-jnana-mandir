@@ -225,9 +225,15 @@ export class StudentsRepository extends BaseRepository {
       .is('deleted_at', null);
 
     if (needsEnrollmentJoin) {
-      dbQuery = dbQuery
-        .eq('current_enrollment.is_current', true)
-        .is('current_enrollment.deleted_at', null);
+      // Only enforce is_current when no enrollment-scoping filter is provided.
+      // If academicYearId / standardId / sectionId is present the caller has
+      // already narrowed the year/class, so locking to is_current would hide
+      // students whose current flag belongs to a different year.
+      const hasEnrollmentFilter = Boolean(academicYearId || standardId || sectionId);
+      if (!hasEnrollmentFilter) {
+        dbQuery = dbQuery.eq('current_enrollment.is_current', true);
+      }
+      dbQuery = dbQuery.is('current_enrollment.deleted_at', null);
     }
 
     if (search) {

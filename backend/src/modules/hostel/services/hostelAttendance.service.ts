@@ -32,12 +32,16 @@ export const hostelAttendanceService = {
       attendance_date: input.attendanceDate,
       session_period: input.sessionPeriod,
       block_id: input.blockId ?? null,
+      standard_id: input.standardId ?? null,
+      section_id: input.sectionId ?? null,
       notes: input.notes ?? null,
     });
   },
 
   async ensureSession(tenantId: number, input: EnsureSessionInput, userId: string) {
-    const blockId = input.blockId ?? null;
+    const blockId    = input.blockId    ?? null;
+    const standardId = input.standardId ?? null;
+    const sectionId  = input.sectionId  ?? null;
     if (blockId) {
       const block = await hostelRepository.findBlockById(blockId, tenantId);
       if (!block) throw new AppError(400, 'Invalid block');
@@ -48,6 +52,8 @@ export const hostelAttendanceService = {
       input.attendanceDate,
       input.sessionPeriod,
       blockId,
+      standardId,
+      sectionId,
     );
     if (existing) return existing;
 
@@ -55,13 +61,17 @@ export const hostelAttendanceService = {
       attendance_date: input.attendanceDate,
       session_period: input.sessionPeriod,
       block_id: blockId,
+      standard_id: standardId,
+      section_id: sectionId,
       notes: null,
     });
   },
 
   async getDailyBoard(tenantId: number, query: DailyBoardQuery) {
-    const blockId = query.blockId ?? null;
-    const rosterCount = await countHostelAttendanceRoster(tenantId, blockId);
+    const blockId    = query.blockId    ?? null;
+    const standardId = query.standardId ?? null;
+    const sectionId  = query.sectionId  ?? null;
+    const rosterCount = await countHostelAttendanceRoster(tenantId, blockId, standardId, sectionId);
 
     const slots: Record<
       string,
@@ -79,6 +89,8 @@ export const hostelAttendanceService = {
         query.date,
         period,
         blockId,
+        standardId,
+        sectionId,
       );
       const markedCount = session
         ? await hostelAttendanceRepository.countRecords(session.id, tenantId)
@@ -91,7 +103,7 @@ export const hostelAttendanceService = {
       };
     }
 
-    return { date: query.date, blockId, rosterCount, slots };
+    return { date: query.date, blockId, standardId, sectionId, rosterCount, slots };
   },
 
   async getSession(id: string, tenantId: number) {
@@ -136,6 +148,6 @@ export const hostelAttendanceService = {
 
   async getSessionRoster(sessionId: string, tenantId: number) {
     const session = await this.getSession(sessionId, tenantId);
-    return buildHostelAttendanceRoster(tenantId, session.blockId);
+    return buildHostelAttendanceRoster(tenantId, session.blockId, session.standardId, session.sectionId);
   },
 };

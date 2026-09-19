@@ -8,25 +8,36 @@ import { Label } from '@/components/ui/label';
 import { HostelProgressRing } from '@/features/hostel/components/HostelProgressRing';
 import { HostelSectionCard } from '@/features/hostel/components/HostelSectionCard';
 import { useEnsureAttendanceSession, useHostelBlocks, useHostelDailyBoard } from '@/hooks/useHostel';
+import { useLookups } from '@/hooks/useLookups';
 import { cn } from '@/lib/utils';
 
 export function HostelAttendancePage() {
   const { t } = useTranslation('hostel');
   const navigate = useNavigate();
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [blockId, setBlockId] = useState('');
-  const blockFilter = blockId ? Number(blockId) : undefined;
+  const [date, setDate]           = useState(new Date().toISOString().slice(0, 10));
+  const [blockId, setBlockId]     = useState('');
+  const [standardId, setStandardId] = useState('');
+  const [sectionId, setSectionId]   = useState('');
+
+  const blockFilter    = blockId    ? Number(blockId)    : undefined;
+  const standardFilter = standardId ? Number(standardId) : undefined;
+  const sectionFilter  = sectionId  ? Number(sectionId)  : undefined;
 
   const { data: blocksData } = useHostelBlocks();
   const blocks = blocksData?.data ?? [];
-  const { data: board, isLoading } = useHostelDailyBoard(date, blockFilter);
+  const { academicStandards, sections } = useLookups();
+  const activeSections = sections.filter((s) => s.isActive);
+
+  const { data: board, isLoading } = useHostelDailyBoard(date, blockFilter, standardFilter, sectionFilter);
   const ensureSession = useEnsureAttendanceSession();
 
   const openMark = async (period: 'morning' | 'evening') => {
     const session = await ensureSession.mutateAsync({
       attendanceDate: date,
-      sessionPeriod: period,
-      blockId: blockFilter,
+      sessionPeriod:  period,
+      blockId:    blockFilter,
+      standardId: standardFilter,
+      sectionId:  sectionFilter,
     });
     navigate(`/hostel/attendance/${session.id}`);
   };
@@ -119,18 +130,46 @@ export function HostelAttendancePage() {
             <Label htmlFor="attendance-block">{t('attendance.block')}</Label>
             <select
               id="attendance-block"
-              className="flex h-10 min-w-[180px] rounded-md border border-orange-200/50 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="flex h-10 min-w-[160px] rounded-md border border-orange-200/50 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
               value={blockId}
               onChange={(e) => setBlockId(e.target.value)}
             >
               <option value="">{t('attendance.allBlocks')}</option>
               {blocks.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
+                <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>
           </div>
+          <div>
+            <Label htmlFor="attendance-standard">{t('attendance.standard')}</Label>
+            <select
+              id="attendance-standard"
+              className="flex h-10 min-w-[130px] rounded-md border border-orange-200/50 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              value={standardId}
+              onChange={(e) => { setStandardId(e.target.value); setSectionId(''); }}
+            >
+              <option value="">{t('attendance.allStandards')}</option>
+              {academicStandards.map((s) => (
+                <option key={s.id} value={s.id}>{s.value}</option>
+              ))}
+            </select>
+          </div>
+          {activeSections.length > 0 && (
+            <div>
+              <Label htmlFor="attendance-section">{t('attendance.section')}</Label>
+              <select
+                id="attendance-section"
+                className="flex h-10 min-w-[110px] rounded-md border border-orange-200/50 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                value={sectionId}
+                onChange={(e) => setSectionId(e.target.value)}
+              >
+                <option value="">{t('attendance.allSections')}</option>
+                {activeSections.map((s) => (
+                  <option key={s.id} value={s.id}>{s.value}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </HostelSectionCard>
 
