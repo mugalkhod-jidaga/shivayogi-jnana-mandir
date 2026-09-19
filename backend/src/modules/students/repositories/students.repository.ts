@@ -225,9 +225,10 @@ export class StudentsRepository extends BaseRepository {
       .is('deleted_at', null);
 
     if (needsEnrollmentJoin) {
-      dbQuery = dbQuery
-        .eq('current_enrollment.is_current', true)
-        .is('current_enrollment.deleted_at', null);
+      if (!academicYearId) {
+        dbQuery = dbQuery.eq('current_enrollment.is_current', true);
+      }
+      dbQuery = dbQuery.is('current_enrollment.deleted_at', null);
     }
 
     if (search) {
