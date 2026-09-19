@@ -1,3 +1,4 @@
+import { supabase } from '../../../config/supabase';
 import { hostelRepository } from '../repositories/hostel.repository';
 import { hostelReportsRepository } from '../repositories/hostelReports.repository';
 
@@ -13,9 +14,35 @@ export type HostelAttendanceRosterRow = {
   bedLabel: string | null;
 };
 
+async function filterByClass(
+  rows: HostelAttendanceRosterRow[],
+  tenantId: number,
+  standardId?: number | null,
+  sectionId?: number | null,
+): Promise<HostelAttendanceRosterRow[]> {
+  if (!standardId && !sectionId) return rows;
+
+  let q = supabase
+    .from('student_enrollments')
+    .select('student_id')
+    .eq('is_current', true)
+    .is('deleted_at', null);
+
+  if (standardId) q = q.eq('standard_id', standardId);
+  if (sectionId)  q = q.eq('section_id', sectionId);
+
+  const { data, error } = await q;
+  if (error) throw error;
+
+  const ids = new Set((data ?? []).map((r) => r.student_id as string));
+  return rows.filter((r) => ids.has(r.studentId));
+}
+
 export async function buildHostelAttendanceRoster(
   tenantId: number,
   blockId: number | null,
+  standardId?: number | null,
+  sectionId?: number | null,
 ): Promise<HostelAttendanceRosterRow[]> {
   const allocated = await hostelRepository.listAllocationsForBlock(tenantId, blockId);
 
@@ -48,13 +75,16 @@ export async function buildHostelAttendanceRoster(
     }
   }
 
-  return rows.sort((a, b) => a.admissionNumber.localeCompare(b.admissionNumber));
+  const filtered = await filterByClass(rows, tenantId, standardId, sectionId);
+  return filtered.sort((a, b) => a.admissionNumber.localeCompare(b.admissionNumber));
 }
 
 export async function countHostelAttendanceRoster(
   tenantId: number,
   blockId: number | null,
+  standardId?: number | null,
+  sectionId?: number | null,
 ): Promise<number> {
-  const roster = await buildHostelAttendanceRoster(tenantId, blockId);
+  const roster = await buildHostelAttendanceRoster(tenantId, blockId, standardId, sectionId);
   return roster.length;
 }
