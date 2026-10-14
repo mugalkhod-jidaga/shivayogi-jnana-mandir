@@ -86,15 +86,21 @@
       "description": "Pick the standard you're promoting from, the standard students will move into, and the academic year they're moving to.",
       "sourceStandard": "Promote from standard",
       "targetStandard": "Promote to standard",
-      "targetYear": "Target academic year"
+      "targetYear": "Target academic year",
+      "alumni": "Alumni (graduates)",
+      "targetLockedHint": "Set automatically to the next standard.",
+      "finalHint": "Final standard — students graduate to Alumni.",
+      "noPreviousYear": "no previous year",
+      "sourceYearHint": "Promoting students from {{year}}."
     },
     "roster": {
       "title": "2. Review the roster",
-      "description": "Every active student currently in the source standard is included by default. Tick a box to change what happens to a specific student.",
-      "empty": "No active students are currently enrolled in this standard.",
+      "description": "Active students of the source standard in {{year}} are included by default. Tick a box to change what happens to a specific student.",
+      "empty": "No active students found in this standard for {{year}}, or they have already been promoted.",
       "holdback": "Hold back (repeat)",
       "exclude": "Exclude",
-      "help": "{{count}} will be promoted, {{holdback}} held back to repeat, {{exclude}} excluded from this batch."
+      "help": "{{count}} will be promoted, {{holdback}} held back to repeat, {{exclude}} excluded from this batch.",
+      "helpFinal": "{{count}} will graduate to Alumni, {{holdback}} held back to repeat, {{exclude}} excluded from this batch."
     },
     "run": {
       "title": "3. Preview and confirm",
@@ -102,7 +108,8 @@
       "preview": "Preview (no changes saved)",
       "confirm": "Confirm & promote",
       "previewFirst": "Run a preview before confirming.",
-      "previewSummary": "Preview: {{promoted}} would be promoted, {{repeated}} would repeat, {{skipped}} would be skipped."
+      "previewSummary": "Preview: {{promoted}} would be promoted, {{repeated}} would repeat, {{skipped}} would be skipped.",
+      "previewSummaryFinal": "Preview: {{graduated}} would become Alumni, {{repeated}} would repeat, {{skipped}} would be skipped."
     },
     "stats": {
       "title": "Enrollment so far for the target year",
@@ -113,10 +120,15 @@
       "repeated": "Repeated",
       "transferred": "Transferred"
     },
-    "success": "Promotion complete — {{promoted}} promoted, {{repeated}} repeated.",
+    "success": "Promotion complete — {{promoted}} promoted, {{repeated}} repeated, {{graduated}} moved to Alumni.",
     "errors": {
       "previewFailed": "Could not run the preview",
-      "promoteFailed": "Could not complete the promotion"
+      "promoteFailed": "Could not complete the promotion",
+      "loadFailed": "Could not load the students for this promotion",
+      "selectAll": "Choose the source standard and the target academic year.",
+      "standardNotIncremental": "Students can only be promoted to the very next standard (e.g. 5th → 6th). Skipping a standard is not allowed.",
+      "noTargetStandard": "There is no standard after the selected one to promote into.",
+      "noPreviousYear": "There is no academic year before the selected target year, so there is nobody to promote from."
     }
   },
   "form": {

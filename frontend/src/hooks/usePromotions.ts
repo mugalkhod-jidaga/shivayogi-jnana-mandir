@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { studentKeys } from '@/hooks/useStudents';
-import type { EnrollmentStats, PromoteStudentsPayload, PromotionResult } from '@/types/promotion';
+import type {
+  EnrollmentStats,
+  PromoteStudentsPayload,
+  PromotionCandidates,
+  PromotionResult,
+} from '@/types/promotion';
 
 export const enrollmentStatsKeys = {
   all: ['enrollment-stats'] as const,
@@ -33,6 +38,33 @@ export function useEnrollmentStats(
   });
 }
 
+export const promotionCandidatesKeys = {
+  all: ['promotion-candidates'] as const,
+  filtered: (sourceStandardId?: number, targetAcademicYearId?: number) =>
+    [...promotionCandidatesKeys.all, { sourceStandardId, targetAcademicYearId }] as const,
+};
+
+/**
+ * Active students in `sourceStandardId` from the academic year immediately
+ * before `targetAcademicYearId`. The server owns that rule.
+ */
+export function usePromotionCandidates(params: {
+  sourceStandardId?: number;
+  targetAcademicYearId?: number;
+}) {
+  const enabled = Boolean(params.sourceStandardId && params.targetAcademicYearId);
+
+  return useQuery({
+    queryKey: promotionCandidatesKeys.filtered(params.sourceStandardId, params.targetAcademicYearId),
+    queryFn: () =>
+      apiFetch<PromotionCandidates>(
+        `/students/promotions/candidates?sourceStandardId=${params.sourceStandardId}&targetAcademicYearId=${params.targetAcademicYearId}`,
+      ),
+    enabled,
+    retry: false,
+  });
+}
+
 export function usePromoteStudents() {
   const queryClient = useQueryClient();
 
@@ -46,6 +78,7 @@ export function usePromoteStudents() {
       if (!result.dryRun) {
         void queryClient.invalidateQueries({ queryKey: studentKeys.all });
         void queryClient.invalidateQueries({ queryKey: enrollmentStatsKeys.all });
+        void queryClient.invalidateQueries({ queryKey: promotionCandidatesKeys.all });
       }
     },
   });

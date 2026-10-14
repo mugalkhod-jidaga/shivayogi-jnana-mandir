@@ -9,6 +9,7 @@ import type {
   EmergencyContactInput,
   EnrollmentStatsQuery,
   PromoteStudentsInput,
+  PromotionCandidatesQuery,
   StudentListQuery,
   UpdateAcademicPlacementInput,
   UpdateStudentInput,
@@ -446,7 +447,7 @@ export const studentService = {
       p_tenant_id: tenantId,
       p_target_academic_year_id: input.targetAcademicYearId,
       p_source_standard_id: input.sourceStandardId,
-      p_target_standard_id: input.targetStandardId,
+      p_target_standard_id: input.targetStandardId ?? null,
       p_student_ids: input.studentIds ?? null,
       p_exclude_student_ids: input.excludeStudentIds,
       p_holdback_student_ids: input.holdbackStudentIds,
@@ -461,6 +462,7 @@ export const studentService = {
       dryRun?: boolean;
       promoted?: number;
       repeated?: number;
+      graduated?: number;
       skipped?: Array<{ studentId: string; reason: string }>;
       affected?: Array<{ studentId: string; enrollmentType: string; standardId: number }>;
     };
@@ -473,8 +475,53 @@ export const studentService = {
       dryRun: result.dryRun ?? false,
       promoted: result.promoted ?? 0,
       repeated: result.repeated ?? 0,
+      graduated: result.graduated ?? 0,
       skipped: result.skipped ?? [],
       affected: result.affected ?? [],
+    };
+  },
+
+  /**
+   * Active students eligible for promotion into `targetAcademicYearId` from
+   * `sourceStandardId`: enrolled in that standard in the academic year
+   * immediately before the target year. Rules live in `promotion_context()`
+   * (migration 021) so this list and `promote()` can never disagree.
+   */
+  async promotionCandidates(tenantId: number, input: PromotionCandidatesQuery) {
+    const { data, error } = await supabase.rpc('promotion_candidates', {
+      p_tenant_id: tenantId,
+      p_target_academic_year_id: input.targetAcademicYearId,
+      p_source_standard_id: input.sourceStandardId,
+    });
+
+    if (error) throw new AppError(500, error.message);
+
+    const result = data as {
+      success?: boolean;
+      error?: string;
+      sourceAcademicYearLabel?: string;
+      targetAcademicYearLabel?: string;
+      isFinalStandard?: boolean;
+      expectedTargetStandardId?: number | null;
+      students?: Array<{
+        id: string;
+        admissionNumber: string;
+        firstName: string;
+        lastName: string | null;
+        rollNumber: string | null;
+      }>;
+    };
+
+    if (!result?.success) {
+      throw new AppError(400, result?.error ?? 'Could not load promotion candidates');
+    }
+
+    return {
+      sourceAcademicYearLabel: result.sourceAcademicYearLabel ?? '',
+      targetAcademicYearLabel: result.targetAcademicYearLabel ?? '',
+      isFinalStandard: result.isFinalStandard ?? false,
+      expectedTargetStandardId: result.expectedTargetStandardId ?? null,
+      students: result.students ?? [],
     };
   },
 

@@ -159,7 +159,8 @@ export const promoteStudentsSchema = z
   .object({
     targetAcademicYearId: z.number().int().positive(),
     sourceStandardId: z.number().int().positive(),
-    targetStandardId: z.number().int().positive(),
+    // Omitted only when `sourceStandardId` is the final standard (students graduate to Alumni).
+    targetStandardId: z.number().int().positive().optional(),
     studentIds: uuidArray.min(1).optional(),
     excludeStudentIds: uuidArray.default([]),
     holdbackStudentIds: uuidArray.default([]),
@@ -177,6 +178,11 @@ export const promoteStudentsSchema = z
     message: 'A student cannot be in both holdbackStudentIds and excludeStudentIds',
     path: ['holdbackStudentIds'],
   });
+
+export const promotionCandidatesQuerySchema = z.object({
+  sourceStandardId: z.coerce.number().int().positive(),
+  targetAcademicYearId: z.coerce.number().int().positive(),
+});
 
 export const avatarPresignSchema = z.object({
   filename: z.string().trim().min(1).max(255),
@@ -211,4 +217,5 @@ export const enrollmentStatsQuerySchema = z.object({
 
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
 export type PromoteStudentsInput = z.infer<typeof promoteStudentsSchema>;
+export type PromotionCandidatesQuery = z.infer<typeof promotionCandidatesQuerySchema>;
 export type EnrollmentStatsQuery = z.infer<typeof enrollmentStatsQuerySchema>;

@@ -39,6 +39,13 @@ studentRoutes.get(
 
 // Registered before `/:id` — otherwise Express would match `/promotions`
 // as an id param on the routes below.
+studentRoutes.get(
+  '/promotions/candidates',
+  extractTenantMiddleware,
+  requirePermission('students:promote'),
+  asyncHandler(studentController.promotionCandidates),
+);
+
 studentRoutes.post(
   '/promotions',
   extractTenantMiddleware,

@@ -7,7 +7,11 @@ import type {
   PromoteStudentsInput,
   UpdateStudentInput,
 } from '../schemas/student.schemas';
-import { enrollmentStatsQuerySchema, studentListQuerySchema } from '../schemas/student.schemas';
+import {
+  enrollmentStatsQuerySchema,
+  promotionCandidatesQuerySchema,
+  studentListQuerySchema,
+} from '../schemas/student.schemas';
 import { studentService } from '../services/student.service';
 
 function requireAuthContext(req: Request): { profileId: string; tenantId: number } {
@@ -118,6 +122,13 @@ export const studentController = {
   async getAvatarDownload(req: Request, res: Response): Promise<void> {
     const { tenantId } = requireAuthContext(req);
     const data = await studentService.getAvatarDownloadUrl(paramId(req), tenantId);
+    res.json({ success: true, data });
+  },
+
+  async promotionCandidates(req: Request, res: Response): Promise<void> {
+    const { tenantId } = requireAuthContext(req);
+    const query = promotionCandidatesQuerySchema.parse(req.query);
+    const data = await studentService.promotionCandidates(tenantId, query);
     res.json({ success: true, data });
   },
 

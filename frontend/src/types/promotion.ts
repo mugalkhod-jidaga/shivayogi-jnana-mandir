@@ -20,7 +20,8 @@ export type EnrollmentStats = {
 export type PromoteStudentsPayload = {
   targetAcademicYearId: number;
   sourceStandardId: number;
-  targetStandardId: number;
+  /** Omitted when promoting out of the final standard (students become Alumni). */
+  targetStandardId?: number;
   studentIds?: string[];
   excludeStudentIds?: string[];
   holdbackStudentIds?: string[];
@@ -34,14 +35,31 @@ export type PromotionSkippedEntry = {
 
 export type PromotionAffectedEntry = {
   studentId: string;
-  enrollmentType: EnrollmentType;
+  enrollmentType: EnrollmentType | 'ALUMNI';
   standardId: number;
+};
+
+export type PromotionCandidate = {
+  id: string;
+  admissionNumber: string;
+  firstName: string;
+  lastName: string | null;
+  rollNumber: string | null;
+};
+
+export type PromotionCandidates = {
+  sourceAcademicYearLabel: string;
+  targetAcademicYearLabel: string;
+  isFinalStandard: boolean;
+  expectedTargetStandardId: number | null;
+  students: PromotionCandidate[];
 };
 
 export type PromotionResult = {
   dryRun: boolean;
   promoted: number;
   repeated: number;
+  graduated: number;
   skipped: PromotionSkippedEntry[];
   affected: PromotionAffectedEntry[];
 };
